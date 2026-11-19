@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 1.2 - A evolução: de shell a interface de agentes | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Part 1 - Base overrides */
+        html:not(.dark) body { background-color: #f8fafc; color: #1f2937; }
+        html:not(.dark) .bg-dark-900, html:not(.dark) .bg-dark-800, html:not(.dark) .bg-dark-700 { background-color: #ffffff !important; }
+        html:not(.dark) .border-dark-600, html:not(.dark) .border-dark-700 { border-color: #e5e7eb !important; }
+        html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-neutral-400, html:not(.dark) .text-neutral-300 { color: #6b7280 !important; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af !important; }
+        html:not(.dark) .text-neutral-200 { color: #374151 !important; }
+        html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-700\/50 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .hover\:bg-dark-700:hover { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-dark-800\/80 { background-color: #f9fafb !important; }
+
+        /* Part 2 - Emerald accent */
+        html:not(.dark) .text-emerald-400 { color: #059669 !important; }
+        html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.1) !important; }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.2) !important; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08) !important; }
+        html:not(.dark) .bg-emerald-500 { background-color: #059669 !important; }
+        html:not(.dark) .ring-emerald-500\/20 { --tw-ring-color: rgba(5, 150, 105, 0.15) !important; }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-emerald-900\/30 { --tw-gradient-from: rgba(5, 150, 105, 0.05) !important; }
+        html:not(.dark) .to-transparent { --tw-gradient-to: transparent !important; }
+        html:not(.dark) .bg-gradient-to-b, html:not(.dark) .bg-gradient-to-r { background: #ffffff !important; }
+        html:not(.dark) .header-gradient { background: linear-gradient(to bottom, rgba(5, 150, 105, 0.06), transparent) !important; }
+        html:not(.dark) .text-primary { color: #b45309 !important; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(180, 83, 9, 0.08) !important; }
+        html:not(.dark) .border-primary\/30 { border-color: rgba(180, 83, 9, 0.2) !important; }
+        html:not(.dark) .text-sky-400 { color: #0369a1 !important; }
+        html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3, 105, 161, 0.08) !important; }
+        html:not(.dark) .border-sky-500\/30 { border-color: rgba(3, 105, 161, 0.2) !important; }
+        html:not(.dark) .text-yellow-400 { color: #b45309 !important; }
+        html:not(.dark) .text-red-400 { color: #dc2626 !important; }
+        html:not(.dark) .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08) !important; }
+        html:not(.dark) .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.2) !important; }
+
+        /* Part 4 - Nav */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        html:not(.dark) nav { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #e5e7eb !important; }
+        html:not(.dark) footer { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+                        <span class="text-2xl">⚡</span>
+                        <span class="font-bold text-lg hidden sm:inline">CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10">
+                        <span class="sm:hidden">T1</span><span class="hidden sm:inline">Fundamentos</span>
+                    </a>
+                    <a href="../trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors">
+                        <span class="sm:hidden">T2</span><span class="hidden sm:inline">Arquitetura</span>
+                    </a>
+                    <a href="../trilha3/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors">
+                        <span class="sm:hidden">T3</span><span class="hidden sm:inline">CLI-Anything</span>
+                    </a>
+                    <a href="../trilha4/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors">
+                        <span class="sm:hidden">T4</span><span class="hidden sm:inline">Ecossistema</span>
+                    </a>
+                    <a href="../trilha5/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-teal-400 hover:bg-teal-500/10 transition-colors">
+                        <span class="sm:hidden">T5</span><span class="hidden sm:inline">Projetos</span>
+                    </a>
+                    <a href="../trilha6/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+                        <span class="sm:hidden">T6</span><span class="hidden sm:inline">Estratégia</span>
+                    </a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-2">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm text-neutral-400 mb-8">
+            <a href="../../index.html" class="hover:text-emerald-400 transition-colors">Início</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-emerald-400 transition-colors">Trilha 1</a>
+            <span>/</span>
+            <span class="text-emerald-400">Módulo 1.2</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header-gradient bg-gradient-to-b from-emerald-900/30 to-transparent rounded-2xl p-8 mb-12 border border-emerald-500/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-bold tracking-wider uppercase">Módulo 1.2</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Teoria</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">A evolução: de shell a interface de agentes</h1>
+            <p class="text-lg text-neutral-300 mb-6 max-w-3xl">Explore como o shell evoluiu de um simples interpretador de comandos para a interface principal de agentes inteligentes — passando por pipes, composição, entrada/saída estruturada e memória contextual.</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">6</span>
+                    <span class="text-neutral-400 text-sm">Tópicos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">30</span>
+                    <span class="text-neutral-400 text-sm">Minutos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">Iniciante</span>
+                    <span class="text-neutral-400 text-sm">Nível</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">Teoria</span>
+                    <span class="text-neutral-400 text-sm">Tipo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 1 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">1</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🐚 O que é um shell</h2>
+                    <p class="text-neutral-300 leading-relaxed">O shell é o programa que <span class="text-emerald-400 font-semibold">interpreta os comandos que você digita</span> e os traduz em instruções para o sistema operacional. Ele é a camada entre você (ou um agente) e o kernel do computador.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">Uma distinção fundamental que muita gente confunde: <strong class="text-emerald-400">shell ≠ terminal</strong>.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold mb-2">Shell (Interpretador)</p>
+                            <p class="text-neutral-400 text-sm">O programa que interpreta e executa comandos. Exemplos: Bash, Zsh, Fish, PowerShell. Ele processa sua entrada, executa programas e retorna resultados.</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold mb-2">Terminal (Emulador)</p>
+                            <p class="text-neutral-400 text-sm">A janela onde você vê e digita texto. Exemplos: iTerm2, Warp, Windows Terminal, Alacritty. Ele apenas exibe input e output — o shell faz o trabalho real.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Os Shells Mais Usados</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Bash</span> — O mais comum em Linux. Default na maioria das distribuições e em muitos scripts de CI/CD.</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Zsh</span> — Default no macOS desde Catalina. Compatível com Bash + extensões poderosas via Oh My Zsh.</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Fish</span> — Shell moderno com auto-sugestões, syntax highlighting e configuração amigável out-of-the-box.</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">PowerShell</span> — Shell da Microsoft, cross-platform, orientado a objetos em vez de texto puro.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">2</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📡 Pipes e composição — A filosofia Unix</h2>
+                    <p class="text-neutral-300 leading-relaxed">A filosofia Unix, formulada nos anos 1970, define um princípio que se tornou profético para a era dos agentes: <span class="text-emerald-400 font-semibold">faça uma coisa bem feita e componha via pipes</span>. Cada programa é uma peça especializada que se conecta a outras.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">O pipe (<code class="text-emerald-400 bg-dark-800 px-2 py-0.5 rounded">|</code>) conecta a saída de um programa à entrada do próximo, criando pipelines poderosos:</p>
+                    <div class="bg-dark-800 rounded-lg p-4 border border-dark-600 font-mono text-sm">
+                        <p class="text-neutral-400 mb-2"># Três programas compostos em uma pipeline:</p>
+                        <p class="text-emerald-400">cat arquivo.txt | grep "erro" | wc -l</p>
+                        <p class="text-neutral-500 mt-2 text-xs">1. cat lê o arquivo → 2. grep filtra linhas com "erro" → 3. wc conta as linhas</p>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">Essa ideia de composição voltou com força total na era dos agentes. O <span class="text-emerald-400 font-semibold">Model Context Protocol (MCP)</span> é essencialmente a versão moderna dos pipes Unix: agentes compondo ferramentas diversas em workflows complexos. Um agente pode ler um arquivo, analisar seu conteúdo, buscar na web por soluções e aplicar uma correção — tudo composto como uma pipeline inteligente.</p>
+
+                <!-- Dica Prática -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Domine a composição de comandos via pipes antes de trabalhar com agentes. Um agente CLI essencialmente faz a mesma coisa — compõe ferramentas — mas em uma escala e complexidade muito maiores. Se você entende pipes, já entende metade do que um agente faz.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 3 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">3</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📋 Entrada e saída estruturada</h2>
+                    <p class="text-neutral-300 leading-relaxed">A entrada e saída de dados no terminal evoluiu de <span class="text-emerald-400 font-semibold">texto puro para formatos estruturados</span>. Essa mudança é crucial: agentes de IA precisam de dados que possam ser processados programaticamente, não apenas lidos por humanos.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Fazer vs Evitar -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+                        <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-4">✅ Saída Estruturada (JSON)</h3>
+                        <div class="bg-dark-800 rounded-lg p-3 font-mono text-xs border border-dark-600">
+                            <p class="text-emerald-400">{"status": "ok",</p>
+                            <p class="text-emerald-400"> "files": 42,</p>
+                            <p class="text-emerald-400"> "errors": 0}</p>
+                        </div>
+                        <p class="text-neutral-300 text-sm mt-3">Parseável, tipada, sem ambiguidade. Agentes processam instantaneamente.</p>
+                    </div>
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                        <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-4">❌ Saída Não-Estruturada</h3>
+                        <div class="bg-dark-800 rounded-lg p-3 font-mono text-xs border border-dark-600">
+                            <p class="text-red-400">Processamento concluído!</p>
+                            <p class="text-red-400">42 arquivos encontrados</p>
+                            <p class="text-red-400">Nenhum erro detectado :)</p>
+                        </div>
+                        <p class="text-neutral-300 text-sm mt-3">Legível para humanos, mas difícil de parsear programaticamente.</p>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">O <span class="text-emerald-400 font-semibold">JSON é a língua franca dos agentes</span>: parseável, tipado e composável. Ferramentas modernas como <code class="text-emerald-400 bg-dark-800 px-2 py-0.5 rounded">jq</code> transformam JSON no terminal com a mesma naturalidade que <code class="text-emerald-400 bg-dark-800 px-2 py-0.5 rounded">grep</code> processa texto. Além de JSON, streams permitem processamento em tempo real de dados que chegam continuamente.</p>
+
+                <!-- Dica Prática -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Sempre que possível, use flags como <code class="text-primary bg-dark-800 px-2 py-0.5 rounded">--output json</code> ou <code class="text-primary bg-dark-800 px-2 py-0.5 rounded">--format json</code> nos seus comandos. Muitas ferramentas CLI modernas suportam saída JSON — isso torna seus dados consumíveis tanto por humanos (via <code class="text-primary bg-dark-800 px-2 py-0.5 rounded">jq</code>) quanto por agentes.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">4</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔗 De scripts a agentes — A transição</h2>
+                    <p class="text-neutral-300 leading-relaxed">A automação no terminal passou por uma evolução radical. De scripts determinísticos que seguem passos fixos, chegamos a <span class="text-emerald-400 font-semibold">agentes adaptativos que decidem o próximo passo</span> com base no contexto e nos resultados anteriores.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold mb-2">Script Shell</p>
+                            <p class="text-neutral-400 text-sm">Automação <strong>procedural e determinística</strong>. Cada linha é executada em sequência. Se algo falha inesperadamente, o script para ou segue cegamente. Não há adaptação.</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold mb-2">Agente CLI</p>
+                            <p class="text-neutral-400 text-sm">Automação <strong>inteligente e adaptativa</strong>. O agente analisa o resultado de cada passo e decide o próximo. Se algo falha, ele diagnostica, tenta alternativas e pede ajuda se necessário.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="space-y-4">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider">A Evolução da Automação</h3>
+                    <div class="relative border-l-2 border-emerald-500/30 pl-6 space-y-5">
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">Scripts Shell</p>
+                            <p class="text-neutral-300 text-sm">Sequências fixas de comandos. Exemplos: backup.sh, deploy.sh. Executam passos predefinidos sem inteligência.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">Cron Jobs</p>
+                            <p class="text-neutral-300 text-sm">Scripts agendados para execução periódica. Automatizaram tarefas recorrentes mas sem feedback ou adaptação.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">CI/CD Pipelines</p>
+                            <p class="text-neutral-300 text-sm">Automação de build, teste e deploy disparada por eventos (push, PR). Adicionaram condicionais e paralelismo.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">Chatbots CLI</p>
+                            <p class="text-neutral-300 text-sm">Assistentes no terminal que respondem perguntas. Úteis mas não executam ações reais no sistema.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">Agentes CLI (2024-2026)</p>
+                            <p class="text-neutral-300 text-sm">Inteligência + execução + contexto. Entendem o projeto, decidem ações, executam com supervisão, aprendem com resultados.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">5</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🧠 Memória e contexto</h2>
+                    <p class="text-neutral-300 leading-relaxed">A diferença entre um autocomplete sofisticado e um verdadeiro parceiro de trabalho é uma só: <span class="text-emerald-400 font-semibold">memória</span>. Agentes modernos mantêm estado entre interações, acumulando contexto sobre o projeto, as decisões tomadas e os padrões do desenvolvedor.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">Existem dois tipos fundamentais de memória em agentes CLI:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold mb-2">Memória de Sessão</p>
+                            <p class="text-neutral-400 text-sm">Contexto da conversa atual. O agente lembra o que foi discutido, arquivos editados, comandos executados e decisões tomadas nesta sessão. Desaparece quando você encerra.</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold mb-2">Memória Persistente</p>
+                            <p class="text-neutral-400 text-sm">Contexto entre sessões. O agente lembra preferências, padrões do projeto, decisões arquiteturais e histórico de interações passadas. Sobrevive entre sessões.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Como Cada Agente Lida com Memória</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Claude Code</span> — Salva contexto do repositório via CLAUDE.md, mantém memória de projeto e preferências do desenvolvedor entre sessões.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Gemini CLI</span> — Usa extensões e arquivo de contexto para manter estado. Integra-se com Google Cloud para persistência.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Codex CLI</span> — Contexto baseado em sessão com armazenamento local de preferências e instruções do projeto.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">Sem memória, um agente é apenas um autocomplete que responde perguntas isoladas. Com memória, ele se torna um <span class="text-emerald-400 font-semibold">parceiro de trabalho</span> que entende seu projeto, lembra das decisões tomadas e mantém consistência ao longo do tempo.</p>
+            </div>
+        </section>
+
+        <!-- Topic 6 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">6</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔄 Sessões longas — O terminal que não esquece</h2>
+                    <p class="text-neutral-300 leading-relaxed">O modelo tradicional do terminal era simples: você digita um comando, recebe a resposta, e o terminal <span class="text-emerald-400 font-semibold">esquece tudo</span>. O modelo novo é radicalmente diferente: sessões longas com contexto acumulado que transformam o terminal em um ambiente de trabalho contínuo.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Fazer vs Evitar -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                        <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-4">Modelo Antigo</h3>
+                        <div class="space-y-3 text-neutral-200 text-sm">
+                            <p><strong>comando → resposta → esquece</strong></p>
+                            <p>Cada interação é isolada. O terminal não sabe o que você fez antes. Se você editou um arquivo, precisa re-explicar o contexto no próximo comando.</p>
+                        </div>
+                    </div>
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+                        <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-4">Modelo Novo</h3>
+                        <div class="space-y-3 text-neutral-200 text-sm">
+                            <p><strong>sessão longa com contexto acumulado</strong></p>
+                            <p>O agente mantém todo o histórico da sessão. Ele sabe quais arquivos foram editados, quais testes falharam, e quais decisões foram tomadas.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">Em sessões longas, agentes podem revisar trabalho anterior, desfazer mudanças, comparar com versões anteriores e manter um plano de ação que evolui conforme o projeto avança. Essa continuidade é o que transforma o terminal de uma ferramenta de <span class="text-emerald-400 font-semibold">execução de comandos</span> em um <span class="text-emerald-400 font-semibold">ambiente de desenvolvimento inteligente</span>.</p>
+
+                <!-- Dica Prática -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Use sessões longas para tarefas complexas que envolvem múltiplos passos: refatoração de código, debugging de problemas difíceis, implementação de features que afetam vários arquivos. Para tarefas simples e pontuais (one-liners), uma interação rápida é suficiente. O poder da sessão longa está na acumulação de contexto.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumo Final -->
+        <section class="mt-16 mb-12">
+            <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-2xl p-8">
+                <h2 class="text-2xl font-bold text-white mb-6">Resumo Final</h2>
+                <div class="space-y-3 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Shell é o interpretador de comandos; terminal é a janela que exibe — são coisas diferentes</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Pipes Unix são o ancestral direto da composição de ferramentas via MCP</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">JSON é a língua franca entre humanos e agentes — saída estruturada é essencial</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Scripts são determinísticos; agentes são adaptativos e contextuais</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Memória transforma um autocomplete em parceiro de trabalho</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Sessões longas com contexto acumulado são o futuro do trabalho no terminal</span>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800/50 rounded-xl p-4 mb-6 border border-dark-600">
+                    <p class="text-neutral-300"><span class="text-emerald-400 font-semibold">Próximo módulo:</span> Vamos conhecer os terminais modernos — Warp, iTerm2, Windows Terminal — e como configurá-los para trabalhar com agentes de IA de forma produtiva.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="index.html" class="flex-1 text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-neutral-300 font-semibold transition-colors">
+                        ← Voltar para Trilha
+                    </a>
+                    <a href="modulo-1-3.html" class="flex-1 text-center px-6 py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 rounded-xl text-emerald-400 font-semibold transition-colors">
+                        Próximo Módulo →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-600 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
+    </script>
+</body>
+</html>

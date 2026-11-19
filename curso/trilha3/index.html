@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T3 - CLI-Anything: Agentifique Qualquer Software | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ===== LIGHT MODE - Part 1: Base ===== */
+        html:not(.dark) body { background-color: #f8fafc; }
+        html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+        html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+        html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+        html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+        html:not(.dark) .text-neutral-100 { color: #111827; }
+        html:not(.dark) .text-neutral-300 { color: #4b5563; }
+        html:not(.dark) .text-neutral-400 { color: #6b7280; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+        html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+        html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+        /* ===== LIGHT MODE - Part 2: Purple accent ===== */
+        html:not(.dark) .text-purple-400 { color: #7c3aed; }
+        html:not(.dark) .text-purple-300 { color: #7c3aed; }
+        html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124, 58, 237, 0.1); }
+        html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124, 58, 237, 0.12); }
+        html:not(.dark) .bg-purple-400\/10 { background-color: rgba(124, 58, 237, 0.1); }
+        html:not(.dark) .border-purple-500\/30 { border-color: rgba(124, 58, 237, 0.3); }
+        html:not(.dark) .border-purple-400\/30 { border-color: rgba(124, 58, 237, 0.3); }
+        html:not(.dark) .hover\:text-purple-300:hover { color: #7c3aed; }
+        html:not(.dark) .hover\:border-purple-400\/50:hover { border-color: rgba(124, 58, 237, 0.5); }
+        html:not(.dark) .group-hover\:text-purple-300 { color: #7c3aed; }
+
+        /* Other trail colors for nav */
+        html:not(.dark) .text-emerald-400 { color: #059669; }
+        html:not(.dark) .hover\:text-emerald-300:hover { color: #059669; }
+        html:not(.dark) .text-blue-400 { color: #2563eb; }
+        html:not(.dark) .hover\:text-blue-300:hover { color: #2563eb; }
+        html:not(.dark) .text-amber-400 { color: #92400e; }
+        html:not(.dark) .hover\:text-amber-300:hover { color: #92400e; }
+        html:not(.dark) .text-teal-400 { color: #0d9488; }
+        html:not(.dark) .hover\:text-teal-300:hover { color: #0d9488; }
+        html:not(.dark) .text-rose-400 { color: #9f1239; }
+        html:not(.dark) .hover\:text-rose-300:hover { color: #9f1239; }
+
+        /* ===== LIGHT MODE - Part 3: Remove gradients + special colors ===== */
+        html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+        html:not(.dark) .text-primary { color: #a16207; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+        html:not(.dark) .border-primary\/40 { border-color: rgba(161, 98, 7, 0.25); }
+        html:not(.dark) .text-sky-400 { color: #0369a1; }
+        html:not(.dark) .text-yellow-400 { color: #a16207; }
+        html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+        html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+        /* ===== LIGHT MODE - Part 4: Nav ===== */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+
+        /* Topic expand/collapse */
+        .topic-content { display: none; }
+        .topic-content.active { display: block; }
+        .topic-number {
+            width: 28px; height: 28px; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 600;
+            border: 2px solid rgba(168, 85, 247, 0.4);
+            color: #c084fc;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .topic-number.active {
+            background-color: rgba(168, 85, 247, 0.3);
+            border-color: #a855f7;
+            color: #e9d5ff;
+        }
+        html:not(.dark) .topic-number {
+            border-color: rgba(124, 58, 237, 0.4);
+            color: #7c3aed;
+        }
+        html:not(.dark) .topic-number.active {
+            background-color: rgba(124, 58, 237, 0.15);
+            border-color: #7c3aed;
+            color: #6d28d9;
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-neutral-100 font-sans min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-dark-900/95 backdrop-blur-sm border-b border-dark-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo + INEMA.CLUB -->
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center gap-2 text-yellow-400 font-bold text-xl hover:text-yellow-300 transition-colors">
+                        <span>⚡</span>
+                        <span>CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+
+                <!-- Nav Links -->
+                <div class="flex items-center gap-1 sm:gap-3 text-sm overflow-x-auto">
+                    <a href="../trilha1/index.html" class="text-emerald-400 hover:text-emerald-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Fundamentos</span><span class="sm:hidden">T1</span></a>
+                    <a href="../trilha2/index.html" class="text-blue-400 hover:text-blue-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Arquitetura</span><span class="sm:hidden">T2</span></a>
+                    <span class="text-purple-400 font-semibold px-1.5 py-1 whitespace-nowrap border-b-2 border-purple-400"><span class="hidden sm:inline">CLI-Anything</span><span class="sm:hidden">T3</span></span>
+                    <a href="../trilha4/index.html" class="text-amber-400 hover:text-amber-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Ecossistema</span><span class="sm:hidden">T4</span></a>
+                    <a href="../trilha5/index.html" class="text-teal-400 hover:text-teal-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Projetos</span><span class="sm:hidden">T5</span></a>
+                    <a href="../trilha6/index.html" class="text-rose-400 hover:text-rose-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Estratégia</span><span class="sm:hidden">T6</span></a>
+
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors text-neutral-400 hover:text-neutral-100" title="Alternar tema">
+                        <svg id="iconSun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <svg id="iconMoon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <section class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-purple-900/30 via-transparent to-transparent"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="inline-block bg-purple-500/20 border border-purple-500/30 rounded-full px-4 py-1.5 text-purple-400 text-sm font-semibold mb-6 tracking-wide">
+                    TRILHA 3 — FOCO PRINCIPAL
+                </div>
+                <h1 class="text-4xl sm:text-5xl font-800 text-neutral-100 mb-4 tracking-tight">
+                    🔮 CLI-Anything: Agentifique Qualquer Software
+                </h1>
+                <p class="text-neutral-300 text-lg max-w-3xl mx-auto mb-10 leading-relaxed">
+                    A trilha mais importante do curso. Aqui você domina a ferramenta que promete transformar qualquer software — inclusive GUIs — em interfaces operáveis por agentes de IA. O CLI-Anything é um pipeline automatizado de 7 fases que analisa um codebase, projeta comandos e gera um CLI completo, com estado, REPL, saída JSON e documentação agent-ready.
+                </p>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+                    <div class="bg-dark-800 border border-purple-500/30 rounded-xl p-4">
+                        <div class="text-2xl font-bold text-purple-400">6</div>
+                        <div class="text-neutral-400 text-sm">Módulos</div>
+                    </div>
+                    <div class="bg-dark-800 border border-purple-500/30 rounded-xl p-4">
+                        <div class="text-2xl font-bold text-purple-400">36</div>
+                        <div class="text-neutral-400 text-sm">Tópicos</div>
+                    </div>
+                    <div class="bg-dark-800 border border-purple-500/30 rounded-xl p-4">
+                        <div class="text-2xl font-bold text-purple-400">~4h</div>
+                        <div class="text-neutral-400 text-sm">Conteúdo</div>
+                    </div>
+                    <div class="bg-dark-800 border border-purple-500/30 rounded-xl p-4">
+                        <div class="text-2xl font-bold text-purple-400">Int-Av</div>
+                        <div class="text-neutral-400 text-sm">Nível</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modules -->
+    <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 space-y-8">
+
+        <!-- Module 3.1 -->
+        <div class="bg-dark-800 border border-purple-500/30 rounded-xl overflow-hidden">
+            <div class="p-6 border-b border-dark-700">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                        <h2 class="text-xl font-bold text-purple-400 mb-1">3.1 O que é CLI-Anything e por que é disruptivo</h2>
+                        <p class="text-neutral-400 text-sm">A tese central do curso: qualquer software pode ganhar uma interface CLI operável por agentes.</p>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm text-neutral-500 whitespace-nowrap">
+                        <span>~35min</span>
+                        <span>6 tópicos</span>
+                        <button onclick="openModal('modulo-3-1.html')" class="bg-purple-500/20 border border-purple-500/30 text-purple-400 px-3 py-1 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition-colors">Abrir módulo</button>
+                    </div>
+                </div>
+            </div>
+            <div class="divide-y divide-dark-700">
+
+                <!-- Topic 3.1.1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">1</span>
+                        <span class="text-neutral-100 font-medium">🚀 A tese radical — Qualquer software pode virar CLI agent-native</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">A ideia de que qualquer software — de um editor de imagens a um ERP — pode ser transformado em uma CLI operável por agentes de IA. Não é um wrapper superficial: é re-expressar as capacidades do software como comandos estruturados com argumentos, flags e saída JSON, criando uma interface programática completa onde antes só existia GUI.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Essa é a tese mais ambiciosa do movimento CLI-first de 2026. Se ela se confirma, qualquer empresa pode tornar seu software "agentificável" sem reescrever o produto. Entender essa tese permite avaliar onde ela funciona de verdade e onde é apenas aspiracional.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Agent-native interface, CLI como contrato programático, re-expressão de funcionalidades (GUI → comandos), acessibilidade operacional para LLMs, diferença entre operar pixels e operar comandos estruturados.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.1.2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">2</span>
+                        <span class="text-neutral-100 font-medium">🔄 De GUI para CLI — Por que agentes preferem comandos a pixels</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">A explicação técnica de por que LLMs e agentes operam melhor via texto estruturado do que via interfaces gráficas. GUIs foram desenhadas para humanos navegarem visualmente; CLIs produzem saídas determinísticas, parseáveis e encadeáveis — exatamente o que um agente precisa para tomar decisões e executar ações em sequência.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Entender essa assimetria é fundamental para justificar o investimento em CLI-Anything. Sem essa compreensão, parece regressão tecnológica. Com ela, fica claro que CLI não é "voltar ao passado" — é criar a interface nativa para o novo tipo de operador: o agente de IA.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Latência de interpretação (screenshot parsing vs stdout parsing), determinismo de saída, composabilidade de comandos (pipes), custo computacional de visão vs texto, tokens necessários para descrever uma GUI vs um help text.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.1.3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">3</span>
+                        <span class="text-neutral-100 font-medium">🏗️ Arquitetura geral — Pipeline automatizada de múltiplas fases</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Visão de alto nível do pipeline CLI-Anything: 7 fases sequenciais que vão do clone do repositório até a geração de um CLI completo com testes e documentação. Cada fase tem entrada, processamento e saída definidos, formando uma cadeia reprodutível e automatizável por agentes LLM.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Conhecer a arquitetura geral antes de mergulhar em cada fase evita a armadilha de se perder nos detalhes. Permite entender o fluxo completo, identificar gargalos e saber exatamente onde cada decisão de design acontece no processo.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Pipeline de 7 fases (clone, análise, design, implementação, testes, docs, SKILL.md), processamento sequencial com checkpoints, artefatos intermediários, reprodutibilidade, automação via prompt engineering.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.1.4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">4</span>
+                        <span class="text-neutral-100 font-medium">📊 CLI-Anything vs wrappers tradicionais — O que muda de verdade</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Comparação direta entre CLI-Anything e abordagens tradicionais como shell scripts wrapper, CLIs manuais ou SDKs. Wrappers tradicionais cobrem apenas funcionalidades expostas por APIs existentes. CLI-Anything analisa o código-fonte e tenta mapear toda a funcionalidade do software, incluindo operações internas sem API pública.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Evita o erro de subestimar ou superestimar o CLI-Anything. Saber exatamente o que diferencia essa abordagem de wrappers simples ajuda a comunicar o valor real para times técnicos e a decidir quando cada abordagem é mais apropriada.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Wrapper vs interface nativa, cobertura de funcionalidade (surface area), análise de código-fonte vs API pública, profundidade de integração, estado e sessão vs comandos stateless, geração automática vs desenvolvimento manual.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.1.5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">5</span>
+                        <span class="text-neutral-100 font-medium">🎯 Casos de uso ideais — Quando usar CLI-Anything</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Mapeamento dos cenários onde CLI-Anything entrega mais valor: softwares com backend claro e APIs internas bem definidas, aplicações web com lógica de negócio separada da UI, ferramentas de produtividade com operações repetitivas, e sistemas legados que precisam de automação sem rewrite completo.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Aplicar CLI-Anything no software errado gera frustração e resultados de baixa qualidade. Conhecer os candidatos ideais permite priorizar projetos com alto retorno e evitar investir tempo onde o resultado será inevitavelmente um mock superficial.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Critérios de candidato ideal (separação backend/frontend, APIs REST internas, lógica de negócio acessível), softwares com operações CRUD, ferramentas de devops, sistemas de gestão, score de agentificabilidade.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.1.6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">6</span>
+                        <span class="text-neutral-100 font-medium">⚠️ Limites honestos — Quando o resultado é mock, não controle real</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Análise transparente das limitações do CLI-Anything: nem sempre o CLI gerado opera o software de verdade. Em muitos casos, o resultado é uma simulação (mock) que espelha a estrutura de comandos mas não conecta com o backend real. Softwares com GUIs nativas sem API, binários fechados ou lógica fortemente acoplada à UI tendem a gerar mocks, não controle real.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Honestidade sobre limitações é o que separa entendimento real de hype. Saber quando o resultado é mock permite gerenciar expectativas, comunicar limitações a stakeholders e decidir se o mock já é útil (para prototipagem, por exemplo) ou se outra abordagem é necessária.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Mock vs controle real, nível de fidelidade do CLI gerado, indicadores de mock (sem chamadas reais ao backend, dados estáticos), software opaco vs software transparente, estratégias para elevar mock a controle parcial.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Module 3.2 -->
+        <div class="bg-dark-800 border border-purple-500/30 rounded-xl overflow-hidden">
+            <div class="p-6 border-b border-dark-700">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                        <h2 class="text-xl font-bold text-purple-400 mb-1">3.2 Arquitetura do pipeline de 7 fases</h2>
+                        <p class="text-neutral-400 text-sm">Entenda cada fase do pipeline que transforma código-fonte em CLI agent-ready.</p>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm text-neutral-500 whitespace-nowrap">
+                        <span>~40min</span>
+                        <span>6 tópicos</span>
+                        <button onclick="openModal('modulo-3-2.html')" class="bg-purple-500/20 border border-purple-500/30 text-purple-400 px-3 py-1 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition-colors">Abrir módulo</button>
+                    </div>
+                </div>
+            </div>
+            <div class="divide-y divide-dark-700">
+
+                <!-- Topic 3.2.1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">1</span>
+                        <span class="text-neutral-100 font-medium">📋 Visão geral do pipeline — As 7 fases em sequência</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">O mapa completo das 7 fases: (1) Clone e preparação, (2) Análise arquitetural, (3) Design do CLI, (4) Implementação, (5) Testes, (6) Documentação, (7) SKILL.md. Cada fase produz artefatos que alimentam a próxima, criando uma cadeia de transformação do código-fonte bruto até um CLI publicável.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Ter o mapa mental do pipeline completo permite navegar entre fases com confiança, entender dependências entre etapas e diagnosticar quando algo dá errado em qual fase específica o problema ocorreu.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Fases sequenciais, artefatos intermediários (relatório de análise, schema de comandos, código gerado, suíte de testes, README, SKILL.md), checkpoints de qualidade entre fases, tempo médio de execução por fase.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.2.2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">2</span>
+                        <span class="text-neutral-100 font-medium">🔍 Fase 1: Clone e preparação — Obtendo o código-fonte</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">A primeira fase clona o repositório-alvo, identifica a linguagem predominante, frameworks utilizados, estrutura de diretórios e prepara o ambiente para análise. Também detecta presença de testes existentes, documentação e configurações que serão úteis nas fases seguintes.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Uma preparação malfeita contamina todas as fases seguintes. Entender o que a Fase 1 examina e como ela categoriza o software-alvo é essencial para corrigir problemas precoces e garantir que a análise parta de premissas corretas.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Git clone + shallow clone para performance, detecção de linguagem (package.json, Cargo.toml, go.mod, requirements.txt), mapeamento de estrutura (src/, lib/, api/, routes/), inventário de dependências, .gitignore e exclusões.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.2.3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">3</span>
+                        <span class="text-neutral-100 font-medium">🧠 Fase 2: Análise arquitetural — Entendendo a estrutura do software</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">O agente LLM analisa o código-fonte para mapear módulos, classes, funções públicas, endpoints de API, rotas e fluxos de dados. Produz um relatório estruturado com a "geografia" do software: o que faz, como está organizado, quais são os pontos de entrada e quais operações podem ser expostas como comandos CLI.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">A qualidade da análise arquitetural determina a qualidade de todo o CLI gerado. Se o agente interpreta mal a estrutura, os comandos gerados não fazem sentido. Compreender essa fase permite auditar e corrigir o relatório de análise antes de prosseguir.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">AST parsing assistido por LLM, identificação de módulos e responsabilidades, mapeamento de endpoints REST/GraphQL, detecção de padrões (MVC, microserviços, monolito), relatório de análise como artefato auditable.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.2.4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">4</span>
+                        <span class="text-neutral-100 font-medium">✏️ Fase 3: Design do CLI — Espelhando a GUI em comandos</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Baseado no relatório da Fase 2, o pipeline projeta a estrutura de comandos CLI: quais subcomandos existirão, que argumentos e flags cada um aceita, como os comandos se organizam em grupos e qual o formato de saída (JSON, tabela, texto). É a tradução de "o que o software faz" para "como um agente vai operar isso via terminal".</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">O design do CLI é onde a ergonomia é decidida. Um CLI mal desenhado é inutilizável mesmo que funcione tecnicamente. Entender os princípios de design de CLI permite avaliar e refinar os comandos gerados para que sejam intuitivos tanto para humanos quanto para agentes.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Schema de comandos (command tree), convenções POSIX, flags globais (--format, --verbose, --dry-run), agrupamento lógico de subcomandos, consistência de nomes, mapeamento GUI-action → CLI-command.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.2.5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">5</span>
+                        <span class="text-neutral-100 font-medium">🔧 Fase 4: Implementação — Módulos com estado e REPL</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">A geração do código real do CLI. O agente produz módulos executáveis que implementam cada comando do design, com gerenciamento de estado (login, sessão, contexto), REPL interativo para operação contínua e saída JSON estruturada para consumo por outros agentes. É o momento onde o design vira software funcional.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">A implementação é onde a maioria dos problemas técnicos aparece: chamadas que não conectam, estado que não persiste, REPL que trava. Entender como essa fase funciona permite diagnosticar e corrigir o código gerado quando ele não funciona como esperado.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Geração de código por LLM, scaffolding de projeto (setup de build, dependências), state management (config files, session tokens), implementação REPL (read-eval-print loop), serialização JSON, integração com APIs do software-alvo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.2.6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">6</span>
+                        <span class="text-neutral-100 font-medium">🧪 Fase 5-7: Testes, docs e SKILL.md — Completando o ciclo</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">As três fases finais que transformam código gerado em produto distribuível: Fase 5 gera testes unitários e E2E para validar cada comando; Fase 6 produz README, help integrado e exemplos de uso; Fase 7 gera o SKILL.md — o documento que ensina agentes LLM a operar o CLI, servindo como "manual do agente".</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Sem testes, o CLI é código não verificado. Sem docs, humanos não conseguem usar. Sem SKILL.md, agentes não sabem como operar. Essas três fases são o que diferencia um protótipo descartável de um CLI profissional que pode ser adotado por times e integrado em workflows.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Testes gerados automaticamente (assertions por comando), cobertura de comandos, README como onboarding, help text integrado (--help), SKILL.md como contrato LLM (capabilities, examples, constraints), versionamento e manifest.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Module 3.3 -->
+        <div class="bg-dark-800 border border-purple-500/30 rounded-xl overflow-hidden">
+            <div class="p-6 border-b border-dark-700">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                        <h2 class="text-xl font-bold text-purple-400 mb-1">3.3 Análise e Design: entendendo o software-alvo</h2>
+                        <p class="text-neutral-400 text-sm">Como o pipeline examina código-fonte e traduz funcionalidades em comandos CLI bem desenhados.</p>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm text-neutral-500 whitespace-nowrap">
+                        <span>~35min</span>
+                        <span>6 tópicos</span>
+                        <button onclick="openModal('modulo-3-3.html')" class="bg-purple-500/20 border border-purple-500/30 text-purple-400 px-3 py-1 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition-colors">Abrir módulo</button>
+                    </div>
+                </div>
+            </div>
+            <div class="divide-y divide-dark-700">
+
+                <!-- Topic 3.3.1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">1</span>
+                        <span class="text-neutral-100 font-medium">🔬 Análise estática de código — O que o pipeline examina</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">O processo pelo qual o agente LLM lê e interpreta o código-fonte sem executá-lo. Examina imports, definições de classe, funções exportadas, tipagem, decorators/annotations de rotas e padrões de organização. Diferente de análise dinâmica (que executa o software), a análise estática é segura e não requer ambiente configurado.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Saber o que o pipeline examina permite preparar melhor o código-alvo, entender limitações (código ofuscado, metaprogramação pesada) e auditar se a análise capturou corretamente as funcionalidades do software.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Análise estática vs dinâmica, leitura de AST por LLM, identificação de exports e interface pública, detecção de frameworks (Express, Django, Spring), limitações com código dinâmico/reflection, escopo de análise (profundidade de leitura).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.3.2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">2</span>
+                        <span class="text-neutral-100 font-medium">🗺️ Mapeamento de funcionalidades — GUI → ações CLI</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">O processo de traduzir cada funcionalidade visível na GUI (botões, formulários, fluxos) em ações CLI equivalentes. Um botão "Criar Projeto" vira <code>app project create --name "X"</code>. Um formulário de configuração vira <code>app config set --key value</code>. O objetivo é cobertura: toda operação da GUI deve ter um equivalente CLI.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">O mapeamento é o elo entre a interface visual que humanos conhecem e a interface textual que agentes vão usar. Um mapeamento incompleto gera um CLI que só faz metade do que o software oferece, tornando-o insuficiente para automação completa.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Inventário de funcionalidades, tabela de mapeamento (GUI action → CLI command), operações CRUD como padrão base, funcionalidades que não traduzem bem (drag-and-drop, visualizações complexas), cobertura percentual de funcionalidades.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.3.3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">3</span>
+                        <span class="text-neutral-100 font-medium">📐 Princípios de design de CLI — Ergonomia para humanos e agentes</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Os princípios que guiam o design de um CLI que funcione bem para humanos e agentes simultaneamente: nomes de comando previsíveis, flags consistentes, saída parseável, mensagens de erro claras, help text útil e composabilidade (pipe-friendly). São as regras que separam um CLI bem feito de uma ferramenta frustrante.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">O pipeline gera CLIs automaticamente, mas o resultado nem sempre segue boas práticas. Conhecer os princípios de design permite avaliar criticamente o CLI gerado e fazer ajustes que melhoram drasticamente a experiência de uso.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Princípio da menor surpresa, convenção sobre configuração, verbos como comandos (create, list, delete, update), consistência de flags (--output, --format, --quiet), saída para stdout/stderr, exit codes significativos, help como documentação.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.3.4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">4</span>
+                        <span class="text-neutral-100 font-medium">🔗 Identificação de APIs internas — Backends e endpoints disponíveis</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">O processo de descobrir quais APIs internas o software já possui — endpoints REST, funções de serviço, RPCs internos — que podem ser chamados diretamente pelo CLI gerado. Quando o software tem uma API interna bem definida, o CLI pode se conectar de verdade em vez de simular. É o que faz a diferença entre mock e controle real.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">APIs internas são o "ouro" do pipeline. Quanto mais APIs o agente identifica, mais comandos do CLI podem fazer chamadas reais ao software. Saber como essa identificação funciona permite guiar o agente para encontrar endpoints que ele pode ter perdido.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Endpoints REST (GET, POST, PUT, DELETE), definições de rota (Express app.get, Flask @app.route, Spring @RequestMapping), serviços internos vs API pública, autenticação interna, documentação OpenAPI/Swagger como atalho para mapeamento.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.3.5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">5</span>
+                        <span class="text-neutral-100 font-medium">📊 Schema de comandos — Argumentos, flags e opções</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">A definição formal de cada comando: nome, descrição, argumentos posicionais obrigatórios, flags opcionais com tipos e defaults, formatos de saída aceitos e exemplos de uso. O schema funciona como um contrato: define exatamente o que cada comando aceita e o que retorna, permitindo validação automática e geração de help text.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">O schema é o artefato mais importante entre a fase de design e a de implementação. Um schema bem definido gera código limpo; um schema vago gera comandos inconsistentes. Saber ler e refinar o schema é a habilidade mais prática dessa trilha.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Command schema (JSON/YAML), argumentos posicionais vs nomeados, flags booleanas vs com valor, tipos de dados (string, int, enum, file path), valores default, validação de input, schema como fonte de verdade para implementação e testes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.3.6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">6</span>
+                        <span class="text-neutral-100 font-medium">🎯 Priorização — Quais funcionalidades virar CLI primeiro</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">A estratégia para decidir quais funcionalidades do software devem virar comandos CLI primeiro. Nem tudo pode ser agentificado de uma vez. A priorização considera: frequência de uso da funcionalidade, viabilidade técnica de implementação real (não mock), valor para automação e complexidade de implementação.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Tentar agentificar tudo de uma vez gera um CLI gigante e de baixa qualidade. Priorização permite entregar valor incremental: primeiro os comandos de maior impacto e melhor qualidade, depois expandir cobertura iterativamente.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Matriz impacto vs viabilidade, MVP de CLI (minimum viable CLI), funcionalidades CRUD como base, endpoints com melhor documentação como prioridade, iteração incremental, feedback loop entre priorização e qualidade.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Module 3.4 -->
+        <div class="bg-dark-800 border border-purple-500/30 rounded-xl overflow-hidden">
+            <div class="p-6 border-b border-dark-700">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                        <h2 class="text-xl font-bold text-purple-400 mb-1">3.4 Implementação: estado, REPL e saída JSON</h2>
+                        <p class="text-neutral-400 text-sm">A mecânica de gerar CLIs funcionais com sessão, interatividade e output estruturado.</p>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm text-neutral-500 whitespace-nowrap">
+                        <span>~40min</span>
+                        <span>6 tópicos</span>
+                        <button onclick="openModal('modulo-3-4.html')" class="bg-purple-500/20 border border-purple-500/30 text-purple-400 px-3 py-1 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition-colors">Abrir módulo</button>
+                    </div>
+                </div>
+            </div>
+            <div class="divide-y divide-dark-700">
+
+                <!-- Topic 3.4.1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">1</span>
+                        <span class="text-neutral-100 font-medium">💾 Gerenciamento de estado — Sessões e persistência</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Como o CLI gerado mantém estado entre execuções: tokens de autenticação, configurações do usuário, contexto da sessão atual (projeto selecionado, ambiente ativo). Diferente de CLIs stateless onde cada comando é independente, CLIs agent-native frequentemente precisam de sessão persistente para operações complexas de múltiplos passos.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Agentes operam em workflows de múltiplos passos: autenticam, selecionam contexto, executam operações, verificam resultado. Sem estado persistente, cada comando precisaria re-autenticar e re-selecionar contexto, tornando a automação impraticável.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">State file (~/.config/app-cli/state.json), session tokens, credential storage seguro, context switching (app use project-x), persistência entre execuções vs estado em memória, cleanup e expiração de sessão.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.4.2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">2</span>
+                        <span class="text-neutral-100 font-medium">🔄 REPL interativo — O loop de leitura-avaliação-impressão</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">O modo interativo do CLI onde o usuário (ou agente) entra em um shell dedicado e executa comandos em sequência sem precisar re-invocar o programa. O REPL mantém estado na sessão, oferece autocomplete, histórico de comandos e permite exploração iterativa das funcionalidades do software agentificado.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">O REPL é especialmente valioso para agentes que precisam explorar e operar o software em múltiplas etapas. Em vez de múltiplas invocações separadas, o REPL oferece uma sessão contínua com contexto compartilhado, reduzindo overhead e complexidade de orquestração.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Read-Eval-Print Loop, modo interativo vs modo batch, manutenção de contexto no loop, autocomplete e tab completion, histórico de comandos (.history), prompt customizado, exit graceful, REPL como interface preferida de agentes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.4.3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">3</span>
+                        <span class="text-neutral-100 font-medium">📊 Saída JSON estruturada — Formato para agentes consumirem</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">A capacidade do CLI de produzir output em JSON estruturado (via --format json ou --json), permitindo que agentes parseiem resultados programaticamente. Inclui não apenas dados, mas metadata como status, timestamps, paginação e erros estruturados. É o que torna o CLI "agent-native" e não apenas "agent-usable".</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Sem saída JSON, o agente precisa parsear texto livre — processo frágil e propenso a erros. JSON estruturado permite que o agente extraia dados com precisão, tome decisões baseadas em valores exatos e encadeie resultados de um comando como input de outro.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Envelope de resposta JSON ({status, data, error, metadata}), formato human-readable vs machine-readable, --format flag (json, table, csv, yaml), JSON lines para streaming, erros estruturados com código e mensagem, jq como parceiro de parsing.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.4.4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">4</span>
+                        <span class="text-neutral-100 font-medium">🔌 Módulos e subcomandos — Organizando o CLI gerado</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">A estrutura de código que organiza o CLI em módulos separados por domínio funcional. Cada módulo agrupa subcomandos relacionados (ex: <code>app users list</code>, <code>app users create</code>). A modularização permite manutenção independente, testes isolados e extensão incremental sem afetar comandos existentes.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">CLIs gerados automaticamente tendem a ser monolíticos. Entender a organização modular permite reestruturar o código gerado para que seja mantível, testável e extensível — qualidades essenciais se o CLI vai ser usado em produção e evoluir com o software-alvo.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Command tree (app → module → action), padrão de subcomandos (git-style: git commit, git push), arquivo por módulo, registro dinâmico de comandos, plugins como extensão, lazy loading de módulos pesados.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.4.5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">5</span>
+                        <span class="text-neutral-100 font-medium">⚙️ Configuração e flags — --dry-run, --format, --verbose</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">O conjunto de flags globais que todo CLI agent-native deve oferecer: --dry-run (simular sem executar), --format (json/table/csv), --verbose (output detalhado para debug), --quiet (sem output decorativo), --config (arquivo de configuração alternativo). São as "meta-funcionalidades" que controlam como o CLI se comporta, não o que ele faz.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Agentes dependem dessas flags para operar com segurança (--dry-run antes de ações destrutivas), parsear resultados (--format json) e diagnosticar problemas (--verbose). Um CLI sem essas flags é muito menos útil para automação, mesmo que os comandos principais funcionem perfeitamente.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Flags globais vs flags por comando, --dry-run como contrato de segurança, --format como switch de audiência (humano vs agente), configuração por arquivo vs variáveis de ambiente vs flags, precedência de configuração, profiles de configuração.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.4.6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">6</span>
+                        <span class="text-neutral-100 font-medium">🔗 Integração com o software original — Chamadas reais vs simulação</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">A diferença entre um CLI que faz chamadas HTTP reais ao backend do software, importa módulos diretamente do código-fonte ou chama funções via bindings, versus um CLI que apenas simula as operações com dados estáticos. Integração real significa que <code>app users list</code> retorna dados do banco de dados real; simulação retorna JSON hardcoded.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Essa distinção é a linha entre um CLI útil em produção e um protótipo demonstrativo. Saber identificar quais comandos fazem chamadas reais e quais são mocks permite avaliar honestamente a utilidade do CLI gerado e priorizar a elevação de mocks para chamadas reais.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Integração via HTTP/REST, importação direta de módulos (mesma linguagem), FFI/bindings (linguagens diferentes), simulação com dados estáticos, nível de fidelidade por comando, smoke test de integração real, indicadores de mock no código gerado.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Module 3.5 -->
+        <div class="bg-dark-800 border border-purple-500/30 rounded-xl overflow-hidden">
+            <div class="p-6 border-b border-dark-700">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                        <h2 class="text-xl font-bold text-purple-400 mb-1">3.5 Testes, documentação e SKILL.md</h2>
+                        <p class="text-neutral-400 text-sm">As fases finais que transformam código gerado em produto distribuível e agent-ready.</p>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm text-neutral-500 whitespace-nowrap">
+                        <span>~35min</span>
+                        <span>6 tópicos</span>
+                        <button onclick="openModal('modulo-3-5.html')" class="bg-purple-500/20 border border-purple-500/30 text-purple-400 px-3 py-1 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition-colors">Abrir módulo</button>
+                    </div>
+                </div>
+            </div>
+            <div class="divide-y divide-dark-700">
+
+                <!-- Topic 3.5.1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">1</span>
+                        <span class="text-neutral-100 font-medium">🧪 Testes unitários gerados — Validando cada comando</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">O pipeline gera automaticamente testes unitários para cada comando CLI: verifica que argumentos obrigatórios são validados, flags são reconhecidas, saída JSON tem a estrutura esperada e erros retornam exit codes corretos. São testes que validam o contrato de cada comando sem depender do software-alvo em execução.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Testes gerados são a primeira linha de defesa contra regressões. Quando o CLI é refinado ou o software-alvo muda, os testes indicam o que quebrou. Entender como esses testes são gerados permite avaliar sua cobertura e adicionar testes para cenários edge case que o pipeline não capturou.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Testes de contrato (argumentos, flags, saída), assertions sobre estrutura JSON, testes de validação de input, exit code testing, mocking de chamadas externas para isolamento, cobertura por comando (cada comando tem pelo menos 1 teste).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.5.2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">2</span>
+                        <span class="text-neutral-100 font-medium">🔄 Testes E2E — Fluxos completos de ponta a ponta</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Testes que validam fluxos completos de uso: autenticar → selecionar projeto → criar recurso → listar recursos → verificar que o novo aparece → deletar → confirmar remoção. Diferente de testes unitários que testam comandos isolados, E2E testa a experiência real de um agente operando o CLI em sequência.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Comandos podem funcionar individualmente mas falhar em sequência (estado corrompido entre comandos, tokens expirados, contexto perdido). Testes E2E capturam esses problemas de integração que são exatamente os bugs que agentes encontrarão na prática.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Fluxos de teste (cenários de uso reais), setup e teardown de ambiente, testes com estado acumulado, validação de sequência de comandos, testes contra software-alvo real vs testes em modo mock, CI/CD para rodar E2E periodicamente.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.5.3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">3</span>
+                        <span class="text-neutral-100 font-medium">📝 Documentação automática — README e help integrado</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">O pipeline gera documentação em duas camadas: README.md com instalação, quick start e referência de comandos; e help text integrado (--help em cada comando e subcomando) com descrição, argumentos, flags e exemplos. A documentação é gerada a partir do schema de comandos, garantindo consistência entre docs e implementação.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Documentação gerada a partir do schema é sempre atualizada (single source of truth). Mas documentação gerada pode ser genérica demais. Saber como refinar o help text e o README gerados melhora significativamente a adoção do CLI por humanos e a compreensão por agentes.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">README gerado (instalação, uso, exemplos), help text por comando e subcomando, exemplos de uso com output esperado, documentação como single source of truth a partir do schema, man pages, documentação como onboarding.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.5.4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">4</span>
+                        <span class="text-neutral-100 font-medium">🤖 SKILL.md — O contrato para agentes LLM</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">O SKILL.md é um documento em Markdown estruturado que descreve para um agente LLM como operar o CLI: quais comandos existem, em que ordem usá-los, quais são as restrições, quais outputs esperar e como interpretar erros. É o "manual de instruções" que transforma um CLI genérico em uma skill que qualquer agente pode aprender e usar.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">O SKILL.md é o que fecha o ciclo agent-native. Sem ele, o agente precisa "adivinhar" como usar o CLI. Com ele, o agente tem instruções explícitas que podem ser carregadas como contexto. É a diferença entre um agente que tenta e erra e um agente que opera com confiança.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">SKILL.md como formato padronizado, seções: capabilities, commands, workflows, constraints, examples, error handling. Diferença entre docs para humanos (README) e docs para agentes (SKILL.md), prompt engineering implícito no SKILL.md, versionamento de skills.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.5.5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">5</span>
+                        <span class="text-neutral-100 font-medium">📋 Manifest e metadata — Descrevendo capacidades</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Arquivos de manifesto que descrevem o CLI de forma machine-readable: versão, lista de comandos com assinaturas, dependências, requisitos de sistema, nível de fidelidade (real vs mock) por comando e compatibilidade. O manifest permite que registries e orquestradores descubram e integrem o CLI automaticamente.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Manifests são o que permite escalar o ecossistema de CLIs gerados. Em vez de ler documentação, um agente pode consultar o manifest para saber exatamente o que o CLI faz, qual versão é, e se atende aos requisitos da tarefa — tudo programaticamente.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Manifest JSON/YAML (cli-manifest.json), metadata: name, version, description, commands[], capabilities, requirements, fidelity score por comando, compatibilidade com orquestradores de agentes, discovery automática.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.5.6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">6</span>
+                        <span class="text-neutral-100 font-medium">🔍 Refinamento iterativo — Melhorando a qualidade do CLI</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">O processo de rodar o pipeline múltiplas vezes, cada vez refinando o resultado: corrigindo comandos que não funcionam, melhorando help text, adicionando edge cases nos testes, elevando mocks para chamadas reais. Raramente a primeira execução do pipeline gera um CLI perfeito — o refinamento iterativo é parte essencial do processo.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Esperar perfeição na primeira execução gera frustração. Entender que o refinamento é parte do processo permite planejar iterações, medir progresso entre rodadas e saber quando o CLI atingiu qualidade suficiente para uso em produção.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Iteração como parte do processo (não falha), métricas de qualidade (testes passando, cobertura de funcionalidades, fidelidade), feedback do uso real, refinamento manual vs re-execução do pipeline, convergência de qualidade, critérios de "done".</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Module 3.6 -->
+        <div class="bg-dark-800 border border-purple-500/30 rounded-xl overflow-hidden">
+            <div class="p-6 border-b border-dark-700">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                    <div>
+                        <h2 class="text-xl font-bold text-purple-400 mb-1">3.6 Prática: agentificando um software real</h2>
+                        <p class="text-neutral-400 text-sm">Hands-on completo: do setup à publicação de um CLI gerado pelo pipeline.</p>
+                    </div>
+                    <div class="flex items-center gap-3 text-sm text-neutral-500 whitespace-nowrap">
+                        <span>~40min</span>
+                        <span>6 tópicos</span>
+                        <button onclick="openModal('modulo-3-6.html')" class="bg-purple-500/20 border border-purple-500/30 text-purple-400 px-3 py-1 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition-colors">Abrir módulo</button>
+                    </div>
+                </div>
+            </div>
+            <div class="divide-y divide-dark-700">
+
+                <!-- Topic 3.6.1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">1</span>
+                        <span class="text-neutral-100 font-medium">🎯 Escolhendo o alvo — Critérios para bons candidatos</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Guia prático para selecionar o software que você vai agentificar. Critérios: repositório público no GitHub, linguagem suportada (Node.js, Python, Go, Rust são os mais maduros), presença de API interna ou backend separado, documentação mínima e tamanho de codebase gerenciável (10k-100k linhas como sweet spot).</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">A escolha do alvo determina o sucesso do exercício. Um software muito complexo frustra; um muito simples não ensina. Os critérios apresentados foram testados em dezenas de execuções do pipeline e maximizam a chance de um resultado satisfatório na primeira iteração.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Checklist de candidato ideal, repositórios recomendados para prática, red flags (binário fechado, GUI nativa sem API, codebase > 500k linhas), sweet spot de complexidade, softwares web com backend REST como candidatos ideais.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.6.2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">2</span>
+                        <span class="text-neutral-100 font-medium">🔧 Setup do ambiente — Instalação e configuração do CLI-Anything</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Passo a passo de instalação: configuração de API keys para o LLM que executa o pipeline, instalação das dependências do CLI-Anything, configuração do workspace local, verificação de pré-requisitos (Git, Node.js/Python, conexão com API do LLM). Inclui troubleshooting para os problemas mais comuns de setup.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Setup incorreto é a causa número um de falhas na primeira execução. Um ambiente bem configurado elimina variáveis e permite focar no que importa: entender como o pipeline funciona e avaliar o resultado. Configuração de API keys e limites de rate também impactam custo.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Pré-requisitos de sistema, API keys (OpenAI, Anthropic, etc.), configuração de modelo (qual LLM usar em cada fase), workspace e diretório de output, .env e segurança de credenciais, custos estimados por execução do pipeline.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.6.3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">3</span>
+                        <span class="text-neutral-100 font-medium">📋 Executando o pipeline — Passo a passo completo</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">A execução real do pipeline contra o software escolhido. Acompanhar fase por fase: observar o clone, ler o relatório de análise, revisar o schema de comandos, inspecionar o código gerado, rodar os testes, ler a documentação e o SKILL.md. Inclui tempos reais de execução e consumo de tokens/custo por fase.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Ver o pipeline em execução real consolida o entendimento teórico das fases. Observar os artefatos intermediários permite desenvolver intuição sobre o que o LLM faz bem, onde erra e como cada decisão em uma fase impacta o resultado nas seguintes.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Comando de execução, flags de configuração do pipeline, logs e output por fase, artefatos intermediários no disco, inspeção de relatório de análise, revisão do schema de comandos antes da implementação, custo total da execução.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.6.4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">4</span>
+                        <span class="text-neutral-100 font-medium">🔍 Avaliando o resultado — Qualidade, cobertura e fidelidade</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Framework de avaliação do CLI gerado em três dimensões: qualidade (os comandos funcionam corretamente?), cobertura (quantas funcionalidades do software original estão representadas?) e fidelidade (os comandos operam o software de verdade ou são mocks?). Inclui rubrica de scoring para avaliação objetiva.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Sem critérios claros de avaliação, é impossível saber se o resultado é bom o suficiente. A rubrica de scoring permite comparar resultados entre execuções, medir progresso do refinamento e comunicar objetivamente a qualidade do CLI para stakeholders.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Scoring tridimensional (qualidade, cobertura, fidelidade), testes como proxy de qualidade, mapeamento de funcionalidades como proxy de cobertura, smoke tests contra software real como proxy de fidelidade, threshold de aceitação, relatório de avaliação.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.6.5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">5</span>
+                        <span class="text-neutral-100 font-medium">🔄 Iterando e refinando — Quando o primeiro resultado não basta</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">Estratégias práticas para melhorar o CLI gerado: editar o relatório de análise e re-executar fases subsequentes, ajustar o schema de comandos manualmente, corrigir bugs no código gerado, adicionar testes faltantes e expandir o SKILL.md. Cada tipo de problema tem uma estratégia de refinamento diferente.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Na prática, refinamento é onde a maior parte do tempo é gasto. Saber refinar eficientemente — editando artefatos intermediários em vez de re-executar tudo — economiza tempo e tokens. É a habilidade que diferencia um operador novato de um experiente do CLI-Anything.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Re-execução parcial (a partir de fase específica), edição de artefatos intermediários, refinamento de schema como alavanca, correção manual de código gerado, adição de testes para cenários edge case, convergência iterativa, quando parar de refinar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3.6.6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors justify-start">
+                        <span class="topic-number">6</span>
+                        <span class="text-neutral-100 font-medium">🚀 Publicando e distribuindo — Como compartilhar o CLI gerado</span>
+                    </button>
+                    <div class="topic-content px-4 pb-4 pl-14">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">O que é</h4>
+                                <p class="text-neutral-400">O processo de transformar o CLI gerado em um pacote distribuível: publicar no npm/PyPI/crates.io, criar releases no GitHub, configurar CI/CD para builds automáticos, gerar binários pré-compilados e registrar o SKILL.md em registries de skills para que agentes possam descobrir e usar o CLI automaticamente.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Por que aprender</h4>
+                                <p class="text-neutral-400">Um CLI que só existe na sua máquina tem impacto limitado. Publicação e distribuição transformam o resultado do pipeline em uma ferramenta que times inteiros podem adotar, agentes em produção podem usar e a comunidade pode contribuir para melhorar.</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold mb-1">Conceitos-chave</h4>
+                                <p class="text-neutral-400">Package managers (npm publish, pip install, cargo install), GitHub Releases com binários, CI/CD (GitHub Actions para build e publicação), semver para versionamento, registry de skills, licenciamento (respeitar a licença do software-alvo), distribuição de SKILL.md junto com o CLI.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Bottom Navigation -->
+    <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div class="flex items-center justify-between gap-4">
+            <a href="../trilha2/index.html" class="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors font-medium">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                Arquitetura Técnica
+            </a>
+            <a href="../trilha4/index.html" class="flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors font-medium">
+                Ecossistema de Agentes
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-700 bg-dark-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+                <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 transition-colors text-sm font-medium">INEMA.CLUB</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="moduleModal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="absolute inset-4 sm:inset-8 lg:inset-16 bg-dark-900 rounded-2xl border border-dark-700 overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-dark-700">
+                <h3 class="text-purple-400 font-semibold">Módulo</h3>
+                <button onclick="closeModal()" class="text-neutral-400 hover:text-neutral-100 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <iframe id="moduleIframe" class="flex-1 w-full" src="about:blank"></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const iconSun = document.getElementById('iconSun');
+        const iconMoon = document.getElementById('iconMoon');
+        const html = document.documentElement;
+
+        function setTheme(dark) {
+            if (dark) {
+                html.classList.add('dark');
+                iconSun.classList.add('hidden');
+                iconMoon.classList.remove('hidden');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                html.classList.remove('dark');
+                iconSun.classList.remove('hidden');
+                iconMoon.classList.add('hidden');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            setTheme(false);
+        } else {
+            setTheme(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = html.classList.contains('dark');
+            setTheme(!isDark);
+        });
+
+        // Topic Toggle
+        function toggleTopic(btn) {
+            const content = btn.nextElementSibling;
+            const number = btn.querySelector('.topic-number');
+            const isActive = content.classList.contains('active');
+
+            // Close all topics in same module
+            const module = btn.closest('.divide-y');
+            module.querySelectorAll('.topic-content').forEach(c => c.classList.remove('active'));
+            module.querySelectorAll('.topic-number').forEach(n => n.classList.remove('active'));
+
+            if (!isActive) {
+                content.classList.add('active');
+                number.classList.add('active');
+            }
+        }
+
+        // Modal
+        function openModal(url) {
+            document.getElementById('moduleModal').classList.remove('hidden');
+            document.getElementById('moduleIframe').src = url;
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('moduleModal').classList.add('hidden');
+            document.getElementById('moduleIframe').src = 'about:blank';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>

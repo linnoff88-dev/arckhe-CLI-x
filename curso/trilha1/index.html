@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T1 - Fundamentos da CLI | CLI-x: O Terminal como Interface dos Agentes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Light mode overrides */
+
+        /* Part 1 - Base overrides */
+        html:not(.dark) body {
+            background-color: #f9fafb !important;
+            color: #1f2937 !important;
+        }
+        html:not(.dark) .bg-dark-900,
+        html:not(.dark) .bg-dark-800,
+        html:not(.dark) .bg-dark-700 {
+            background-color: #ffffff !important;
+        }
+        html:not(.dark) .border-dark-600,
+        html:not(.dark) .border-dark-700 {
+            border-color: #e5e7eb !important;
+        }
+        html:not(.dark) .text-white {
+            color: #111827 !important;
+        }
+        html:not(.dark) .text-gray-400,
+        html:not(.dark) .text-gray-300 {
+            color: #6b7280 !important;
+        }
+        html:not(.dark) .text-gray-500 {
+            color: #9ca3af !important;
+        }
+        html:not(.dark) .bg-dark-800\/50,
+        html:not(.dark) .bg-dark-700\/50 {
+            background-color: #f3f4f6 !important;
+        }
+        html:not(.dark) .hover\:bg-dark-700:hover {
+            background-color: #f3f4f6 !important;
+        }
+
+        /* Part 2 - Emerald accent */
+        html:not(.dark) .text-emerald-400 {
+            color: #059669 !important;
+        }
+        html:not(.dark) .bg-emerald-500\/20 {
+            background-color: rgba(5, 150, 105, 0.1) !important;
+        }
+        html:not(.dark) .border-emerald-500\/30 {
+            border-color: rgba(5, 150, 105, 0.2) !important;
+        }
+        html:not(.dark) .bg-emerald-500\/10 {
+            background-color: rgba(5, 150, 105, 0.08) !important;
+        }
+        html:not(.dark) .bg-emerald-500 {
+            background-color: #059669 !important;
+        }
+        html:not(.dark) .ring-emerald-500\/20 {
+            --tw-ring-color: rgba(5, 150, 105, 0.15) !important;
+        }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-emerald-900\/30 {
+            --tw-gradient-from: rgba(5, 150, 105, 0.05) !important;
+        }
+        html:not(.dark) .to-transparent {
+            --tw-gradient-to: transparent !important;
+        }
+        html:not(.dark) .bg-gradient-to-b,
+        html:not(.dark) .bg-gradient-to-r {
+            background: #ffffff !important;
+        }
+        html:not(.dark) .header-gradient {
+            background: linear-gradient(to bottom, rgba(5, 150, 105, 0.06), transparent) !important;
+        }
+        html:not(.dark) .topic-content {
+            background-color: #f9fafb !important;
+            border-color: #e5e7eb !important;
+        }
+        html:not(.dark) .module-card {
+            background-color: #ffffff !important;
+            border-color: #e5e7eb !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+        }
+        html:not(.dark) .stat-card {
+            background-color: #f9fafb !important;
+            border-color: #e5e7eb !important;
+        }
+
+        /* Part 4 - Nav */
+        html:not(.dark) nav {
+            background-color: #ffffff !important;
+            border-color: #e5e7eb !important;
+        }
+        html:not(.dark) .nav-tab {
+            color: #6b7280 !important;
+        }
+        html:not(.dark) .nav-tab:hover {
+            color: #111827 !important;
+        }
+        html:not(.dark) .nav-tab.active {
+            color: #059669 !important;
+            border-color: #059669 !important;
+        }
+        html:not(.dark) .text-yellow-400 {
+            color: #b45309 !important;
+        }
+        html:not(.dark) .text-sky-400 {
+            color: #0369a1 !important;
+        }
+        html:not(.dark) footer {
+            background-color: #ffffff !important;
+            border-color: #e5e7eb !important;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            width: 100%;
+            max-width: 72rem;
+            height: 90vh;
+            border-radius: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+        .modal-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Topic transition */
+        .topic-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+        }
+        .topic-content.open {
+            max-height: 600px;
+            padding: 1rem 1.25rem;
+        }
+
+        /* Number circle */
+        .number-circle {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-40 bg-dark-900/95 backdrop-blur-md border-b border-dark-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center gap-2 text-yellow-400 font-bold text-xl hover:text-yellow-300 transition-colors">
+                        <span>⚡</span>
+                        <span>CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+
+                <!-- Trail tabs -->
+                <div class="flex items-center gap-1 overflow-x-auto">
+                    <a href="#" class="nav-tab active px-3 py-2 text-sm font-medium text-emerald-400 border-b-2 border-emerald-400 transition-colors">T1</a>
+                    <a href="../trilha2/index.html" class="nav-tab px-3 py-2 text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent transition-colors">T2</a>
+                    <a href="../trilha3/index.html" class="nav-tab px-3 py-2 text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent transition-colors">T3</a>
+                    <a href="../trilha4/index.html" class="nav-tab px-3 py-2 text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent transition-colors">T4</a>
+                    <a href="../trilha5/index.html" class="nav-tab px-3 py-2 text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent transition-colors">T5</a>
+                    <a href="../trilha6/index.html" class="nav-tab px-3 py-2 text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent transition-colors">T6</a>
+
+                    <!-- Theme toggle -->
+                    <button onclick="toggleTheme()" class="ml-4 p-2 rounded-lg bg-dark-800 hover:bg-dark-700 text-gray-400 hover:text-white transition-colors" title="Alternar tema">
+                        <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="header-gradient bg-gradient-to-b from-emerald-900/30 to-transparent border-b border-dark-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <!-- Badge -->
+            <div class="mb-4">
+                <span class="inline-block px-3 py-1 text-xs font-bold tracking-widest uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full">
+                    TRILHA 1
+                </span>
+            </div>
+
+            <!-- Title -->
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-white mb-4">
+                🖥️ Fundamentos da CLI
+            </h1>
+
+            <!-- Description -->
+            <p class="text-lg text-gray-400 max-w-3xl mb-8">
+                Descubra o que é a interface de linha de comando, por que ela voltou com força em 2026 impulsionada por agentes de IA, como o terminal moderno funciona, os conceitos essenciais e seu primeiro contato com agentes inteligentes no terminal.
+            </p>
+
+            <!-- Stats grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl">
+                <div class="stat-card bg-dark-800 rounded-lg border border-dark-600 p-4 text-center">
+                    <div class="text-2xl font-bold text-emerald-400">5</div>
+                    <div class="text-sm text-gray-400">Módulos</div>
+                </div>
+                <div class="stat-card bg-dark-800 rounded-lg border border-dark-600 p-4 text-center">
+                    <div class="text-2xl font-bold text-emerald-400">30</div>
+                    <div class="text-sm text-gray-400">Tópicos</div>
+                </div>
+                <div class="stat-card bg-dark-800 rounded-lg border border-dark-600 p-4 text-center">
+                    <div class="text-2xl font-bold text-emerald-400">~2.5h</div>
+                    <div class="text-sm text-gray-400">Duração</div>
+                </div>
+                <div class="stat-card bg-dark-800 rounded-lg border border-dark-600 p-4 text-center">
+                    <div class="text-2xl font-bold text-emerald-400">Iniciante</div>
+                    <div class="text-sm text-gray-400">Nível</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+
+        <!-- =============================== -->
+        <!-- Module 1.1 -->
+        <!-- =============================== -->
+        <div class="module-card bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
+            <!-- Module header -->
+            <div class="p-6 sm:p-8 border-b border-dark-600">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-emerald-400 font-mono text-sm font-semibold">Módulo 1.1</span>
+                    <span class="text-gray-500 text-sm">~30min</span>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">O que é CLI e por que importa em 2026</h2>
+                <p class="text-gray-400">Entenda o conceito fundamental de interface de linha de comando, sua história, e por que ela se tornou central no ecossistema de agentes de IA.</p>
+            </div>
+
+            <!-- Topics -->
+            <div class="divide-y divide-dark-600">
+                <!-- Topic 1 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">1</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🖥️ Definição de CLI</div>
+                            <div class="text-sm text-gray-400">Interface de linha de comando explicada</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">CLI (Command Line Interface) é uma interface onde o usuário interage com o computador através de comandos de texto. Diferente de interfaces gráficas, a CLI oferece controle direto e preciso sobre o sistema operacional e aplicações.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Em 2026, a CLI é a interface principal dos agentes de IA. Entender como ela funciona é o primeiro passo para dominar ferramentas como Claude Code, GitHub Copilot CLI e outros agentes que operam via terminal.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Prompt, comando, argumento, flag, stdin/stdout/stderr, código de saída, shell vs terminal.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 2 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">2</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">📜 Breve história</div>
+                            <div class="text-sm text-gray-400">De mainframes ao terminal moderno</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">A história da CLI começa nos anos 1960 com teletypes conectados a mainframes, passa pela revolução Unix nos anos 70, sobrevive à era GUI dos anos 80-90, e renasce como interface primária de agentes inteligentes na década de 2020.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Conhecer a história ajuda a entender as decisões de design que moldaram o terminal moderno e por que certos padrões persistem há mais de 50 anos.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Teletypes (TTY), Unix, shell Bourne, Bash, terminal emulador, POSIX, a filosofia Unix.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">3</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🔄 Por que a CLI voltou</div>
+                            <div class="text-sm text-gray-400">O renascimento via agentes de IA</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">A CLI experimentou um renascimento dramático porque agentes de IA operam naturalmente com texto. LLMs geram e interpretam comandos, leem outputs e compõem operações de forma mais eficiente via texto do que clicando em interfaces gráficas.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Compreender esta convergência entre CLI e IA é essencial para aproveitar as ferramentas mais poderosas de desenvolvimento de software em 2026.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">LLMs, agentes de IA, text-first interfaces, composabilidade, automação inteligente, developer experience.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 4 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">4</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">⚡ CLI vs GUI</div>
+                            <div class="text-sm text-gray-400">Quando cada uma vence</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">CLI e GUI não competem — complementam-se. A CLI excele em automação, composição, repetibilidade e operações em lote. A GUI é superior para visualização, exploração e tarefas que dependem de feedback visual imediato.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Saber quando usar cada interface maximiza sua produtividade. Desenvolvedores experientes alternam fluidamente entre CLI e GUI conforme a tarefa exige.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Scriptabilidade, reprodutibilidade, automação, batch processing, feedback visual, curva de aprendizado, TUI (Terminal UI).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 5 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">5</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🤖 O terminal como interface de agentes</div>
+                            <div class="text-sm text-gray-400">A tese central</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">A tese central do CLI-x: o terminal está se tornando a interface universal de agentes de IA. Assim como o navegador dominou a era web, o terminal emerge como ponto de convergência entre humanos e agentes inteligentes.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Esta perspectiva fundamenta todo o curso e explica por que dominar o terminal em 2026 é uma habilidade estratégica de carreira.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Interface de agentes, human-in-the-loop, supervisão, delegação, co-pilotagem, agentic workflows.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 6 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">6</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🌐 O ecossistema 2026</div>
+                            <div class="text-sm text-gray-400">Quem está apostando em CLI</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">O ecossistema CLI em 2026 inclui gigantes como Anthropic (Claude Code), GitHub (Copilot CLI), Google (Gemini CLI), além de startups como Warp, Fig e Charm. Empresas investem bilhões na interface textual.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Mapear o ecossistema permite escolher as melhores ferramentas e entender as tendências do mercado de desenvolvimento de software.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Claude Code, GitHub Copilot CLI, Gemini CLI, Warp, Cursor, agentic IDEs, CLI-first development.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module buttons -->
+            <div class="p-6 sm:px-8 border-t border-dark-600 flex justify-start gap-3">
+                <button onclick="openModal('modal-1-1')" class="px-4 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg hover:bg-emerald-500/30 transition-colors text-sm font-medium">
+                    Ver em Modal
+                </button>
+                <a href="modulo-1-1.html" class="px-4 py-2 bg-dark-700 text-white border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors text-sm font-medium">
+                    Ver Completo
+                </a>
+            </div>
+        </div>
+
+        <!-- =============================== -->
+        <!-- Module 1.2 -->
+        <!-- =============================== -->
+        <div class="module-card bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
+            <div class="p-6 sm:p-8 border-b border-dark-600">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-emerald-400 font-mono text-sm font-semibold">Módulo 1.2</span>
+                    <span class="text-gray-500 text-sm">~30min</span>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">A evolução: de shell a interface de agentes</h2>
+                <p class="text-gray-400">Acompanhe a jornada do shell tradicional até a era dos agentes, entendendo pipes, composição e como o terminal ganhou memória e contexto.</p>
+            </div>
+
+            <div class="divide-y divide-dark-600">
+                <!-- Topic 1 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">1</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🐚 O que é um shell</div>
+                            <div class="text-sm text-gray-400">Bash, Zsh, Fish, PowerShell</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">O shell é o programa que interpreta seus comandos e os envia ao sistema operacional. Bash é o padrão no Linux, Zsh no macOS, Fish oferece autocompletar inteligente e PowerShell domina no Windows com objetos em vez de texto.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Escolher e configurar o shell certo é fundamental. Cada shell tem suas forças e entender as diferenças permite aproveitar o máximo de cada ambiente.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Bash, Zsh, Fish, PowerShell, Nushell, interpretador de comandos, shell scripting, configuração (.bashrc, .zshrc).</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 2 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">2</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">📡 Pipes e composição</div>
+                            <div class="text-sm text-gray-400">A filosofia Unix que voltou</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Pipes (|) conectam a saída de um programa à entrada de outro, permitindo compor operações complexas a partir de ferramentas simples. Esta filosofia Unix de "faça uma coisa bem feita" é a base dos workflows agênticos.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">A composição via pipes é o modelo mental que agentes de IA usam para encadear operações. Dominar pipes é dominar o pensamento composicional.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Pipe (|), composição, Unix philosophy, ferramentas pequenas, stdin/stdout, encadeamento, data pipelines.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">3</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">📋 Entrada e saída estruturada</div>
+                            <div class="text-sm text-gray-400">Texto, JSON, streams</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Comandos tradicionais produzem texto plano, mas o terminal moderno trabalha cada vez mais com dados estruturados como JSON. Ferramentas como jq e fx permitem consultar e transformar dados estruturados diretamente no terminal.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Agentes de IA preferem dados estruturados para tomar decisões. Saber trabalhar com JSON no terminal é essencial para integrar com APIs e agentes.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">JSON, YAML, streams, stdout, stderr, jq, fx, dados tabulares, saída estruturada vs texto plano.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 4 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">4</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🔗 De scripts a agentes</div>
+                            <div class="text-sm text-gray-400">A transição</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Scripts automatizam sequências fixas de comandos. Agentes vão além: interpretam contexto, tomam decisões, adaptam-se a erros e pedem confirmação quando necessário. É a evolução de automação rígida para inteligência flexível.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Entender esta transição é fundamental para saber quando usar scripts tradicionais e quando delegar para agentes inteligentes.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Shell scripts, automação, agentes autônomos, decisão contextual, error recovery, human approval, tool use.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 5 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">5</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🧠 Memória e contexto</div>
+                            <div class="text-sm text-gray-400">Como agentes mantêm estado</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Diferente de comandos isolados, agentes mantêm memória da conversa, do projeto e das decisões anteriores. Usam context windows, arquivos de memória e embeddings para "lembrar" o que importa.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Saber como agentes gerenciam contexto permite usá-los de forma mais eficiente, fornecendo as informações certas no momento certo.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Context window, memória de longo prazo, CLAUDE.md, embeddings, RAG, state management, conversational memory.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 6 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">6</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🔄 Sessões longas</div>
+                            <div class="text-sm text-gray-400">O terminal que não esquece</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Sessões longas permitem que agentes trabalhem em tarefas complexas ao longo de horas ou dias, mantendo contexto acumulado. O terminal moderno com agentes se torna um parceiro persistente de desenvolvimento.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Dominar sessões longas multiplica a produtividade. Um agente que lembra do seu projeto trabalha exponencialmente melhor que um que começa do zero.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Session persistence, tmux, screen, session resume, contexto acumulado, checkpoints, workflow contínuo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 sm:px-8 border-t border-dark-600 flex justify-start gap-3">
+                <button onclick="openModal('modal-1-2')" class="px-4 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg hover:bg-emerald-500/30 transition-colors text-sm font-medium">
+                    Ver em Modal
+                </button>
+                <a href="modulo-1-2.html" class="px-4 py-2 bg-dark-700 text-white border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors text-sm font-medium">
+                    Ver Completo
+                </a>
+            </div>
+        </div>
+
+        <!-- =============================== -->
+        <!-- Module 1.3 -->
+        <!-- =============================== -->
+        <div class="module-card bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
+            <div class="p-6 sm:p-8 border-b border-dark-600">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-emerald-400 font-mono text-sm font-semibold">Módulo 1.3</span>
+                    <span class="text-gray-500 text-sm">~25min</span>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">O terminal moderno: Warp, iTerm, Windows Terminal</h2>
+                <p class="text-gray-400">Conheça os terminais mais avançados de 2026, suas funcionalidades exclusivas e como escolher o ideal para seu fluxo de trabalho com agentes de IA.</p>
+            </div>
+
+            <div class="divide-y divide-dark-600">
+                <!-- Topic 1 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">1</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🚀 Warp</div>
+                            <div class="text-sm text-gray-400">O ambiente de desenvolvimento agêntico</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Warp é um terminal construído do zero em Rust com IA integrada. Oferece blocos de comando, autocompletar inteligente, workflows compartilháveis e agente embutido que entende seu contexto de desenvolvimento.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Warp representa o futuro dos terminais: nativo em IA, colaborativo e com UX moderna. Conhecê-lo é entender para onde os terminais estão evoluindo.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Warp AI, command blocks, workflows, Warp Drive, agente integrado, Rust-based terminal.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 2 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">2</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">💻 iTerm2 e Alacritty</div>
+                            <div class="text-sm text-gray-400">Terminais para power users</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">iTerm2 é o terminal mais popular no macOS com split panes, profiles e integração shell. Alacritty é um terminal GPU-accelerated, mínimo e extremamente rápido, configurado via YAML/TOML.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Power users precisam de terminais que acompanhem sua velocidade. iTerm2 e Alacritty são escolhas sólidas para quem prioriza performance e customização.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">iTerm2 profiles, split panes, triggers, Alacritty, GPU rendering, configuração TOML, hotkey windows.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">3</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🪟 Windows Terminal</div>
+                            <div class="text-sm text-gray-400">O terminal da Microsoft</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Windows Terminal unifica CMD, PowerShell e WSL (Windows Subsystem for Linux) em uma interface moderna com tabs, rendering GPU e customização via JSON. É a porta de entrada do Windows para o ecossistema CLI.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Com WSL2, desenvolvedores Windows têm acesso completo ao ecossistema Linux. O Windows Terminal torna essa experiência fluida e produtiva.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Windows Terminal, WSL2, PowerShell 7, tabs e profiles, settings.json, rendering GPU, integração com Linux.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 4 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">4</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🎨 Customização</div>
+                            <div class="text-sm text-gray-400">Temas, fonts e produtividade</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Customizar o terminal vai além da estética. Fontes com ligatures (como Fira Code e JetBrains Mono), temas como Catppuccin e Dracula, e prompts como Starship e Oh My Posh transformam a experiência e aumentam a produtividade.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Um terminal bem configurado reduz fadiga visual, melhora a legibilidade e torna o trabalho diário mais agradável e eficiente.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Nerd Fonts, Starship prompt, Oh My Posh, Catppuccin, Dracula, ligatures, true color, configuração de tema.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 5 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">5</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🤖 Agentes embutidos</div>
+                            <div class="text-sm text-gray-400">Quando o terminal já traz IA</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Terminais modernos como Warp já incluem agentes de IA nativos. Eles sugerem comandos, explicam erros, geram scripts e até executam tarefas complexas — tudo sem sair do terminal.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Agentes embutidos são o primeiro contato mais acessível com IA no terminal. Entender como funcionam prepara para ferramentas mais avançadas.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Warp AI, sugestão de comandos, explicação de erros, geração de scripts, inline AI, terminal copilot.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 6 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">6</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🔌 Integração com editores</div>
+                            <div class="text-sm text-gray-400">VS Code, JetBrains, Neovim</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">O terminal integrado de editores como VS Code, JetBrains IDEs e Neovim cria um ambiente unificado onde código e comandos coexistem. Agentes como Claude Code operam diretamente dentro destes editores.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">A integração terminal-editor é onde a maioria dos desenvolvedores passa o dia. Otimizar este fluxo multiplica a produtividade.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">VS Code integrated terminal, JetBrains terminal, Neovim :terminal, toggleterm, split workflow, editor + agent.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 sm:px-8 border-t border-dark-600 flex justify-start gap-3">
+                <button onclick="openModal('modal-1-3')" class="px-4 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg hover:bg-emerald-500/30 transition-colors text-sm font-medium">
+                    Ver em Modal
+                </button>
+                <a href="modulo-1-3.html" class="px-4 py-2 bg-dark-700 text-white border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors text-sm font-medium">
+                    Ver Completo
+                </a>
+            </div>
+        </div>
+
+        <!-- =============================== -->
+        <!-- Module 1.4 -->
+        <!-- =============================== -->
+        <div class="module-card bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
+            <div class="p-6 sm:p-8 border-b border-dark-600">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-emerald-400 font-mono text-sm font-semibold">Módulo 1.4</span>
+                    <span class="text-gray-500 text-sm">~30min</span>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Conceitos essenciais: shell, comandos, pipes, JSON</h2>
+                <p class="text-gray-400">Domine os fundamentos práticos: anatomia de comandos, composição com pipes, manipulação de dados estruturados e navegação eficiente no sistema de arquivos.</p>
+            </div>
+
+            <div class="divide-y divide-dark-600">
+                <!-- Topic 1 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">1</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">📝 Anatomia de um comando</div>
+                            <div class="text-sm text-gray-400">Estrutura e flags</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Todo comando segue a estrutura: programa [flags] [argumentos]. Flags modificam o comportamento (como -v para verbose, --help para ajuda), e argumentos são os alvos da operação. Entender esta anatomia é essencial.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Quando você entende a estrutura universal de comandos, qualquer ferramenta nova se torna intuitiva. É a gramática da CLI.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Comando, subcomando, flag curta (-v), flag longa (--verbose), argumentos posicionais, man pages, --help, tldr.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 2 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">2</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🔗 Pipes e redirecionamento</div>
+                            <div class="text-sm text-gray-400">Compondo operações</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Pipes (|) encadeiam comandos. Redirecionamento (>, >>, <, 2>) controla de onde vem e para onde vai a informação. Juntos, permitem construir pipelines poderosos de processamento de dados.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Pipes e redirecionamento são o superpoder da CLI. Permitem resolver problemas complexos combinando ferramentas simples de forma elegante.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Pipe (|), redirect (>), append (>>), input (<), stderr (2>), tee, xargs, process substitution.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">3</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">📊 JSON no terminal</div>
+                            <div class="text-sm text-gray-400">jq, fx e saída estruturada</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">jq é o "sed para JSON" — permite filtrar, transformar e consultar dados JSON no terminal. fx oferece visualização interativa. Ferramentas modernas como gh e docker produzem JSON nativo, tornando estas skills essenciais.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">APIs retornam JSON, agentes produzem JSON, configurações são JSON. Manipular dados estruturados no terminal é uma habilidade diária em 2026.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">jq filters, jq select, fx interativo, JSON path, pretty print, --json flag, structured output.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 4 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">4</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">📁 Navegação e manipulação de arquivos</div>
+                            <div class="text-sm text-gray-400">Operações essenciais</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Comandos como cd, ls, cp, mv, rm, mkdir e touch são a base de toda operação no terminal. Ferramentas modernas como exa/eza, bat, fd e zoxide tornam estas operações mais rápidas e informativas.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Navegar e manipular arquivos é a operação mais frequente no terminal. Fazer isso com fluência é o que separa iniciantes de usuários competentes.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">cd, ls, cp, mv, rm, mkdir, touch, exa/eza, bat, zoxide, tree, caminhos absolutos vs relativos, ~, .., wildcards.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 5 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">5</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🔍 Busca e filtragem</div>
+                            <div class="text-sm text-gray-400">grep, find, ripgrep</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Buscar conteúdo (grep/ripgrep) e encontrar arquivos (find/fd) são operações fundamentais. ripgrep (rg) é ordens de magnitude mais rápido que grep, e fd simplifica a sintaxe do find.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Encontrar informação rapidamente é crucial. Agentes usam estas mesmas ferramentas para navegar codebases — entendê-las ajuda a entender como agentes "pensam".</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">grep, ripgrep (rg), find, fd, expressões regulares, glob patterns, --include, --exclude, busca recursiva.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 6 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">6</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">⚙️ Variáveis e ambiente</div>
+                            <div class="text-sm text-gray-400">PATH, env, dotfiles</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Variáveis de ambiente configuram o comportamento do shell e dos programas. PATH define onde o sistema busca executáveis. Dotfiles (.bashrc, .zshrc) são scripts de configuração que personalizam seu ambiente.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Variáveis de ambiente controlam API keys, configurações e comportamentos. Dominá-las é essencial para configurar agentes e ferramentas corretamente.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">$PATH, $HOME, export, env, .bashrc, .zshrc, dotfiles, API keys, .env files, source, alias.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 sm:px-8 border-t border-dark-600 flex justify-start gap-3">
+                <button onclick="openModal('modal-1-4')" class="px-4 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg hover:bg-emerald-500/30 transition-colors text-sm font-medium">
+                    Ver em Modal
+                </button>
+                <a href="modulo-1-4.html" class="px-4 py-2 bg-dark-700 text-white border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors text-sm font-medium">
+                    Ver Completo
+                </a>
+            </div>
+        </div>
+
+        <!-- =============================== -->
+        <!-- Module 1.5 -->
+        <!-- =============================== -->
+        <div class="module-card bg-dark-800 rounded-xl border border-dark-600 overflow-hidden">
+            <div class="p-6 sm:p-8 border-b border-dark-600">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-emerald-400 font-mono text-sm font-semibold">Módulo 1.5</span>
+                    <span class="text-gray-500 text-sm">~25min</span>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Primeiro contato com agentes no terminal</h2>
+                <p class="text-gray-400">Instale, configure e interaja com seu primeiro agente de IA no terminal. Da instalação à execução segura de comandos, aprenda os fundamentos práticos.</p>
+            </div>
+
+            <div class="divide-y divide-dark-600">
+                <!-- Topic 1 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">1</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🤖 Instalando seu primeiro agente</div>
+                            <div class="text-sm text-gray-400">Setup rápido</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Instalar um agente de IA no terminal geralmente é um único comando: npm install -g @anthropic-ai/claude-code para Claude Code, ou brew install para outras ferramentas. A configuração inicial envolve autenticação via API key ou OAuth.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">O primeiro passo prático do curso. Após esta seção, você terá um agente funcional no seu terminal pronto para usar.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">npm install, brew install, API keys, OAuth, configuração inicial, requisitos de sistema, versões e updates.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 2 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">2</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">💬 Conversando com IA no terminal</div>
+                            <div class="text-sm text-gray-400">Prompts e respostas</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Interagir com um agente no terminal é como uma conversa: você faz perguntas, dá instruções e o agente responde com texto, sugere comandos ou executa ações. A qualidade do prompt determina a qualidade da resposta.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Saber conversar efetivamente com agentes é a habilidade mais importante da era IA. Bons prompts geram resultados extraordinários.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Prompt engineering, contexto, instruções claras, iteração, multi-turn conversation, slash commands, /help.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 3 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">3</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">📂 Agente lendo código</div>
+                            <div class="text-sm text-gray-400">Inspeção de repositórios</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Agentes podem ler, navegar e entender repositórios inteiros. Eles usam ferramentas como grep, find e cat para explorar o código, construindo um mapa mental do projeto que permite responder perguntas complexas sobre a codebase.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Ter um agente que entende seu código transforma debugging, onboarding e review. É como ter um colega que leu todo o repositório.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Code reading, repository navigation, codebase understanding, file exploration, dependency mapping, architecture analysis.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 4 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">4</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">✏️ Agente editando arquivos</div>
+                            <div class="text-sm text-gray-400">Modificações assistidas</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Agentes podem criar e modificar arquivos com precisão cirúrgica. Eles mostram diffs antes de aplicar mudanças, pedem confirmação e podem reverter alterações. É edição de código com supervisão humana.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Delegar edições ao agente acelera refatorações, correções e criação de código. Saber supervisionar estas edições garante qualidade.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">File editing, diffs, approval workflow, create vs edit, bulk modifications, refactoring assistido, code generation.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 5 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">5</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🏃 Agente executando comandos</div>
+                            <div class="text-sm text-gray-400">Shell com supervisão</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Agentes podem executar comandos no shell: instalar dependências, rodar testes, fazer builds e deploy. Cada comando é mostrado antes da execução, e o usuário decide se aprova, rejeita ou modifica.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Execução supervisionada de comandos é o equilíbrio entre automação e controle. Entender este modelo é crucial para usar agentes com confiança.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Command execution, approval mode, auto-approve, allowlist, command review, output interpretation, error handling.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic 6 -->
+                <div class="topic-wrapper">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-4 p-4 sm:px-8 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="number-circle bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">6</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-white">🔒 Segurança básica</div>
+                            <div class="text-sm text-gray-400">Permissões e sandbox</div>
+                        </div>
+                    </button>
+                    <div class="topic-content border-t border-dark-600 bg-dark-800/50 px-8">
+                        <div class="space-y-3">
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">O que é:</span>
+                                <p class="text-gray-300 text-sm mt-1">Segurança com agentes envolve: limitar permissões de arquivo, usar sandboxes, revisar comandos antes de executar, proteger API keys e nunca dar acesso root a agentes. O princípio do menor privilégio se aplica.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Por que aprender:</span>
+                                <p class="text-gray-300 text-sm mt-1">Agentes são poderosos — e poder requer responsabilidade. Entender segurança básica protege seu sistema, dados e credenciais.</p>
+                            </div>
+                            <div>
+                                <span class="text-emerald-400 font-semibold text-sm">Conceitos-chave:</span>
+                                <p class="text-gray-300 text-sm mt-1">Sandbox, permissões, least privilege, API key management, .env files, gitignore, command review, trust levels.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 sm:px-8 border-t border-dark-600 flex justify-start gap-3">
+                <button onclick="openModal('modal-1-5')" class="px-4 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg hover:bg-emerald-500/30 transition-colors text-sm font-medium">
+                    Ver em Modal
+                </button>
+                <a href="modulo-1-5.html" class="px-4 py-2 bg-dark-700 text-white border border-dark-600 rounded-lg hover:bg-dark-600 transition-colors text-sm font-medium">
+                    Ver Completo
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom navigation -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div class="flex items-center justify-between border-t border-dark-700 pt-8">
+            <a href="../../index.html" class="text-gray-400 hover:text-white transition-colors text-sm font-medium">
+                &larr; Voltar ao Início
+            </a>
+            <a href="../trilha2/index.html" class="text-emerald-400 hover:text-emerald-300 transition-colors text-sm font-medium">
+                Próxima: Arquitetura Técnica &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-700 bg-dark-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-gray-500 text-sm">CLI-x: O Terminal como Interface dos Agentes &mdash; 2026</p>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="modal-1-1" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-1-1')">
+        <div class="modal-content bg-dark-900 border border-dark-600">
+            <button onclick="closeModal('modal-1-1')" class="absolute top-4 right-4 z-10 p-2 bg-dark-800 hover:bg-dark-700 rounded-lg text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <iframe src="modulo-1-1.html"></iframe>
+        </div>
+    </div>
+
+    <div id="modal-1-2" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-1-2')">
+        <div class="modal-content bg-dark-900 border border-dark-600">
+            <button onclick="closeModal('modal-1-2')" class="absolute top-4 right-4 z-10 p-2 bg-dark-800 hover:bg-dark-700 rounded-lg text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <iframe src="modulo-1-2.html"></iframe>
+        </div>
+    </div>
+
+    <div id="modal-1-3" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-1-3')">
+        <div class="modal-content bg-dark-900 border border-dark-600">
+            <button onclick="closeModal('modal-1-3')" class="absolute top-4 right-4 z-10 p-2 bg-dark-800 hover:bg-dark-700 rounded-lg text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <iframe src="modulo-1-3.html"></iframe>
+        </div>
+    </div>
+
+    <div id="modal-1-4" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-1-4')">
+        <div class="modal-content bg-dark-900 border border-dark-600">
+            <button onclick="closeModal('modal-1-4')" class="absolute top-4 right-4 z-10 p-2 bg-dark-800 hover:bg-dark-700 rounded-lg text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <iframe src="modulo-1-4.html"></iframe>
+        </div>
+    </div>
+
+    <div id="modal-1-5" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-1-5')">
+        <div class="modal-content bg-dark-900 border border-dark-600">
+            <button onclick="closeModal('modal-1-5')" class="absolute top-4 right-4 z-10 p-2 bg-dark-800 hover:bg-dark-700 rounded-lg text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <iframe src="modulo-1-5.html"></iframe>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Toggle topic expand/collapse
+        function toggleTopic(button) {
+            const wrapper = button.closest('.topic-wrapper');
+            const content = wrapper.querySelector('.topic-content');
+            const circle = button.querySelector('.number-circle');
+
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                circle.classList.remove('bg-emerald-500', 'text-white');
+                circle.classList.add('bg-emerald-500/20', 'text-emerald-400');
+            } else {
+                content.classList.add('open');
+                circle.classList.remove('bg-emerald-500/20', 'text-emerald-400');
+                circle.classList.add('bg-emerald-500', 'text-white');
+            }
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        // Load saved theme
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'light') {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+
+        // Open modal
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close modal
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active').forEach(function(modal) {
+                    modal.classList.remove('active');
+                });
+                document.body.style.overflow = '';
+            }
+        });
+    </script>
+</body>
+</html>

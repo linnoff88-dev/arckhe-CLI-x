@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 1.4 - Conceitos essenciais: shell, comandos, pipes, JSON | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Part 1 - Base overrides */
+        html:not(.dark) body { background-color: #f8fafc; color: #1f2937; }
+        html:not(.dark) .bg-dark-900, html:not(.dark) .bg-dark-800, html:not(.dark) .bg-dark-700 { background-color: #ffffff !important; }
+        html:not(.dark) .border-dark-600, html:not(.dark) .border-dark-700 { border-color: #e5e7eb !important; }
+        html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-neutral-400, html:not(.dark) .text-neutral-300 { color: #6b7280 !important; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af !important; }
+        html:not(.dark) .text-neutral-200 { color: #374151 !important; }
+        html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-700\/50 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .hover\:bg-dark-700:hover { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-dark-800\/80 { background-color: #f9fafb !important; }
+
+        /* Part 2 - Emerald accent */
+        html:not(.dark) .text-emerald-400 { color: #059669 !important; }
+        html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.1) !important; }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.2) !important; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08) !important; }
+        html:not(.dark) .bg-emerald-500 { background-color: #059669 !important; }
+        html:not(.dark) .ring-emerald-500\/20 { --tw-ring-color: rgba(5, 150, 105, 0.15) !important; }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-emerald-900\/30 { --tw-gradient-from: rgba(5, 150, 105, 0.05) !important; }
+        html:not(.dark) .to-transparent { --tw-gradient-to: transparent !important; }
+        html:not(.dark) .bg-gradient-to-b, html:not(.dark) .bg-gradient-to-r { background: #ffffff !important; }
+        html:not(.dark) .header-gradient { background: linear-gradient(to bottom, rgba(5, 150, 105, 0.06), transparent) !important; }
+        html:not(.dark) .text-primary { color: #b45309 !important; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(180, 83, 9, 0.08) !important; }
+        html:not(.dark) .border-primary\/30 { border-color: rgba(180, 83, 9, 0.2) !important; }
+        html:not(.dark) .text-sky-400 { color: #0369a1 !important; }
+        html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3, 105, 161, 0.08) !important; }
+        html:not(.dark) .border-sky-500\/30 { border-color: rgba(3, 105, 161, 0.2) !important; }
+        html:not(.dark) .text-yellow-400 { color: #b45309 !important; }
+        html:not(.dark) .text-red-400 { color: #dc2626 !important; }
+        html:not(.dark) .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08) !important; }
+        html:not(.dark) .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.2) !important; }
+
+        /* Part 4 - Nav */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        html:not(.dark) nav { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #e5e7eb !important; }
+        html:not(.dark) footer { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+                        <span class="text-2xl">⚡</span>
+                        <span class="font-bold text-lg hidden sm:inline">CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10">
+                        <span class="sm:hidden">T1</span><span class="hidden sm:inline">Fundamentos</span>
+                    </a>
+                    <a href="../trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors">
+                        <span class="sm:hidden">T2</span><span class="hidden sm:inline">Arquitetura</span>
+                    </a>
+                    <a href="../trilha3/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors">
+                        <span class="sm:hidden">T3</span><span class="hidden sm:inline">CLI-Anything</span>
+                    </a>
+                    <a href="../trilha4/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors">
+                        <span class="sm:hidden">T4</span><span class="hidden sm:inline">Ecossistema</span>
+                    </a>
+                    <a href="../trilha5/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-teal-400 hover:bg-teal-500/10 transition-colors">
+                        <span class="sm:hidden">T5</span><span class="hidden sm:inline">Projetos</span>
+                    </a>
+                    <a href="../trilha6/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+                        <span class="sm:hidden">T6</span><span class="hidden sm:inline">Estratégia</span>
+                    </a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-2">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm text-neutral-400 mb-8">
+            <a href="../../index.html" class="hover:text-emerald-400 transition-colors">Início</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-emerald-400 transition-colors">Trilha 1</a>
+            <span>/</span>
+            <span class="text-emerald-400">Módulo 1.4</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header-gradient bg-gradient-to-b from-emerald-900/30 to-transparent rounded-2xl p-8 mb-12 border border-emerald-500/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-bold tracking-wider uppercase">Módulo 1.4</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Prático</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Conceitos essenciais: shell, comandos, pipes, JSON</h1>
+            <p class="text-lg text-neutral-300 mb-6 max-w-3xl">Domine os fundamentos práticos que todo usuário de CLI precisa: anatomia de comandos, pipes e redirecionamento, processamento de JSON, navegação de arquivos, busca/filtragem e variáveis de ambiente.</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">6</span>
+                    <span class="text-neutral-400 text-sm">Tópicos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">30</span>
+                    <span class="text-neutral-400 text-sm">Minutos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">Iniciante</span>
+                    <span class="text-neutral-400 text-sm">Nível</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">Prático</span>
+                    <span class="text-neutral-400 text-sm">Tipo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 1 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">1</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📝 Anatomia de um comando</h2>
+                    <p class="text-neutral-300 leading-relaxed">Todo comando no terminal segue uma <span class="text-emerald-400 font-semibold">estrutura consistente</span>. Entender essa anatomia é como aprender a gramática de uma língua — uma vez que você domina a estrutura, qualquer comando novo se torna intuitivo.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">A estrutura universal de um comando CLI:</p>
+                    <div class="bg-dark-800 rounded-lg p-4 border border-dark-600 font-mono text-sm mb-4">
+                        <p class="text-neutral-400 mb-2"># Estrutura geral:</p>
+                        <p class="text-emerald-400">comando [subcomando] [flags] [argumentos]</p>
+                        <p class="text-neutral-400 mt-4 mb-2"># Exemplo real:</p>
+                        <p><span class="text-emerald-400">git</span> <span class="text-sky-400">commit</span> <span class="text-primary">-m</span> <span class="text-neutral-200">"mensagem do commit"</span></p>
+                        <p class="text-neutral-500 text-xs mt-2">git=comando | commit=subcomando | -m=flag | "mensagem..."=argumento</p>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="bg-dark-800/50 rounded-lg p-3 text-center border border-dark-600">
+                            <p class="text-emerald-400 font-bold text-sm">Comando</p>
+                            <p class="text-neutral-400 text-xs">O programa</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-3 text-center border border-dark-600">
+                            <p class="text-sky-400 font-bold text-sm">Subcomando</p>
+                            <p class="text-neutral-400 text-xs">A ação</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-3 text-center border border-dark-600">
+                            <p class="text-primary font-bold text-sm">Flags</p>
+                            <p class="text-neutral-400 text-xs">Modificadores</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-3 text-center border border-dark-600">
+                            <p class="text-neutral-200 font-bold text-sm">Argumentos</p>
+                            <p class="text-neutral-400 text-xs">Os alvos</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">Flags curtas usam um traço (<code class="text-emerald-400 bg-dark-800 px-2 py-0.5 rounded">-v</code>) e podem ser combinadas (<code class="text-emerald-400 bg-dark-800 px-2 py-0.5 rounded">-la</code> = <code class="text-emerald-400 bg-dark-800 px-2 py-0.5 rounded">-l -a</code>). Flags longas usam dois traços (<code class="text-emerald-400 bg-dark-800 px-2 py-0.5 rounded">--verbose</code>) e são mais legíveis. Use <code class="text-emerald-400 bg-dark-800 px-2 py-0.5 rounded">--help</code> em qualquer comando para ver as opções disponíveis, e <code class="text-emerald-400 bg-dark-800 px-2 py-0.5 rounded">man comando</code> para a documentação completa.</p>
+
+                <!-- Dica Prática -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Quando encontrar um comando desconhecido, use <code class="text-primary bg-dark-800 px-2 py-0.5 rounded">tldr comando</code> (instale via <code class="text-primary bg-dark-800 px-2 py-0.5 rounded">npm install -g tldr</code>) para ver exemplos práticos resumidos. É muito mais rápido que ler a man page completa e suficiente para 90% dos casos.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">2</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔗 Pipes e redirecionamento</h2>
+                    <p class="text-neutral-300 leading-relaxed">Pipes e redirecionamento são o <span class="text-emerald-400 font-semibold">superpoder da CLI</span>. Eles permitem conectar programas simples em pipelines complexas e controlar para onde vai a saída de cada comando.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Operadores Essenciais</h3>
+                    <div class="space-y-4">
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <code class="text-emerald-400 font-bold text-lg">|</code>
+                                <span class="text-neutral-200 font-semibold">Pipe</span>
+                            </div>
+                            <p class="text-neutral-400 text-sm">Conecta a saída (stdout) de um comando à entrada (stdin) do próximo.</p>
+                            <p class="text-emerald-400 font-mono text-sm mt-2">ls -la | grep ".js" | wc -l</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <code class="text-emerald-400 font-bold text-lg">></code>
+                                <span class="text-neutral-200 font-semibold">Redireciona (sobrescreve)</span>
+                            </div>
+                            <p class="text-neutral-400 text-sm">Envia a saída para um arquivo, substituindo o conteúdo existente.</p>
+                            <p class="text-emerald-400 font-mono text-sm mt-2">echo "hello" > arquivo.txt</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <code class="text-emerald-400 font-bold text-lg">>></code>
+                                <span class="text-neutral-200 font-semibold">Redireciona (append)</span>
+                            </div>
+                            <p class="text-neutral-400 text-sm">Adiciona a saída ao final de um arquivo, sem substituir.</p>
+                            <p class="text-emerald-400 font-mono text-sm mt-2">echo "nova linha" >> log.txt</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <code class="text-emerald-400 font-bold text-lg">2>&1</code>
+                                <span class="text-neutral-200 font-semibold">Stderr para stdout</span>
+                            </div>
+                            <p class="text-neutral-400 text-sm">Redireciona mensagens de erro para a mesma saída do stdout. Útil para capturar tudo em logs.</p>
+                            <p class="text-emerald-400 font-mono text-sm mt-2">npm build 2>&1 | tee build.log</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 3 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">3</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📊 JSON no terminal</h2>
+                    <p class="text-neutral-300 leading-relaxed">JSON é o formato que conecta humanos, APIs e agentes de IA. Dominar ferramentas de <span class="text-emerald-400 font-semibold">processamento de JSON no terminal</span> é uma das habilidades mais valiosas na era dos agentes.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">jq — O "sed para JSON"</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4"><code class="text-emerald-400 bg-dark-800 px-2 py-0.5 rounded">jq</code> é a ferramenta essencial para filtrar, transformar e extrair dados de JSON no terminal:</p>
+                    <div class="bg-dark-800 rounded-lg p-4 border border-dark-600 font-mono text-sm space-y-3">
+                        <div>
+                            <p class="text-neutral-500"># Extrair nomes de todos os usuários</p>
+                            <p class="text-emerald-400">cat dados.json | jq '.users[].name'</p>
+                        </div>
+                        <div>
+                            <p class="text-neutral-500"># Filtrar usuários com mais de 30 anos</p>
+                            <p class="text-emerald-400">cat dados.json | jq '.users[] | select(.age > 30)'</p>
+                        </div>
+                        <div>
+                            <p class="text-neutral-500"># Contar itens em um array</p>
+                            <p class="text-emerald-400">cat dados.json | jq '.users | length'</p>
+                        </div>
+                        <div>
+                            <p class="text-neutral-500"># Transformar formato</p>
+                            <p class="text-emerald-400">cat dados.json | jq '.users[] | {nome: .name, email: .email}'</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Ferramentas JSON</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">jq</span> — Processador de JSON via CLI. Filtra, transforma, formata. Essencial e onipresente.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">fx</span> — Visualizador interativo de JSON. Navegue pela estrutura com o teclado e aplique filtros em tempo real.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">jless</span> — Pager para JSON, como o less é para texto. Ideal para explorar JSONs grandes.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dica Prática -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Agentes de IA operam com JSON internamente — dominar <code class="text-primary bg-dark-800 px-2 py-0.5 rounded">jq</code> é essencial para inspecionar, debugar e validar o que agentes estão fazendo. Quando um agente retorna dados estruturados, <code class="text-primary bg-dark-800 px-2 py-0.5 rounded">jq</code> permite que você verifique rapidamente se o resultado está correto.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">4</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📁 Navegação e manipulação de arquivos</h2>
+                    <p class="text-neutral-300 leading-relaxed">Navegar e manipular arquivos pelo terminal é mais rápido que qualquer file manager gráfico — especialmente quando combinado com ferramentas modernas que <span class="text-emerald-400 font-semibold">substituem os utilitários clássicos</span> por versões mais rápidas e informativas.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Dados -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Comandos Essenciais</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600">
+                            <code class="text-sky-400 font-bold">ls / eza</code>
+                            <p class="text-neutral-400 text-xs mt-1">Listar arquivos. eza é o substituto moderno com ícones e cores.</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600">
+                            <code class="text-sky-400 font-bold">cd / z</code>
+                            <p class="text-neutral-400 text-xs mt-1">Navegar entre diretórios. z (zoxide) aprende seus caminhos frequentes.</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600">
+                            <code class="text-sky-400 font-bold">mkdir / cp / mv / rm</code>
+                            <p class="text-neutral-400 text-xs mt-1">Criar diretórios, copiar, mover e remover arquivos.</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600">
+                            <code class="text-sky-400 font-bold">find / fd</code>
+                            <p class="text-neutral-400 text-xs mt-1">Buscar arquivos. fd é mais rápido e com sintaxe mais simples.</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600">
+                            <code class="text-sky-400 font-bold">tree</code>
+                            <p class="text-neutral-400 text-xs mt-1">Visualizar estrutura de diretórios em árvore.</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-3 border border-dark-600">
+                            <code class="text-sky-400 font-bold">pwd</code>
+                            <p class="text-neutral-400 text-xs mt-1">Mostrar o diretório atual (print working directory).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dica -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Use <strong class="text-primary">aliases</strong> para comandos frequentes. Adicione ao seu <code class="text-primary bg-dark-800 px-2 py-0.5 rounded">.zshrc</code>: <code class="text-primary bg-dark-800 px-2 py-0.5 rounded">alias ll='eza -la --git'</code>, <code class="text-primary bg-dark-800 px-2 py-0.5 rounded">alias ..='cd ..'</code>. Cada segundo economizado por comando se multiplica ao longo do dia.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">5</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔍 Busca e filtragem</h2>
+                    <p class="text-neutral-300 leading-relaxed">Encontrar informação rapidamente é talvez a habilidade mais prática no terminal. As ferramentas modernas de busca são <span class="text-emerald-400 font-semibold">ordens de magnitude mais rápidas</span> que seus equivalentes gráficos.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Ferramentas de Busca</h3>
+                    <div class="space-y-4">
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold">grep / ripgrep (rg)</p>
+                            <p class="text-neutral-400 text-sm mt-1">Busca por padrão dentro de arquivos. Ripgrep é o substituto moderno: respeita .gitignore, busca recursiva por padrão, e é 10-100x mais rápido que grep em projetos grandes.</p>
+                            <p class="text-emerald-400 font-mono text-sm mt-2">rg "TODO" --type js</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold">awk e sed</p>
+                            <p class="text-neutral-400 text-sm mt-1">Processamento de texto avançado. awk para extrair colunas e computar dados; sed para substituições em massa. Poderosos mas com curva de aprendizado.</p>
+                            <p class="text-emerald-400 font-mono text-sm mt-2">awk '{print $1, $3}' dados.txt</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold">fzf — Busca fuzzy interativa</p>
+                            <p class="text-neutral-400 text-sm mt-1">Game changer para produtividade. Busca fuzzy em qualquer lista: arquivos, histórico de comandos, branches git, processos. Integra-se com qualquer comando.</p>
+                            <p class="text-emerald-400 font-mono text-sm mt-2">vim $(fzf)  # Abre arquivo buscado no vim</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Velocidade Comparativa</h3>
+                    <p class="text-neutral-200 leading-relaxed">Em um projeto com 100.000 arquivos, ripgrep (rg) encontra resultados em <span class="text-emerald-400 font-semibold">milissegundos</span> enquanto grep tradicional pode levar segundos. Para agentes que executam dezenas de buscas por sessão, essa diferença é transformadora.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 6 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">6</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">⚙️ Variáveis e ambiente</h2>
+                    <p class="text-neutral-300 leading-relaxed">Variáveis de ambiente são o mecanismo que o sistema operacional usa para <span class="text-emerald-400 font-semibold">configurar o comportamento de programas</span> — incluindo agentes de IA. Entender como elas funcionam é fundamental para configurar qualquer ferramenta CLI.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceitos Essenciais</h3>
+                    <div class="space-y-4">
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold">PATH</p>
+                            <p class="text-neutral-400 text-sm mt-1">A variável mais importante: lista de diretórios onde o shell procura executáveis. Quando você digita <code class="text-emerald-400">git</code>, o shell procura em cada diretório do PATH até encontrar o binário.</p>
+                            <p class="text-emerald-400 font-mono text-sm mt-2">echo $PATH</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold">export e .env</p>
+                            <p class="text-neutral-400 text-sm mt-1"><code class="text-emerald-400">export CHAVE=valor</code> define uma variável para a sessão atual e processos filhos. Arquivos <code class="text-emerald-400">.env</code> armazenam variáveis por projeto (API keys, configurações).</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold">.bashrc / .zshrc</p>
+                            <p class="text-neutral-400 text-sm mt-1">Arquivo de configuração que roda toda vez que uma nova sessão de shell inicia. Aliases, variáveis, funções customizadas — tudo fica aqui para persistir entre sessões.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dica Prática -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Use <strong class="text-primary">direnv</strong> para gerenciar variáveis de ambiente por diretório. Quando você entra em uma pasta de projeto, direnv carrega automaticamente as variáveis do <code class="text-primary bg-dark-800 px-2 py-0.5 rounded">.envrc</code> local. Muito útil com agentes: cada projeto pode ter sua API key, modelo preferido e configurações específicas carregadas automaticamente.</p>
+                </div>
+
+                <!-- Alert Box -->
+                <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                    <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">⚠️ Alerta de Segurança</h3>
+                    <p class="text-neutral-200 leading-relaxed">Nunca commite arquivos <code class="text-red-400 bg-dark-800 px-2 py-0.5 rounded">.env</code> no Git — eles contêm API keys e segredos. Adicione <code class="text-red-400 bg-dark-800 px-2 py-0.5 rounded">.env</code> ao seu <code class="text-red-400 bg-dark-800 px-2 py-0.5 rounded">.gitignore</code> imediatamente. Use <code class="text-red-400 bg-dark-800 px-2 py-0.5 rounded">.env.example</code> com valores fictícios para documentar as variáveis necessárias.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumo Final -->
+        <section class="mt-16 mb-12">
+            <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-2xl p-8">
+                <h2 class="text-2xl font-bold text-white mb-6">Resumo Final</h2>
+                <div class="space-y-3 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Todo comando segue: comando [subcomando] [flags] [argumentos]</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Pipes (|) e redirecionamento (>, >>) são o superpoder de composição da CLI</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">jq é essencial para processar JSON — a língua franca dos agentes</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Ferramentas modernas (eza, fd, rg, fzf, zoxide) substituem utilitários clássicos</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">fzf é um game changer para busca fuzzy interativa em qualquer contexto</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">direnv gerencia variáveis de ambiente por projeto — ideal para agentes</span>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800/50 rounded-xl p-4 mb-6 border border-dark-600">
+                    <p class="text-neutral-300"><span class="text-emerald-400 font-semibold">Próximo módulo:</span> Com os fundamentos dominados, vamos colocar a mão na massa: instalar seu primeiro agente, conversar com IA no terminal, e entender segurança básica.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="index.html" class="flex-1 text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-neutral-300 font-semibold transition-colors">
+                        ← Voltar para Trilha
+                    </a>
+                    <a href="modulo-1-5.html" class="flex-1 text-center px-6 py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 rounded-xl text-emerald-400 font-semibold transition-colors">
+                        Próximo Módulo →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-600 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
+    </script>
+</body>
+</html>

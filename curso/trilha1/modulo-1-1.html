@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 1.1 - O que é CLI e por que importa em 2026 | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Part 1 - Base overrides */
+        html:not(.dark) body { background-color: #f8fafc; color: #1f2937; }
+        html:not(.dark) .bg-dark-900, html:not(.dark) .bg-dark-800, html:not(.dark) .bg-dark-700 { background-color: #ffffff !important; }
+        html:not(.dark) .border-dark-600, html:not(.dark) .border-dark-700 { border-color: #e5e7eb !important; }
+        html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-neutral-400, html:not(.dark) .text-neutral-300 { color: #6b7280 !important; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af !important; }
+        html:not(.dark) .text-neutral-200 { color: #374151 !important; }
+        html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-700\/50 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .hover\:bg-dark-700:hover { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-dark-800\/80 { background-color: #f9fafb !important; }
+
+        /* Part 2 - Emerald accent */
+        html:not(.dark) .text-emerald-400 { color: #059669 !important; }
+        html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.1) !important; }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.2) !important; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08) !important; }
+        html:not(.dark) .bg-emerald-500 { background-color: #059669 !important; }
+        html:not(.dark) .ring-emerald-500\/20 { --tw-ring-color: rgba(5, 150, 105, 0.15) !important; }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-emerald-900\/30 { --tw-gradient-from: rgba(5, 150, 105, 0.05) !important; }
+        html:not(.dark) .to-transparent { --tw-gradient-to: transparent !important; }
+        html:not(.dark) .bg-gradient-to-b, html:not(.dark) .bg-gradient-to-r { background: #ffffff !important; }
+        html:not(.dark) .header-gradient { background: linear-gradient(to bottom, rgba(5, 150, 105, 0.06), transparent) !important; }
+        html:not(.dark) .text-primary { color: #b45309 !important; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(180, 83, 9, 0.08) !important; }
+        html:not(.dark) .border-primary\/30 { border-color: rgba(180, 83, 9, 0.2) !important; }
+        html:not(.dark) .text-sky-400 { color: #0369a1 !important; }
+        html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3, 105, 161, 0.08) !important; }
+        html:not(.dark) .border-sky-500\/30 { border-color: rgba(3, 105, 161, 0.2) !important; }
+        html:not(.dark) .text-yellow-400 { color: #b45309 !important; }
+        html:not(.dark) .text-red-400 { color: #dc2626 !important; }
+        html:not(.dark) .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08) !important; }
+        html:not(.dark) .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.2) !important; }
+
+        /* Part 4 - Nav */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        html:not(.dark) nav { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #e5e7eb !important; }
+        html:not(.dark) footer { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+                        <span class="text-2xl">⚡</span>
+                        <span class="font-bold text-lg hidden sm:inline">CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10">
+                        <span class="sm:hidden">T1</span><span class="hidden sm:inline">Fundamentos</span>
+                    </a>
+                    <a href="../trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors">
+                        <span class="sm:hidden">T2</span><span class="hidden sm:inline">Arquitetura</span>
+                    </a>
+                    <a href="../trilha3/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors">
+                        <span class="sm:hidden">T3</span><span class="hidden sm:inline">CLI-Anything</span>
+                    </a>
+                    <a href="../trilha4/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors">
+                        <span class="sm:hidden">T4</span><span class="hidden sm:inline">Ecossistema</span>
+                    </a>
+                    <a href="../trilha5/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-teal-400 hover:bg-teal-500/10 transition-colors">
+                        <span class="sm:hidden">T5</span><span class="hidden sm:inline">Projetos</span>
+                    </a>
+                    <a href="../trilha6/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+                        <span class="sm:hidden">T6</span><span class="hidden sm:inline">Estratégia</span>
+                    </a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-2">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm text-neutral-400 mb-8">
+            <a href="../../index.html" class="hover:text-emerald-400 transition-colors">Início</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-emerald-400 transition-colors">Trilha 1</a>
+            <span>/</span>
+            <span class="text-emerald-400">Módulo 1.1</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header-gradient bg-gradient-to-b from-emerald-900/30 to-transparent rounded-2xl p-8 mb-12 border border-emerald-500/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-bold tracking-wider uppercase">Módulo 1.1</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Teoria</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">O que é CLI e por que importa em 2026</h1>
+            <p class="text-lg text-neutral-300 mb-6 max-w-3xl">Entenda o que é a interface de linha de comando, sua história, por que ela voltou ao centro das atenções com os agentes de IA, e como o ecossistema CLI se transformou em 2026.</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">6</span>
+                    <span class="text-neutral-400 text-sm">Tópicos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">30</span>
+                    <span class="text-neutral-400 text-sm">Minutos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">Iniciante</span>
+                    <span class="text-neutral-400 text-sm">Nível</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">Teoria</span>
+                    <span class="text-neutral-400 text-sm">Tipo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 1 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">1</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🖥️ Definição de CLI</h2>
+                    <p class="text-neutral-300 leading-relaxed">CLI significa <span class="text-emerald-400 font-semibold">Command Line Interface</span> — uma interface baseada em texto onde o usuário digita comandos diretamente para o computador. Em vez de clicar em botões e menus, você escreve instruções precisas que o sistema interpreta e executa imediatamente.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">O fluxo fundamental da CLI segue um padrão simples e poderoso:</p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 text-center">
+                        <div class="bg-dark-800 rounded-lg px-4 py-3 border border-dark-600">
+                            <span class="text-emerald-400 font-bold">Input</span>
+                            <p class="text-neutral-400 text-sm mt-1">Você digita um comando</p>
+                        </div>
+                        <span class="text-emerald-400 text-xl">→</span>
+                        <div class="bg-dark-800 rounded-lg px-4 py-3 border border-dark-600">
+                            <span class="text-emerald-400 font-bold">Processamento</span>
+                            <p class="text-neutral-400 text-sm mt-1">O shell interpreta e executa</p>
+                        </div>
+                        <span class="text-emerald-400 text-xl">→</span>
+                        <div class="bg-dark-800 rounded-lg px-4 py-3 border border-dark-600">
+                            <span class="text-emerald-400 font-bold">Output</span>
+                            <p class="text-neutral-400 text-sm mt-1">Resultado exibido em texto</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">Historicamente, a CLI foi o <span class="text-emerald-400 font-semibold">primeiro modo de interação com computadores</span>. Antes das interfaces gráficas com janelas, mouse e ícones, todo operador de computador trabalhava digitando comandos em um terminal. A GUI (Graphical User Interface) surgiu nos anos 1980 como uma camada visual sobre o sistema operacional, mas a CLI nunca deixou de existir por baixo.</p>
+
+                <!-- Dica Prática -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">CLI não é "coisa antiga" — é a interface mais precisa e automatizável que existe. Enquanto uma GUI exige que você localize visualmente botões e menus, a CLI permite expressar exatamente o que você quer em uma linha de texto. Isso a torna perfeita para automação, scripts e, crucialmente, para agentes de IA.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">2</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📜 Breve história — De mainframes ao terminal moderno</h2>
+                    <p class="text-neutral-300 leading-relaxed">A história da CLI é a história da computação em si. Cada década trouxe uma transformação no modo como humanos interagem com máquinas, e o terminal <span class="text-emerald-400 font-semibold">sempre esteve presente</span> — mesmo quando parecia ter sido substituído.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Timeline -->
+                <div class="space-y-4">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider">Timeline da CLI</h3>
+                    <div class="relative border-l-2 border-emerald-500/30 pl-6 space-y-6">
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">1960s — Mainframes</p>
+                            <p class="text-neutral-300 text-sm">Operadores digitam comandos em terminais conectados a computadores gigantes. Não existe alternativa — CLI é a única interface.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">1970s — Unix e o Shell</p>
+                            <p class="text-neutral-300 text-sm">Ken Thompson e Dennis Ritchie criam o Unix. O shell (sh) nasce como interpretador de comandos. A filosofia Unix de "fazer uma coisa bem feita" define a composição via pipes.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">1980s — DOS e PCs</p>
+                            <p class="text-neutral-300 text-sm">O MS-DOS leva a CLI para computadores pessoais. Milhões aprendem a usar dir, copy e del. O Macintosh introduz a GUI em 1984.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">1990s — GUI domina o mainstream</p>
+                            <p class="text-neutral-300 text-sm">Windows 95, Mac OS, KDE e GNOME tornam a GUI ubíqua. O terminal parece "coisa de nerd", mas administradores de servidores nunca o abandonam.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">2000s — Terminal para desenvolvedores</p>
+                            <p class="text-neutral-300 text-sm">Git, npm, pip, brew, Docker — ferramentas essenciais que são CLI-first. Desenvolvedores redescobrem o poder do terminal.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">2020s — Agentes CLI</p>
+                            <p class="text-neutral-300 text-sm">Copilot CLI, Claude Code, Gemini CLI e Codex CLI transformam o terminal em interface para agentes de IA. A CLI renasce como o hub de produtividade mais poderoso.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados/Pesquisa -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Dados e Pesquisa</h3>
+                    <p class="text-neutral-200 leading-relaxed">No Stack Overflow Developer Survey de 2024, <span class="text-emerald-400 font-semibold">mais de 70% dos desenvolvedores</span> reportaram usar o terminal diariamente. Entre profissionais seniores, esse número ultrapassa 85%. O terminal nunca morreu — apenas saiu do mainstream temporariamente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 3 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">3</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔄 Por que a CLI voltou — O renascimento via agentes de IA</h2>
+                    <p class="text-neutral-300 leading-relaxed">A ascensão dos agentes de IA não aconteceu por acaso no terminal. Os agentes precisam de interfaces <span class="text-emerald-400 font-semibold">estruturadas e previsíveis</span>, e a CLI oferece exatamente isso — diferente de GUIs que dependem de reconhecimento visual de pixels.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-3">A CLI é a interface natural para agentes porque oferece quatro propriedades fundamentais:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-emerald-400 font-bold text-sm">Comandos discretos</span>
+                            <p class="text-neutral-400 text-xs mt-1">Cada ação é um comando explícito e atômico</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-emerald-400 font-bold text-sm">Semântica explícita</span>
+                            <p class="text-neutral-400 text-xs mt-1">O significado de cada comando é claro e documentado</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-emerald-400 font-bold text-sm">E/S estruturável</span>
+                            <p class="text-neutral-400 text-xs mt-1">Entrada e saída podem ser JSON, texto ou streams</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-emerald-400 font-bold text-sm">Auditabilidade</span>
+                            <p class="text-neutral-400 text-xs mt-1">Cada comando fica no histórico, rastreável e reproduzível</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Os Grandes Players CLI em 2026</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Google</span> — Gemini CLI: agente de código open-source, integrado ao ecossistema Google Cloud</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Anthropic</span> — Claude Code: agente agentic coding que opera diretamente no terminal</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">OpenAI</span> — Codex CLI: agente open-source com sandboxing nativo</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">GitHub</span> — Copilot CLI: extensão do Copilot para o terminal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">4</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">⚡ CLI vs GUI — Quando cada uma vence</h2>
+                    <p class="text-neutral-300 leading-relaxed">A discussão CLI versus GUI não deveria ser uma batalha — cada interface tem pontos fortes específicos. O segredo está em <span class="text-emerald-400 font-semibold">saber quando usar cada uma</span> e entender por que os agentes têm uma preferência clara.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Fazer vs Evitar -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+                        <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-4">✅ CLI Vence Em</h3>
+                        <ul class="space-y-3 text-neutral-200 text-sm">
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Automação:</strong> scripts podem executar centenas de comandos sem supervisão</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Reprodutibilidade:</strong> um comando é exato e pode ser repetido identicamente</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Scripting:</strong> compor operações complexas em pipelines encadeados</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Agentes de IA:</strong> interface natural para agentes que operam via texto</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Administração remota:</strong> SSH permite gerenciar servidores em qualquer lugar</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                        <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-4">🖱️ GUI Vence Em</h3>
+                        <ul class="space-y-3 text-neutral-200 text-sm">
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Exploração visual:</strong> navegar imagens, layouts, dashboards gráficos</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Design:</strong> criação visual onde arrastar e soltar é essencial</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Onboarding:</strong> novos usuários aprendem mais rápido com interfaces visuais</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Mídia:</strong> edição de vídeo, áudio e imagem é inerentemente visual</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Apresentações:</strong> comunicação visual para não-técnicos</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Dica Prática -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Não é "um ou outro" — é sobre escolher a ferramenta certa para cada tarefa. Profissionais produtivos usam ambas: GUI para tarefas visuais e exploratórias, CLI para automação, desenvolvimento e interação com agentes. O poder está em saber transitar entre as duas com fluidez.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">5</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🤖 O terminal como interface de agentes</h2>
+                    <p class="text-neutral-300 leading-relaxed">Esta é a <span class="text-emerald-400 font-semibold">tese central deste curso</span>: a CLI está se transformando na API compartilhada entre humanos e agentes de IA. O terminal moderno não é apenas um lugar para digitar comandos — é um hub de ferramentas, contexto e execução.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">Agentes preferem a CLI porque ela oferece um contrato claro de comunicação:</p>
+                    <ul class="space-y-3 text-neutral-200">
+                        <li class="flex items-start space-x-3">
+                            <span class="text-emerald-400 font-bold">1.</span>
+                            <span><strong class="text-emerald-400">Comandos são ações claras</strong> — cada comando tem um verbo (ação), um alvo (recurso) e modificadores (flags). O agente sabe exatamente o que está pedindo.</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <span class="text-emerald-400 font-bold">2.</span>
+                            <span><strong class="text-emerald-400">Saída é parseável</strong> — texto e JSON são triviais de processar. Não há pixels para interpretar, cores ambíguas ou elementos visuais imprecisos.</span>
+                        </li>
+                        <li class="flex items-start space-x-3">
+                            <span class="text-emerald-400 font-bold">3.</span>
+                            <span><strong class="text-emerald-400">Execução é controlável</strong> — o agente pode verificar o resultado de cada passo antes de prosseguir, desfazer ações e ajustar a estratégia dinamicamente.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">O terminal moderno não é só um shell — é um <span class="text-emerald-400 font-semibold">ambiente de trabalho completo</span>. Ele mantém contexto sobre o projeto, integra-se com ferramentas de desenvolvimento, e permite que humanos e agentes colaborem no mesmo espaço de trabalho, usando a mesma linguagem de comandos.</p>
+
+                <!-- Alert Box -->
+                <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                    <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">⚠️ Alerta Importante</h3>
+                    <p class="text-neutral-200 leading-relaxed">Agentes com poder real de execução no terminal exigem <strong class="text-red-400">sandboxing e permissões cuidadosas</strong>. Um agente com acesso irrestrito ao shell pode executar qualquer comando — incluindo os destrutivos. Sempre configure limites claros sobre o que o agente pode e não pode fazer. Abordaremos isso em profundidade no Módulo 1.5.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 6 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">6</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🌐 O ecossistema 2026</h2>
+                    <p class="text-neutral-300 leading-relaxed">O ecossistema de ferramentas CLI em 2026 é o mais rico e dinâmico da história. Cada grande empresa de IA lançou sua própria interface de terminal, e <span class="text-emerald-400 font-semibold">protocolos como o MCP</span> estão unificando a maneira como agentes se conectam a ferramentas.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Dados -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Mapa do Ecossistema</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-dark-800/50 rounded-lg p-4 border border-dark-600">
+                            <p class="text-sky-400 font-bold">Gemini CLI</p>
+                            <p class="text-neutral-400 text-sm">Google — Agente open-source, integração com Google Cloud, suporte a extensões e MCP</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-4 border border-dark-600">
+                            <p class="text-sky-400 font-bold">Claude Code</p>
+                            <p class="text-neutral-400 text-sm">Anthropic — Agentic coding no terminal, edição de arquivos, execução de comandos, contexto de projeto</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-4 border border-dark-600">
+                            <p class="text-sky-400 font-bold">Codex CLI</p>
+                            <p class="text-neutral-400 text-sm">OpenAI — Open-source, sandboxing nativo, multi-modelo, foco em segurança</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-4 border border-dark-600">
+                            <p class="text-sky-400 font-bold">Copilot CLI</p>
+                            <p class="text-neutral-400 text-sm">GitHub — Extensão terminal do Copilot, integrado ao ecossistema GitHub</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-4 border border-dark-600">
+                            <p class="text-sky-400 font-bold">Warp</p>
+                            <p class="text-neutral-400 text-sm">Terminal agêntico com IA embutida, blocos de comando, e agentes nativos</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-4 border border-dark-600">
+                            <p class="text-sky-400 font-bold">MCP</p>
+                            <p class="text-neutral-400 text-sm">Model Context Protocol — Protocolo aberto para conectar agentes a ferramentas e dados</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline lançamentos -->
+                <div class="space-y-4">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider">Timeline de Lançamentos</h3>
+                    <div class="relative border-l-2 border-emerald-500/30 pl-6 space-y-4">
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">2024</p>
+                            <p class="text-neutral-300 text-sm">GitHub Copilot CLI lançado. Claude Code e Codex CLI entram em beta. MCP anunciado pela Anthropic.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">2025</p>
+                            <p class="text-neutral-300 text-sm">Gemini CLI lançado pelo Google. Claude Code e Codex CLI atingem GA. Warp integra agentes nativos. MCP se torna padrão da indústria.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">2026</p>
+                            <p class="text-neutral-300 text-sm">CLI-Anything emerge como fábrica de CLIs agent-native. Agentes multi-ferramenta se tornam padrão. O terminal se consolida como hub de produtividade com IA.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dica -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Você não precisa dominar todas essas ferramentas de uma vez. Comece com uma (recomendamos Claude Code ou Gemini CLI), entenda os fundamentos, e depois explore as outras. O importante é entender os conceitos subjacentes — eles se aplicam a qualquer ferramenta do ecossistema.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumo Final -->
+        <section class="mt-16 mb-12">
+            <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-2xl p-8">
+                <h2 class="text-2xl font-bold text-white mb-6">Resumo Final</h2>
+                <div class="space-y-3 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">CLI é uma interface baseada em texto — a mais precisa e automatizável que existe</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">O terminal tem mais de 60 anos de história e nunca deixou de ser relevante</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Agentes de IA escolheram a CLI como interface natural por sua estrutura e previsibilidade</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">CLI e GUI são complementares — cada uma tem cenários onde brilha</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">O terminal moderno é um hub de ferramentas, contexto e execução para humanos e agentes</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">O ecossistema 2026 inclui Google, Anthropic, OpenAI e GitHub, unificados pelo MCP</span>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800/50 rounded-xl p-4 mb-6 border border-dark-600">
+                    <p class="text-neutral-300"><span class="text-emerald-400 font-semibold">Próximo módulo:</span> Vamos explorar como o terminal evoluiu de um simples shell para a interface de agentes inteligentes — entendendo pipes, composição e memória.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="index.html" class="flex-1 text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-neutral-300 font-semibold transition-colors">
+                        ← Voltar para Trilha
+                    </a>
+                    <a href="modulo-1-2.html" class="flex-1 text-center px-6 py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 rounded-xl text-emerald-400 font-semibold transition-colors">
+                        Próximo Módulo →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-600 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        // Check saved theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
+    </script>
+</body>
+</html>

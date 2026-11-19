@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 5.5 - Projeto 5: Orquestrando múltiplos agentes | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Part 1 - Base overrides */
+        html:not(.dark) body { background-color: #f8fafc; color: #1f2937; }
+        html:not(.dark) .bg-dark-900, html:not(.dark) .bg-dark-800, html:not(.dark) .bg-dark-700 { background-color: #ffffff !important; }
+        html:not(.dark) .border-dark-600, html:not(.dark) .border-dark-700 { border-color: #e5e7eb !important; }
+        html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-neutral-400, html:not(.dark) .text-neutral-300 { color: #6b7280 !important; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af !important; }
+        html:not(.dark) .text-neutral-200 { color: #374151 !important; }
+        html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-700\/50 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .hover\:bg-dark-700:hover { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-dark-800\/80 { background-color: #f9fafb !important; }
+
+        /* Part 2 - Teal accent */
+        html:not(.dark) .text-teal-400 { color: #0d9488 !important; }
+        html:not(.dark) .bg-teal-500\/20 { background-color: rgba(13, 148, 136, 0.1) !important; }
+        html:not(.dark) .border-teal-500\/30 { border-color: rgba(13, 148, 136, 0.2) !important; }
+        html:not(.dark) .bg-teal-500\/10 { background-color: rgba(13, 148, 136, 0.08) !important; }
+        html:not(.dark) .bg-teal-500 { background-color: #0d9488 !important; }
+        html:not(.dark) .ring-teal-500\/20 { --tw-ring-color: rgba(13, 148, 136, 0.15) !important; }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-teal-900\/30 { --tw-gradient-from: rgba(13, 148, 136, 0.05) !important; }
+        html:not(.dark) .to-transparent { --tw-gradient-to: transparent !important; }
+        html:not(.dark) .bg-gradient-to-b, html:not(.dark) .bg-gradient-to-r { background: #ffffff !important; }
+        html:not(.dark) .header-gradient { background: linear-gradient(to bottom, rgba(13, 148, 136, 0.06), transparent) !important; }
+        html:not(.dark) .text-primary { color: #0d9488 !important; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(13, 148, 136, 0.08) !important; }
+        html:not(.dark) .border-primary\/30 { border-color: rgba(13, 148, 136, 0.2) !important; }
+        html:not(.dark) .text-sky-400 { color: #0369a1 !important; }
+        html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3, 105, 161, 0.08) !important; }
+        html:not(.dark) .border-sky-500\/30 { border-color: rgba(3, 105, 161, 0.2) !important; }
+        html:not(.dark) .text-yellow-400 { color: #b45309 !important; }
+        html:not(.dark) .text-red-400 { color: #dc2626 !important; }
+        html:not(.dark) .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08) !important; }
+        html:not(.dark) .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.2) !important; }
+        html:not(.dark) .text-emerald-400 { color: #059669 !important; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08) !important; }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.2) !important; }
+
+        /* Part 4 - Nav */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        html:not(.dark) nav { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #e5e7eb !important; }
+        html:not(.dark) footer { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+
+        pre code { font-family: 'Menlo', 'Monaco', 'Courier New', monospace; font-size: 0.875rem; }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+                        <span class="text-2xl">⚡</span>
+                        <span class="font-bold text-lg hidden sm:inline">CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <a href="../trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Fundamentos</span></a>
+                    <a href="../trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Arquitetura</span></a>
+                    <a href="../trilha3/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors"><span class="sm:hidden">T3</span><span class="hidden sm:inline">CLI-Anything</span></a>
+                    <a href="../trilha4/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Ecossistema</span></a>
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-teal-400 bg-teal-500/10"><span class="sm:hidden">T5</span><span class="hidden sm:inline">Projetos</span></a>
+                    <a href="../trilha6/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"><span class="sm:hidden">T6</span><span class="hidden sm:inline">Estratégia</span></a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-2">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm text-neutral-400 mb-8">
+            <a href="../../index.html" class="hover:text-teal-400 transition-colors">Inicio</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-teal-400 transition-colors">Trilha 5</a>
+            <span>/</span>
+            <span class="text-teal-400">Modulo 5.5</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header-gradient bg-gradient-to-b from-teal-900/30 to-transparent rounded-2xl p-8 mb-12 border border-teal-500/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="px-3 py-1 bg-teal-500/20 text-teal-400 rounded-full text-xs font-bold tracking-wider uppercase">Modulo 5.5</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Pratico</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Avancado</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Projeto 5: Orquestrando multiplos agentes</h1>
+            <p class="text-lg text-neutral-300 mb-6 max-w-3xl">Conecte multiplos MCP servers, crie workflows multi-step e leve agentes para producao. O projeto final da trilha pratica: orquestracao, observabilidade e resiliencia.</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-teal-400 font-bold">6</span>
+                    <span class="text-neutral-400 text-sm">Topicos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-teal-400 font-bold">50</span>
+                    <span class="text-neutral-400 text-sm">Minutos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-teal-400 font-bold">Avancado</span>
+                    <span class="text-neutral-400 text-sm">Nivel</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-teal-400 font-bold">Hands-on</span>
+                    <span class="text-neutral-400 text-sm">Tipo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 1 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-teal-500/20 border border-teal-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-teal-400 font-bold text-lg">1</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🏗️ Arquitetura multi-agente</h2>
+                    <p class="text-neutral-300 leading-relaxed">Um agente principal orquestra outros via MCP. <span class="text-teal-400 font-semibold">Cada agente e especialista</span> — o orquestrador decide quem faz o que.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-teal-900/30 to-transparent border border-teal-500/30 rounded-xl p-6">
+                    <h3 class="text-teal-400 font-bold text-sm uppercase tracking-wider mb-4">Modelo mental</h3>
+                    <div class="flex flex-col items-center space-y-4">
+                        <div class="bg-dark-800 rounded-lg px-6 py-3 border-2 border-teal-500/30 text-center">
+                            <span class="text-teal-400 font-bold">Agente Orquestrador</span>
+                            <p class="text-neutral-400 text-xs mt-1">Claude Code / Gemini CLI</p>
+                        </div>
+                        <div class="flex items-center space-x-2 text-teal-400">
+                            <span>&#8595;</span><span>&#8595;</span><span>&#8595;</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3 w-full">
+                            <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                                <span class="text-sky-400 font-bold text-sm">MCP GitHub</span>
+                                <p class="text-neutral-400 text-xs mt-1">Issues, PRs, code</p>
+                            </div>
+                            <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                                <span class="text-emerald-400 font-bold text-sm">MCP Notes</span>
+                                <p class="text-neutral-400 text-xs mt-1">Notas, docs</p>
+                            </div>
+                            <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                                <span class="text-amber-400 font-bold text-sm">MCP gws</span>
+                                <p class="text-neutral-400 text-xs mt-1">Email, calendar</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Composicao de capacidades</h3>
+                    <p class="text-neutral-200 leading-relaxed">Cada MCP server adiciona capacidades ao agente. Um server de GitHub permite operar repositorios. Um server de notas permite gerenciar conhecimento. Um server gws permite operar email e calendario. Juntos, o agente pode: ler uma issue, analisar codigo, propor fix, criar PR e notificar o time — tudo numa unica interacao.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-teal-500/20 border border-teal-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-teal-400 font-bold text-lg">2</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔗 Conectando MCP servers</h2>
+                    <p class="text-neutral-300 leading-relaxed">Configure <span class="text-teal-400 font-semibold">multiplos MCP servers no mesmo agente</span>. O agente ve todas as tools de todos os servers simultaneamente.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-teal-900/30 to-transparent border border-teal-500/30 rounded-xl p-6">
+                    <h3 class="text-teal-400 font-bold text-sm uppercase tracking-wider mb-3">Configuracao com 3 servers</h3>
+                    <pre class="bg-dark-900 rounded-lg p-4 overflow-x-auto border border-dark-600 text-sm"><code class="text-neutral-300"><span class="text-neutral-500">// .claude/settings.json</span>
+{
+  <span class="text-teal-400">"mcpServers"</span>: {
+    <span class="text-emerald-400">"github"</span>: {
+      <span class="text-teal-400">"command"</span>: <span class="text-emerald-400">"npx"</span>,
+      <span class="text-teal-400">"args"</span>: [<span class="text-emerald-400">"-y"</span>, <span class="text-emerald-400">"@modelcontextprotocol/server-github"</span>],
+      <span class="text-teal-400">"env"</span>: {
+        <span class="text-emerald-400">"GITHUB_TOKEN"</span>: <span class="text-emerald-400">"ghp_..."</span>
+      }
+    },
+    <span class="text-emerald-400">"notes"</span>: {
+      <span class="text-teal-400">"command"</span>: <span class="text-emerald-400">"npx"</span>,
+      <span class="text-teal-400">"args"</span>: [<span class="text-emerald-400">"tsx"</span>, <span class="text-emerald-400">"./mcp-notes/src/index.ts"</span>]
+    },
+    <span class="text-emerald-400">"workspace"</span>: {
+      <span class="text-teal-400">"command"</span>: <span class="text-emerald-400">"npx"</span>,
+      <span class="text-teal-400">"args"</span>: [<span class="text-emerald-400">"-y"</span>, <span class="text-emerald-400">"@anthropic-ai/gws-mcp"</span>]
+    }
+  }
+}</code></pre>
+                </div>
+
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 O que o agente ve</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-3">Com 3 servers conectados, o agente tem acesso a todas as tools simultaneamente:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-sky-400 font-semibold">GitHub (8 tools)</span>
+                            <p class="text-neutral-400 text-xs mt-1">create_issue, create_pr, get_file, search_code...</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-sky-400 font-semibold">Notes (4 tools)</span>
+                            <p class="text-neutral-400 text-xs mt-1">create_note, list_notes, search_notes, delete_note</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-sky-400 font-semibold">Workspace (12 tools)</span>
+                            <p class="text-neutral-400 text-xs mt-1">gmail_send, drive_upload, sheets_read, calendar_create...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 3 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-teal-500/20 border border-teal-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-teal-400 font-bold text-lg">3</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔄 Workflow completo</h2>
+                    <p class="text-neutral-300 leading-relaxed">Um pipeline de 7 passos que usa <span class="text-teal-400 font-semibold">multiplos MCP servers em sequencia</span>. De uma issue no GitHub ate a notificacao por email.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-teal-900/30 to-transparent border border-teal-500/30 rounded-xl p-6">
+                    <h3 class="text-teal-400 font-bold text-sm uppercase tracking-wider mb-4">Pipeline: Issue &#8594; PR &#8594; Notificacao</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-4">
+                            <span class="px-2 py-1 bg-sky-500/20 text-sky-400 rounded text-xs font-bold min-w-[32px] text-center">1</span>
+                            <div>
+                                <span class="text-neutral-200 text-sm"><strong>Le issue no GitHub</strong></span>
+                                <span class="text-neutral-500 text-xs ml-2">&#8594; MCP GitHub: get_issue</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <span class="px-2 py-1 bg-sky-500/20 text-sky-400 rounded text-xs font-bold min-w-[32px] text-center">2</span>
+                            <div>
+                                <span class="text-neutral-200 text-sm"><strong>Analisa codigo relevante</strong></span>
+                                <span class="text-neutral-500 text-xs ml-2">&#8594; MCP GitHub: search_code + get_file</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs font-bold min-w-[32px] text-center">3</span>
+                            <div>
+                                <span class="text-neutral-200 text-sm"><strong>Propoe fix</strong></span>
+                                <span class="text-neutral-500 text-xs ml-2">&#8594; Agente (raciocinio interno)</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs font-bold min-w-[32px] text-center">4</span>
+                            <div>
+                                <span class="text-neutral-200 text-sm"><strong>Cria branch e commit</strong></span>
+                                <span class="text-neutral-500 text-xs ml-2">&#8594; MCP GitHub: create_branch + push_files</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <span class="px-2 py-1 bg-teal-500/20 text-teal-400 rounded text-xs font-bold min-w-[32px] text-center">5</span>
+                            <div>
+                                <span class="text-neutral-200 text-sm"><strong>Roda testes</strong></span>
+                                <span class="text-neutral-500 text-xs ml-2">&#8594; Shell execution (npm test)</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <span class="px-2 py-1 bg-teal-500/20 text-teal-400 rounded text-xs font-bold min-w-[32px] text-center">6</span>
+                            <div>
+                                <span class="text-neutral-200 text-sm"><strong>Cria Pull Request</strong></span>
+                                <span class="text-neutral-500 text-xs ml-2">&#8594; MCP GitHub: create_pull_request</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <span class="px-2 py-1 bg-amber-500/20 text-amber-400 rounded text-xs font-bold min-w-[32px] text-center">7</span>
+                            <div>
+                                <span class="text-neutral-200 text-sm"><strong>Notifica o time</strong></span>
+                                <span class="text-neutral-500 text-xs ml-2">&#8594; MCP Workspace: gmail_send</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-teal-400 font-bold text-sm uppercase tracking-wider mb-3">Prompt que dispara o workflow</h3>
+                    <pre class="bg-dark-900 rounded-lg p-4 overflow-x-auto border border-dark-600"><code class="text-teal-400">&gt; Leia a issue #42 do repo my-org/my-app, analise o codigo,
+  proponha um fix, crie uma PR, e envie email para o time
+  em time@empresa.com com o link da PR</code></pre>
+                    <p class="text-neutral-400 text-sm mt-3">Um unico prompt. O agente orquestra 7 passos usando 3 MCP servers diferentes.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-teal-500/20 border border-teal-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-teal-400 font-bold text-lg">4</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📊 Observabilidade</h2>
+                    <p class="text-neutral-300 leading-relaxed">Sem observabilidade, <span class="text-teal-400 font-semibold">debugging e impossivel</span>. Voce precisa saber o que o agente fez, quanto custou e onde falhou.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-teal-900/30 to-transparent border border-teal-500/30 rounded-xl p-6">
+                    <h3 class="text-teal-400 font-bold text-sm uppercase tracking-wider mb-4">Metricas essenciais</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                            <span class="text-teal-400 font-bold text-lg">Tempo</span>
+                            <p class="text-neutral-400 text-xs mt-1">Duracao por step</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                            <span class="text-teal-400 font-bold text-lg">Tokens</span>
+                            <p class="text-neutral-400 text-xs mt-1">Consumo por acao</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                            <span class="text-teal-400 font-bold text-lg">Erros</span>
+                            <p class="text-neutral-400 text-xs mt-1">Taxa de falha</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                            <span class="text-teal-400 font-bold text-lg">Tools</span>
+                            <p class="text-neutral-400 text-xs mt-1">Chamadas por server</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-teal-400 font-bold text-sm uppercase tracking-wider mb-3">Structured logging</h3>
+                    <pre class="bg-dark-900 rounded-lg p-4 overflow-x-auto border border-dark-600 text-sm"><code class="text-neutral-300"><span class="text-neutral-500">// Log de cada acao do agente em JSON</span>
+{
+  <span class="text-teal-400">"timestamp"</span>: <span class="text-emerald-400">"2026-03-23T14:32:01Z"</span>,
+  <span class="text-teal-400">"step"</span>: <span class="text-emerald-400">3</span>,
+  <span class="text-teal-400">"server"</span>: <span class="text-emerald-400">"github"</span>,
+  <span class="text-teal-400">"tool"</span>: <span class="text-emerald-400">"create_pull_request"</span>,
+  <span class="text-teal-400">"duration_ms"</span>: <span class="text-emerald-400">2340</span>,
+  <span class="text-teal-400">"tokens_used"</span>: <span class="text-emerald-400">1250</span>,
+  <span class="text-teal-400">"status"</span>: <span class="text-emerald-400">"success"</span>,
+  <span class="text-teal-400">"result"</span>: { <span class="text-teal-400">"pr_number"</span>: <span class="text-emerald-400">87</span> }
+}</code></pre>
+                </div>
+
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Ferramentas de observabilidade</h3>
+                    <div class="space-y-2 text-neutral-200 text-sm">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span><strong>Log files:</strong> salve cada sessao do agente em arquivo JSON rotacionado</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span><strong>Custo tracking:</strong> conte tokens por sessao para estimar custo (tokens x preco)</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span><strong>Dashboard:</strong> um script simples que le os logs e gera metricas por dia/semana</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-teal-500/20 border border-teal-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-teal-400 font-bold text-lg">5</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">⚠️ Tratamento de erros</h2>
+                    <p class="text-neutral-300 leading-relaxed">Agentes falham. APIs caem. Permissoes expiram. <span class="text-teal-400 font-semibold">Lidar com falhas e tao importante quanto o fluxo principal</span>.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-teal-900/30 to-transparent border border-teal-500/30 rounded-xl p-6">
+                    <h3 class="text-teal-400 font-bold text-sm uppercase tracking-wider mb-4">Tipos de falha comuns</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <span class="text-red-400 font-bold text-sm">Timeout</span>
+                            <p class="text-neutral-400 text-xs mt-1">MCP server demora mais que o limite</p>
+                            <p class="text-neutral-300 text-xs mt-2">Estrategia: retry com backoff exponencial</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <span class="text-red-400 font-bold text-sm">API Error (4xx/5xx)</span>
+                            <p class="text-neutral-400 text-xs mt-1">GitHub rate limit, Google quota excedida</p>
+                            <p class="text-neutral-300 text-xs mt-2">Estrategia: esperar e retentar ou abortar</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <span class="text-red-400 font-bold text-sm">Permissao negada</span>
+                            <p class="text-neutral-400 text-xs mt-1">Token expirado, scope insuficiente</p>
+                            <p class="text-neutral-300 text-xs mt-2">Estrategia: fallback para humano</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <span class="text-red-400 font-bold text-sm">Output inesperado</span>
+                            <p class="text-neutral-400 text-xs mt-1">Tool retorna formato diferente do esperado</p>
+                            <p class="text-neutral-300 text-xs mt-2">Estrategia: validacao + skip e continuar</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-teal-400 font-bold text-sm uppercase tracking-wider mb-3">Padrao de retry com backoff</h3>
+                    <pre class="bg-dark-900 rounded-lg p-4 overflow-x-auto border border-dark-600 text-sm"><code class="text-neutral-300"><span class="text-sky-400">async function</span> <span class="text-teal-400">withRetry</span>&lt;T&gt;(
+  fn: () =&gt; Promise&lt;T&gt;,
+  maxRetries = <span class="text-emerald-400">3</span>,
+  baseDelay = <span class="text-emerald-400">1000</span>
+): Promise&lt;T&gt; {
+  <span class="text-sky-400">for</span> (<span class="text-sky-400">let</span> i = 0; i &lt; maxRetries; i++) {
+    <span class="text-sky-400">try</span> {
+      <span class="text-sky-400">return await</span> fn();
+    } <span class="text-sky-400">catch</span> (err) {
+      <span class="text-sky-400">if</span> (i === maxRetries - 1) <span class="text-sky-400">throw</span> err;
+      <span class="text-sky-400">const</span> delay = baseDelay * Math.pow(2, i);
+      console.log(<span class="text-emerald-400">`Retry ${i+1}/${maxRetries} em ${delay}ms`</span>);
+      <span class="text-sky-400">await new</span> Promise(r =&gt; setTimeout(r, delay));
+    }
+  }
+  <span class="text-sky-400">throw new</span> Error(<span class="text-emerald-400">"Unreachable"</span>);
+}</code></pre>
+                </div>
+
+                <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                    <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">⚠️ Regra de ouro</h3>
+                    <p class="text-neutral-200 leading-relaxed">Nunca ignore erros silenciosamente em producao. Cada falha deve ser logada, categorizada e — se possivel — alertada. Um agente que falha em silencio e pior que um agente que nao roda: ele da a falsa impressao de que tudo esta funcionando.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 6 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-teal-500/20 border border-teal-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-teal-400 font-bold text-lg">6</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🚀 Producao</h2>
+                    <p class="text-neutral-300 leading-relaxed">Agentes em producao precisam da <span class="text-teal-400 font-semibold">mesma engenharia que microsservicos</span>: idempotencia, rate limiting, circuit breakers e health checks.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-teal-900/30 to-transparent border border-teal-500/30 rounded-xl p-6">
+                    <h3 class="text-teal-400 font-bold text-sm uppercase tracking-wider mb-4">Boas praticas para producao</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-teal-400 mt-2"></span>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">Idempotencia</span>
+                                <p class="text-neutral-400 text-sm">Executar o mesmo workflow duas vezes deve produzir o mesmo resultado. Antes de criar uma PR, verifique se ja existe uma para a mesma issue.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-teal-400 mt-2"></span>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">Rate limiting</span>
+                                <p class="text-neutral-400 text-sm">Limite chamadas por minuto a cada API. GitHub: 5000/hora. Google: varia por servico. Respeite os limites ou sera bloqueado.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-teal-400 mt-2"></span>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">Circuit breakers</span>
+                                <p class="text-neutral-400 text-sm">Se um MCP server falha 3 vezes seguidas, pare de chama-lo por 5 minutos. Evita cascata de falhas.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-teal-400 mt-2"></span>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">Health checks</span>
+                                <p class="text-neutral-400 text-sm">Periodicamente verifique se cada MCP server esta respondendo. Alerte quando um server cair.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-teal-400 font-bold text-sm uppercase tracking-wider mb-3">Health check simples</h3>
+                    <pre class="bg-dark-900 rounded-lg p-4 overflow-x-auto border border-dark-600 text-sm"><code class="text-emerald-400"><span class="text-neutral-500">#!/bin/bash</span>
+<span class="text-neutral-500"># health-check.sh - rode via cron a cada 5 minutos</span>
+
+<span class="text-sky-400">for</span> server <span class="text-sky-400">in</span> github notes workspace; <span class="text-sky-400">do</span>
+  <span class="text-sky-400">if</span> ! mcp-client ping "$server" --timeout 5000; <span class="text-sky-400">then</span>
+    echo "[ALERT] MCP server '$server' nao respondeu" | \
+      mail -s "MCP Health Check FAIL" ops@empresa.com
+  <span class="text-sky-400">fi</span>
+<span class="text-sky-400">done</span></code></pre>
+                </div>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Escalabilidade</h3>
+                    <p class="text-neutral-200 leading-relaxed">Para escalar, rode multiplas instancias de agentes com filas de trabalho (Redis, SQS). Cada instancia puxa uma tarefa da fila, executa o workflow, e reporta o resultado. Isso e exatamente o padrao de workers/consumers de microsservicos — agentes nao sao diferentes.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumo Final -->
+        <section class="mb-16">
+            <div class="bg-gradient-to-b from-teal-900/30 to-transparent rounded-2xl p-8 border border-teal-500/30">
+                <h2 class="text-2xl font-bold text-white mb-6">Resumo Final</h2>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-teal-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">Arquitetura multi-agente: um orquestrador conecta multiplos MCP servers especializados</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-teal-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">Composicao de capacidades: cada server adiciona tools ao agente — juntos, permitem workflows complexos</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-teal-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">Observabilidade e essencial: logue cada acao, track tokens/custo, monitore erros</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-teal-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">Tratamento de erros: retry com backoff, fallback para humano, nunca ignore falhas silenciosamente</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-teal-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">Producao exige engenharia real: idempotencia, rate limiting, circuit breakers e health checks</span>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800/50 rounded-xl p-4 mb-6 border border-dark-600">
+                    <p class="text-neutral-300"><span class="text-teal-400 font-semibold">Proxima trilha:</span> Trilha 6 — Estrategia. Vamos olhar para o futuro: como agentes CLI mudam organizacoes, mercados e carreiras. Da pratica a visao estrategica.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="modulo-5-4.html" class="flex-1 text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-neutral-300 font-semibold transition-colors">
+                        &#8592; Modulo Anterior
+                    </a>
+                    <a href="../trilha6/index.html" class="flex-1 text-center px-6 py-3 bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/30 rounded-xl text-teal-400 font-semibold transition-colors">
+                        Trilha 6: Estrategia &#8594;
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-600 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
+    </script>
+</body>
+</html>

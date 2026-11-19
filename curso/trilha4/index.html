@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T4 - Ecossistema de Agentes CLI | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ===== LIGHT MODE - Part 1: Base ===== */
+        html:not(.dark) body { background-color: #f8fafc; }
+        html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+        html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+        html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+        html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+        html:not(.dark) .text-neutral-100 { color: #111827; }
+        html:not(.dark) .text-neutral-300 { color: #4b5563; }
+        html:not(.dark) .text-neutral-400 { color: #6b7280; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+        html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+        html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+        /* ===== LIGHT MODE - Part 2: Amber accent ===== */
+        html:not(.dark) .text-amber-400 { color: #92400e; }
+        html:not(.dark) .text-amber-300 { color: #92400e; }
+        html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217, 119, 6, 0.1); }
+        html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217, 119, 6, 0.15); }
+        html:not(.dark) .bg-amber-400\/10 { background-color: rgba(217, 119, 6, 0.1); }
+        html:not(.dark) .border-amber-500\/30 { border-color: rgba(217, 119, 6, 0.3); }
+        html:not(.dark) .border-amber-400\/30 { border-color: rgba(217, 119, 6, 0.3); }
+        html:not(.dark) .hover\:text-amber-300:hover { color: #92400e; }
+        html:not(.dark) .hover\:border-amber-400\/50:hover { border-color: rgba(217, 119, 6, 0.5); }
+        html:not(.dark) .group-hover\:text-amber-300 { color: #92400e; }
+
+        /* Other trail colors for nav */
+        html:not(.dark) .text-emerald-400 { color: #059669; }
+        html:not(.dark) .hover\:text-emerald-300:hover { color: #059669; }
+        html:not(.dark) .text-blue-400 { color: #2563eb; }
+        html:not(.dark) .hover\:text-blue-300:hover { color: #2563eb; }
+        html:not(.dark) .text-purple-400 { color: #7c3aed; }
+        html:not(.dark) .hover\:text-purple-300:hover { color: #7c3aed; }
+        html:not(.dark) .text-teal-400 { color: #0d9488; }
+        html:not(.dark) .hover\:text-teal-300:hover { color: #0d9488; }
+        html:not(.dark) .text-rose-400 { color: #9f1239; }
+        html:not(.dark) .hover\:text-rose-300:hover { color: #9f1239; }
+
+        /* ===== LIGHT MODE - Part 3: Remove gradients + special colors ===== */
+        html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+        html:not(.dark) .text-primary { color: #a16207; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+        html:not(.dark) .border-primary\/40 { border-color: rgba(161, 98, 7, 0.25); }
+        html:not(.dark) .text-sky-400 { color: #0369a1; }
+        html:not(.dark) .text-yellow-400 { color: #a16207; }
+        html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+        html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+        /* ===== LIGHT MODE - Part 4: Nav ===== */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+
+        /* Modal overlay */
+        .modal-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Topic expand animation */
+        .topic-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .topic-content.expanded {
+            max-height: 600px;
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-neutral-100 font-sans min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-dark-900/95 backdrop-blur-sm border-b border-dark-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo + INEMA.CLUB -->
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center gap-2 text-yellow-400 font-bold text-xl hover:text-yellow-300 transition-colors">
+                        <span>⚡</span>
+                        <span>CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+
+                <!-- Nav Links -->
+                <div class="flex items-center gap-1 sm:gap-3 text-sm overflow-x-auto">
+                    <a href="../trilha1/index.html" class="text-emerald-400 hover:text-emerald-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Fundamentos</span><span class="sm:hidden">T1</span></a>
+                    <a href="../trilha2/index.html" class="text-blue-400 hover:text-blue-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Arquitetura</span><span class="sm:hidden">T2</span></a>
+                    <a href="../trilha3/index.html" class="text-purple-400 hover:text-purple-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">CLI-Anything</span><span class="sm:hidden">T3</span></a>
+                    <a href="index.html" class="text-amber-400 font-bold px-1.5 py-1 whitespace-nowrap border-b-2 border-amber-400"><span class="hidden sm:inline">Ecossistema</span><span class="sm:hidden">T4</span></a>
+                    <a href="../trilha5/index.html" class="text-teal-400 hover:text-teal-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Projetos</span><span class="sm:hidden">T5</span></a>
+                    <a href="../trilha6/index.html" class="text-rose-400 hover:text-rose-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Estratégia</span><span class="sm:hidden">T6</span></a>
+
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors text-neutral-400 hover:text-neutral-100" title="Alternar tema">
+                        <svg id="iconSun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <svg id="iconMoon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Header -->
+    <section class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-amber-900/30 via-transparent to-transparent"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+            <div class="max-w-4xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-amber-500/20 text-amber-400 text-xs font-bold px-3 py-1 rounded-full border border-amber-500/30">TRILHA 4</span>
+                    <span class="text-neutral-500 text-sm">Intermediário</span>
+                </div>
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-800 text-amber-400 mb-4 tracking-tight">Ecossistema de Agentes CLI</h1>
+                <p class="text-neutral-300 text-lg sm:text-xl max-w-3xl leading-relaxed mb-8">
+                    Conheça as principais ferramentas agent-native de 2026: Gemini CLI, Claude Code, Codex CLI, Copilot CLI e gws. Entenda como cada uma funciona, suas forças, limitações e quando usar qual.
+                </p>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl">
+                    <div class="bg-dark-800 border border-amber-500/30 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-amber-400">5</div>
+                        <div class="text-neutral-400 text-sm">Módulos</div>
+                    </div>
+                    <div class="bg-dark-800 border border-amber-500/30 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-amber-400">30</div>
+                        <div class="text-neutral-400 text-sm">Tópicos</div>
+                    </div>
+                    <div class="bg-dark-800 border border-amber-500/30 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-amber-400">~3h</div>
+                        <div class="text-neutral-400 text-sm">Duração</div>
+                    </div>
+                    <div class="bg-dark-800 border border-amber-500/30 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-amber-400">Inter.</div>
+                        <div class="text-neutral-400 text-sm">Nível</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modules -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+
+        <!-- Module 4.1 -->
+        <div class="mb-8 bg-dark-800 border border-amber-500/30 rounded-xl overflow-hidden">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-start justify-between gap-4 mb-6">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="bg-amber-500/20 text-amber-400 text-xs font-bold px-2.5 py-0.5 rounded-full">4.1</span>
+                            <span class="text-neutral-500 text-sm">~35 min</span>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-neutral-100">Gemini CLI: o agente terminal do Google</h2>
+                    </div>
+                    <button onclick="openModal('modulo-4-1.html')" class="shrink-0 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Abrir Módulo
+                    </button>
+                </div>
+
+                <!-- Topics -->
+                <div class="space-y-3">
+                    <!-- Topic 1 -->
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">1</span>
+                            <span class="text-neutral-300 font-medium">🌐 O que é Gemini CLI - Agente open source do Google para terminal</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Origem e proposta do Gemini CLI como agente de terminal open source</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Modelo Gemini por trás: capacidades e contexto</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Posicionamento no ecossistema Google AI</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Topic 2 -->
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">2</span>
+                            <span class="text-neutral-300 font-medium">🛠️ Ferramentas embutidas - Shell, arquivos, busca, web</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Built-in tools: execução de shell, manipulação de arquivos</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Google Search e web browsing integrados</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Como as ferramentas são orquestradas pelo agente</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Topic 3 -->
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">3</span>
+                            <span class="text-neutral-300 font-medium">🧩 Extensões - MCP servers, prompts, comandos customizados</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Suporte a MCP servers para extensibilidade</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Sistema de prompts e comandos customizados</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Criando extensões próprias para Gemini CLI</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Topic 4 -->
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">4</span>
+                            <span class="text-neutral-300 font-medium">🔒 Sandbox e segurança - Políticas de execução</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Modelo de sandbox e isolamento de execução</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Políticas de permissão e aprovação de comandos</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Boas práticas de segurança no uso diário</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Topic 5 -->
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">5</span>
+                            <span class="text-neutral-300 font-medium">⚙️ Configuração e setup - Instalação e primeiros passos</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Instalação via npm e requisitos de sistema</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Autenticação com Google e configuração de API keys</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Primeiros comandos e fluxo de trabalho básico</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Topic 6 -->
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">6</span>
+                            <span class="text-neutral-300 font-medium">🔄 Gemini CLI vs outros - Forças e limitações</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Vantagens: open source, Google Search, integração Workspace</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Limitações e trade-offs em relação a outros agentes</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Cenários onde Gemini CLI é a melhor escolha</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-start">
+                    <button onclick="openModal('modulo-4-1.html')" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                        Iniciar Módulo 4.1
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 4.2 -->
+        <div class="mb-8 bg-dark-800 border border-amber-500/30 rounded-xl overflow-hidden">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-start justify-between gap-4 mb-6">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="bg-amber-500/20 text-amber-400 text-xs font-bold px-2.5 py-0.5 rounded-full">4.2</span>
+                            <span class="text-neutral-500 text-sm">~35 min</span>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-neutral-100">Claude Code: desenvolvimento agêntico da Anthropic</h2>
+                    </div>
+                    <button onclick="openModal('modulo-4-2.html')" class="shrink-0 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Abrir Módulo
+                    </button>
+                </div>
+
+                <!-- Topics -->
+                <div class="space-y-3">
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">1</span>
+                            <span class="text-neutral-300 font-medium">🤖 O que é Claude Code - Ferramenta agêntica no terminal</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Claude Code como agente de desenvolvimento da Anthropic</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Arquitetura e modelo Claude por trás da ferramenta</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Filosofia de design: segurança e controle do desenvolvedor</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">2</span>
+                            <span class="text-neutral-300 font-medium">📂 Inspeção de repositórios - Leitura e entendimento de código</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Como Claude Code navega e entende codebases complexos</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Ferramentas de leitura: Read, Glob, Grep, Bash</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Estratégias de exploração e análise de arquitetura</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">3</span>
+                            <span class="text-neutral-300 font-medium">✏️ Edição e diff - Modificações com revisão</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Ferramentas Edit e Write para modificações precisas</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Fluxo de diff e revisão antes de aplicar mudanças</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Integração com git para commits e PRs</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">4</span>
+                            <span class="text-neutral-300 font-medium">🔌 MCP e plugins - Extensibilidade e integração</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Suporte nativo a MCP servers e ferramentas externas</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Skills e slash commands para funcionalidades extras</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Conectando Claude Code a APIs e serviços terceiros</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">5</span>
+                            <span class="text-neutral-300 font-medium">💾 Memória e contexto - Sessões persistentes</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>CLAUDE.md e arquivos de memória do projeto</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Gerenciamento de contexto e janela de 1M tokens</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Sessões persistentes e retomada de trabalho</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">6</span>
+                            <span class="text-neutral-300 font-medium">🏢 Uso enterprise - Permissões, auditoria e compliance</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Configurações enterprise: SSO, permissões granulares</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Auditoria de ações e compliance regulatório</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Deploy em ambientes corporativos e air-gapped</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-start">
+                    <button onclick="openModal('modulo-4-2.html')" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                        Iniciar Módulo 4.2
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 4.3 -->
+        <div class="mb-8 bg-dark-800 border border-amber-500/30 rounded-xl overflow-hidden">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-start justify-between gap-4 mb-6">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="bg-amber-500/20 text-amber-400 text-xs font-bold px-2.5 py-0.5 rounded-full">4.3</span>
+                            <span class="text-neutral-500 text-sm">~30 min</span>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-neutral-100">Codex CLI e Copilot CLI: OpenAI e GitHub</h2>
+                    </div>
+                    <button onclick="openModal('modulo-4-3.html')" class="shrink-0 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Abrir Módulo
+                    </button>
+                </div>
+
+                <!-- Topics -->
+                <div class="space-y-3">
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">1</span>
+                            <span class="text-neutral-300 font-medium">💡 Codex CLI - O agente terminal da OpenAI</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Codex CLI: proposta, modelo e capacidades</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Modos de operação: suggest, auto-edit, full-auto</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Sandbox com containers e segurança por padrão</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">2</span>
+                            <span class="text-neutral-300 font-medium">🐙 Copilot CLI - GitHub no terminal</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>GitHub Copilot CLI: extensão agêntica do ecossistema GitHub</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Comandos gh copilot: suggest, explain e integração</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Acesso a PRs, issues e Actions via linguagem natural</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">3</span>
+                            <span class="text-neutral-300 font-medium">🔍 Inspeção e edição - Como cada um opera repositórios</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Abordagens de leitura de código: Codex vs Copilot</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Estratégias de edição e aplicação de mudanças</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Fluxo de trabalho com cada ferramenta</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">4</span>
+                            <span class="text-neutral-300 font-medium">🔗 Integração GitHub - PRs, issues e CI/CD via terminal</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Criando PRs e issues via agentes CLI</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Monitorando CI/CD e GitHub Actions pelo terminal</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Automação de code review e merge workflows</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">5</span>
+                            <span class="text-neutral-300 font-medium">⚖️ Comparativo - Codex vs Copilot vs Claude Code</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Tabela de features: modelo, sandbox, ferramentas, extensões</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Performance em tarefas reais de desenvolvimento</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Custo, licenciamento e modelo de negócio</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">6</span>
+                            <span class="text-neutral-300 font-medium">🎯 Quando usar qual - Cenários e recomendações</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Cenários ideais para cada ferramenta</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Combinando agentes para workflows complexos</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Recomendações por perfil: dev solo, equipe, enterprise</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-start">
+                    <button onclick="openModal('modulo-4-3.html')" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                        Iniciar Módulo 4.3
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 4.4 -->
+        <div class="mb-8 bg-dark-800 border border-amber-500/30 rounded-xl overflow-hidden">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-start justify-between gap-4 mb-6">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="bg-amber-500/20 text-amber-400 text-xs font-bold px-2.5 py-0.5 rounded-full">4.4</span>
+                            <span class="text-neutral-500 text-sm">~35 min</span>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-neutral-100">gws: Google Workspace como superfície agent-native</h2>
+                    </div>
+                    <button onclick="openModal('modulo-4-4.html')" class="shrink-0 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Abrir Módulo
+                    </button>
+                </div>
+
+                <!-- Topics -->
+                <div class="space-y-3">
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">1</span>
+                            <span class="text-neutral-300 font-medium">📧 O que é gws - CLI unificado para Drive, Gmail, Calendar, Sheets, Docs</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>gws como CLI unificado para todo o Google Workspace</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Serviços cobertos: Drive, Gmail, Calendar, Sheets, Docs e mais</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Filosofia agent-native: CLI projetado para LLMs operarem</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">2</span>
+                            <span class="text-neutral-300 font-medium">🔑 Autenticação - OAuth, Google Cloud Project, escopos</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Fluxo OAuth 2.0 e configuração de Google Cloud Project</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Gerenciamento de escopos e permissões por serviço</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Service accounts e autenticação para automação</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">3</span>
+                            <span class="text-neutral-300 font-medium">🏗️ Discovery Service - Comandos montados em runtime a partir das APIs</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Google Discovery Service e geração dinâmica de comandos</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Como gws mapeia APIs REST para comandos CLI</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Vantagem: CLI sempre atualizado com as APIs mais recentes</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">4</span>
+                            <span class="text-neutral-300 font-medium">📊 Saída JSON e --dry-run - Operação estruturada e segura</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Saída JSON estruturada para consumo por agentes</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Flag --dry-run para preview seguro de operações</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Pipelines e composição com jq e outros comandos</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">5</span>
+                            <span class="text-neutral-300 font-medium">🤖 Agent skills - 100+ skills para LLMs operarem Workspace</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Skills pré-definidas para operações comuns do Workspace</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Como agentes LLM descobrem e usam skills via help text</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Exemplos: send-email, create-event, upload-file, query-sheets</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">6</span>
+                            <span class="text-neutral-300 font-medium">🔌 gws como extensão do Gemini CLI - Integração completa</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>gws como extensão nativa do Gemini CLI</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Fluxo completo: linguagem natural para operações Workspace</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Cenários de automação: relatórios, emails, agenda via terminal</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-start">
+                    <button onclick="openModal('modulo-4-4.html')" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                        Iniciar Módulo 4.4
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 4.5 -->
+        <div class="mb-8 bg-dark-800 border border-amber-500/30 rounded-xl overflow-hidden">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-start justify-between gap-4 mb-6">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="bg-amber-500/20 text-amber-400 text-xs font-bold px-2.5 py-0.5 rounded-full">4.5</span>
+                            <span class="text-neutral-500 text-sm">~30 min</span>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-neutral-100">Comparativo geral: forças, fraquezas e casos de uso</h2>
+                    </div>
+                    <button onclick="openModal('modulo-4-5.html')" class="shrink-0 bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Abrir Módulo
+                    </button>
+                </div>
+
+                <!-- Topics -->
+                <div class="space-y-3">
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">1</span>
+                            <span class="text-neutral-300 font-medium">📊 Tabela comparativa - Features lado a lado</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Matriz comparativa: Gemini CLI, Claude Code, Codex, Copilot, gws</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Features: modelo, contexto, ferramentas, extensões, preço</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Pontos fortes e fracos de cada ferramenta</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">2</span>
+                            <span class="text-neutral-300 font-medium">🏗️ Arquitetura - Modelos, runtimes e protocolos</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Comparação de arquiteturas: Node.js, Rust, Python, Go</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Modelos LLM por trás: Gemini, Claude, GPT, Copilot</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Protocolos: MCP, function calling, tool use</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">3</span>
+                            <span class="text-neutral-300 font-medium">🔒 Segurança - Quem sandboxa melhor?</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Modelos de sandbox: containers, permissões, aprovação</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Políticas de segurança por padrão vs opt-in</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Riscos e mitigações em cada plataforma</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">4</span>
+                            <span class="text-neutral-300 font-medium">🧩 Extensibilidade - MCP, plugins, extensions, skills</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>MCP como protocolo universal vs extensões proprietárias</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Ecossistema de plugins de cada plataforma</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Interoperabilidade e portabilidade de extensões</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">5</span>
+                            <span class="text-neutral-300 font-medium">🎯 Por caso de uso - Coding, ops, automação, Workspace</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Melhor agente para coding e desenvolvimento</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Melhor agente para DevOps e infraestrutura</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Melhor agente para automação de Workspace e produtividade</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-dark-600 rounded-lg">
+                        <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 text-left hover:bg-dark-700/50 transition-colors rounded-lg">
+                            <span class="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold border border-amber-500/30">6</span>
+                            <span class="text-neutral-300 font-medium">🔮 Tendências - Para onde cada um está indo</span>
+                            <svg class="w-5 h-5 text-neutral-500 ml-auto shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div class="topic-content">
+                            <div class="px-4 pb-4 space-y-2 text-sm text-neutral-400">
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Roadmaps anunciados e direções estratégicas</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Convergência vs divergência: MCP como padrão</span></div>
+                                <div class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">▸</span><span>Previsões para H2 2026 e 2027</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-start">
+                    <button onclick="openModal('modulo-4-5.html')" class="bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                        Iniciar Módulo 4.5
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Bottom Navigation -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div class="flex items-center justify-between">
+            <a href="../trilha3/index.html" class="flex items-center gap-2 text-amber-400 hover:text-amber-300 transition-colors font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                CLI-Anything
+            </a>
+            <a href="../trilha5/index.html" class="flex items-center gap-2 text-amber-400 hover:text-amber-300 transition-colors font-medium">
+                Projetos Práticos
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-700 bg-dark-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+                <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 transition-colors text-sm font-medium">INEMA.CLUB</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="moduleModal" class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80" onclick="closeModal()"></div>
+        <div class="relative w-full max-w-6xl h-[85vh] bg-dark-900 border border-amber-500/30 rounded-xl overflow-hidden">
+            <div class="flex items-center justify-between p-4 border-b border-dark-700">
+                <h3 id="modalTitle" class="text-amber-400 font-bold">Módulo</h3>
+                <button onclick="closeModal()" class="text-neutral-400 hover:text-neutral-100 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <iframe id="modalIframe" class="w-full h-[calc(85vh-64px)]" src="" frameborder="0"></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const iconSun = document.getElementById('iconSun');
+        const iconMoon = document.getElementById('iconMoon');
+        const html = document.documentElement;
+
+        function setTheme(dark) {
+            if (dark) {
+                html.classList.add('dark');
+                iconSun.classList.add('hidden');
+                iconMoon.classList.remove('hidden');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                html.classList.remove('dark');
+                iconSun.classList.remove('hidden');
+                iconMoon.classList.add('hidden');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            setTheme(false);
+        } else {
+            setTheme(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = html.classList.contains('dark');
+            setTheme(!isDark);
+        });
+
+        // Topic Toggle
+        function toggleTopic(btn) {
+            const content = btn.nextElementSibling;
+            const arrow = btn.querySelector('svg');
+            content.classList.toggle('expanded');
+            arrow.style.transform = content.classList.contains('expanded') ? 'rotate(180deg)' : '';
+        }
+
+        // Modal
+        function openModal(src) {
+            const modal = document.getElementById('moduleModal');
+            const iframe = document.getElementById('modalIframe');
+            const title = document.getElementById('modalTitle');
+            iframe.src = src;
+            title.textContent = src.replace('.html', '').replace(/-/g, ' ').replace(/modulo /i, 'Módulo ');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('moduleModal');
+            const iframe = document.getElementById('modalIframe');
+            modal.classList.remove('active');
+            iframe.src = '';
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trilha 5 - Projetos Práticos | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ===== LIGHT MODE - Part 1: Base ===== */
+        html:not(.dark) body { background-color: #f8fafc; }
+        html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+        html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+        html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+        html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+        html:not(.dark) .text-neutral-100 { color: #111827; }
+        html:not(.dark) .text-neutral-300 { color: #4b5563; }
+        html:not(.dark) .text-neutral-400 { color: #6b7280; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+        html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+        html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+        /* ===== LIGHT MODE - Part 2: Accent colors for all 6 trails ===== */
+
+        /* Emerald */
+        html:not(.dark) .text-emerald-400 { color: #059669; }
+        html:not(.dark) .text-emerald-300 { color: #059669; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.1); }
+        html:not(.dark) .bg-emerald-400\/10 { background-color: rgba(5, 150, 105, 0.1); }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.3); }
+        html:not(.dark) .border-emerald-400\/30 { border-color: rgba(5, 150, 105, 0.3); }
+        html:not(.dark) .hover\:text-emerald-300:hover { color: #059669; }
+        html:not(.dark) .hover\:border-emerald-400\/50:hover { border-color: rgba(5, 150, 105, 0.5); }
+        html:not(.dark) .group-hover\:text-emerald-300 { color: #059669; }
+
+        /* Blue */
+        html:not(.dark) .text-blue-400 { color: #2563eb; }
+        html:not(.dark) .text-blue-300 { color: #2563eb; }
+        html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37, 99, 235, 0.1); }
+        html:not(.dark) .bg-blue-400\/10 { background-color: rgba(37, 99, 235, 0.1); }
+        html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.3); }
+        html:not(.dark) .border-blue-400\/30 { border-color: rgba(37, 99, 235, 0.3); }
+        html:not(.dark) .hover\:text-blue-300:hover { color: #2563eb; }
+        html:not(.dark) .hover\:border-blue-400\/50:hover { border-color: rgba(37, 99, 235, 0.5); }
+        html:not(.dark) .group-hover\:text-blue-300 { color: #2563eb; }
+
+        /* Purple */
+        html:not(.dark) .text-purple-400 { color: #7c3aed; }
+        html:not(.dark) .text-purple-300 { color: #7c3aed; }
+        html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124, 58, 237, 0.1); }
+        html:not(.dark) .bg-purple-400\/10 { background-color: rgba(124, 58, 237, 0.1); }
+        html:not(.dark) .border-purple-500\/30 { border-color: rgba(124, 58, 237, 0.3); }
+        html:not(.dark) .border-purple-400\/30 { border-color: rgba(124, 58, 237, 0.3); }
+        html:not(.dark) .hover\:text-purple-300:hover { color: #7c3aed; }
+        html:not(.dark) .hover\:border-purple-400\/50:hover { border-color: rgba(124, 58, 237, 0.5); }
+        html:not(.dark) .group-hover\:text-purple-300 { color: #7c3aed; }
+
+        /* Amber */
+        html:not(.dark) .text-amber-400 { color: #92400e; }
+        html:not(.dark) .text-amber-300 { color: #92400e; }
+        html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217, 119, 6, 0.1); }
+        html:not(.dark) .bg-amber-400\/10 { background-color: rgba(217, 119, 6, 0.1); }
+        html:not(.dark) .border-amber-500\/30 { border-color: rgba(217, 119, 6, 0.3); }
+        html:not(.dark) .border-amber-400\/30 { border-color: rgba(217, 119, 6, 0.3); }
+        html:not(.dark) .hover\:text-amber-300:hover { color: #92400e; }
+        html:not(.dark) .hover\:border-amber-400\/50:hover { border-color: rgba(217, 119, 6, 0.5); }
+        html:not(.dark) .group-hover\:text-amber-300 { color: #92400e; }
+
+        /* Teal */
+        html:not(.dark) .text-teal-400 { color: #0d9488; }
+        html:not(.dark) .text-teal-300 { color: #0d9488; }
+        html:not(.dark) .bg-teal-500\/10 { background-color: rgba(13, 148, 136, 0.1); }
+        html:not(.dark) .bg-teal-500\/20 { background-color: rgba(13, 148, 136, 0.15); }
+        html:not(.dark) .bg-teal-400\/10 { background-color: rgba(13, 148, 136, 0.1); }
+        html:not(.dark) .border-teal-500\/30 { border-color: rgba(13, 148, 136, 0.3); }
+        html:not(.dark) .border-teal-400\/30 { border-color: rgba(13, 148, 136, 0.3); }
+        html:not(.dark) .hover\:text-teal-300:hover { color: #0d9488; }
+        html:not(.dark) .hover\:border-teal-400\/50:hover { border-color: rgba(13, 148, 136, 0.5); }
+        html:not(.dark) .group-hover\:text-teal-300 { color: #0d9488; }
+
+        /* Rose */
+        html:not(.dark) .text-rose-400 { color: #9f1239; }
+        html:not(.dark) .text-rose-300 { color: #9f1239; }
+        html:not(.dark) .bg-rose-500\/10 { background-color: rgba(225, 29, 72, 0.1); }
+        html:not(.dark) .bg-rose-400\/10 { background-color: rgba(225, 29, 72, 0.1); }
+        html:not(.dark) .border-rose-500\/30 { border-color: rgba(225, 29, 72, 0.3); }
+        html:not(.dark) .border-rose-400\/30 { border-color: rgba(225, 29, 72, 0.3); }
+        html:not(.dark) .hover\:text-rose-300:hover { color: #9f1239; }
+        html:not(.dark) .hover\:border-rose-400\/50:hover { border-color: rgba(225, 29, 72, 0.5); }
+        html:not(.dark) .group-hover\:text-rose-300 { color: #9f1239; }
+
+        /* ===== LIGHT MODE - Part 3: Remove gradients + special colors ===== */
+        html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+        html:not(.dark) .text-primary { color: #a16207; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+        html:not(.dark) .border-primary\/40 { border-color: rgba(161, 98, 7, 0.25); }
+        html:not(.dark) .text-sky-400 { color: #0369a1; }
+        html:not(.dark) .text-yellow-400 { color: #a16207; }
+        html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+        html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+        /* ===== LIGHT MODE - Part 4: Nav ===== */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+    </style>
+</head>
+<body class="bg-dark-900 text-neutral-100 font-sans min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-dark-900/95 backdrop-blur-sm border-b border-dark-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo + INEMA.CLUB -->
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center gap-2 text-yellow-400 font-bold text-xl hover:text-yellow-300 transition-colors">
+                        <span>⚡</span>
+                        <span>CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+
+                <!-- Nav Links -->
+                <div class="flex items-center gap-1 sm:gap-3 text-sm overflow-x-auto">
+                    <a href="../trilha1/" class="text-emerald-400 hover:text-emerald-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Fundamentos</span><span class="sm:hidden">T1</span></a>
+                    <a href="../trilha2/" class="text-blue-400 hover:text-blue-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Arquitetura</span><span class="sm:hidden">T2</span></a>
+                    <a href="../trilha3/" class="text-purple-400 hover:text-purple-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">CLI-Anything</span><span class="sm:hidden">T3</span></a>
+                    <a href="../trilha4/" class="text-amber-400 hover:text-amber-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Ecossistema</span><span class="sm:hidden">T4</span></a>
+                    <a href="../trilha5/" class="text-teal-400 hover:text-teal-300 transition-colors px-1.5 py-1 whitespace-nowrap font-bold border-b-2 border-teal-400"><span class="hidden sm:inline">Projetos</span><span class="sm:hidden">T5</span></a>
+                    <a href="../trilha6/" class="text-rose-400 hover:text-rose-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Estratégia</span><span class="sm:hidden">T6</span></a>
+
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors text-neutral-400 hover:text-neutral-100" title="Alternar tema">
+                        <svg id="iconSun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <svg id="iconMoon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <section class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-teal-900/30 via-transparent to-transparent"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+            <div class="text-center max-w-4xl mx-auto">
+                <div class="inline-block bg-teal-500/20 border border-teal-500/30 rounded-full px-4 py-1.5 text-teal-400 text-sm font-semibold mb-6">TRILHA 5</div>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-800 text-teal-400 mb-4 tracking-tight">Projetos Práticos</h1>
+                <p class="text-xl sm:text-2xl text-neutral-300 font-medium mb-6">Hands-on projects com guias passo a passo</p>
+                <p class="text-neutral-400 text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
+                    Do primeiro agente CLI ao orquestramento multi-agente: cinco projetos práticos que conectam toda a teoria das trilhas anteriores em implementações reais.
+                </p>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+                    <div class="bg-dark-800 border border-teal-500/30 rounded-xl p-4">
+                        <div class="text-2xl font-bold text-teal-400">5</div>
+                        <div class="text-neutral-400 text-sm">Módulos</div>
+                    </div>
+                    <div class="bg-dark-800 border border-teal-500/30 rounded-xl p-4">
+                        <div class="text-2xl font-bold text-teal-400">30</div>
+                        <div class="text-neutral-400 text-sm">Tópicos</div>
+                    </div>
+                    <div class="bg-dark-800 border border-teal-500/30 rounded-xl p-4">
+                        <div class="text-2xl font-bold text-teal-400">~4h</div>
+                        <div class="text-neutral-400 text-sm">Duração</div>
+                    </div>
+                    <div class="bg-dark-800 border border-teal-500/30 rounded-xl p-4">
+                        <div class="text-2xl font-bold text-teal-400">Prático</div>
+                        <div class="text-neutral-400 text-sm">Nível</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modules -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 space-y-8">
+
+        <!-- Module 5.1 -->
+        <div class="bg-dark-800 border border-teal-500/30 rounded-xl overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-teal-500/20 text-teal-400 font-bold text-sm border border-teal-500/30">5.1</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-neutral-100">Projeto 1: Seu primeiro agente CLI</h2>
+                        <span class="text-neutral-500 text-sm">~45min</span>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-dark-700 divide-y divide-dark-700">
+                <!-- Topic 1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">1</span>
+                        <span class="text-neutral-100 font-medium">Escolhendo o agente - Gemini CLI, Claude Code ou Codex CLI</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Análise comparativa dos três principais agentes CLI do mercado: Gemini CLI (Google), Claude Code (Anthropic) e Codex CLI (OpenAI), com critérios para escolher o mais adequado ao seu contexto.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">A escolha do agente impacta diretamente a experiência, os custos e as integrações disponíveis. Entender as diferenças evita retrabalho e frustrações.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Modelos de linguagem subjacentes, limites de contexto, pricing, ecossistema de plugins, suporte a MCP, licenciamento open-source vs proprietário.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">2</span>
+                        <span class="text-neutral-100 font-medium">Instalação passo a passo - Node, Python, autenticação</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Guia completo de instalação do agente escolhido, cobrindo dependências (Node.js, Python), configuração de API keys e autenticação OAuth quando necessário.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Problemas de setup são a principal causa de desistência. Um processo limpo de instalação garante que você comece a produzir valor rapidamente.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">npm/npx, pip/pipx, variáveis de ambiente, API keys, OAuth 2.0, PATH do sistema, versões de runtime, gerenciadores de pacotes.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">3</span>
+                        <span class="text-neutral-100 font-medium">Primeira conversa - Prompts básicos no terminal</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Sua primeira interação real com o agente no terminal: como formular prompts, entender respostas, usar flags e explorar as capacidades básicas.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">A qualidade do prompt determina a qualidade da resposta. Dominar a comunicação com o agente é a habilidade mais fundamental do workflow agent-native.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Prompt engineering no terminal, flags e opções, modo interativo vs one-shot, streaming de resposta, contexto de conversa, temperatura e parâmetros.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">4</span>
+                        <span class="text-neutral-100 font-medium">Explorando um repositório - O agente lendo código</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Usando o agente para navegar, entender e explicar um repositório de código existente — explorando arquivos, dependências, arquitetura e padrões.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Ler código alheio é uma das tarefas mais comuns e demoradas. Um agente CLI pode acelerar esse processo em ordens de magnitude.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Leitura de arquivos via agente, análise de dependências, mapeamento de arquitetura, contexto de projeto, limites de token, estratégias de navegação.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">5</span>
+                        <span class="text-neutral-100 font-medium">Primeira edição assistida - Agente modificando arquivo</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">O momento em que o agente deixa de apenas ler e passa a escrever: editando um arquivo real no seu projeto, com diff review e aprovação humana.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">A edição assistida é o core do workflow de desenvolvimento agent-native. Entender como funciona e como revisar é essencial para produtividade e segurança.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Edição de arquivos via agente, diffs, aprovação humana (human-in-the-loop), rollback, git integration, review de mudanças, confiança gradual.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">6</span>
+                        <span class="text-neutral-100 font-medium">Configurando permissões - Sandbox e aprovação humana</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Configuração de sandboxes, políticas de permissão e fluxos de aprovação para que o agente opere com segurança e dentro dos limites definidos por você.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Segurança não é opcional. Configurar permissões corretamente é o que separa uso profissional de uso irresponsável de agentes CLI.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Sandbox modes, allowlists e denylists, políticas de aprovação, escopo de acesso ao filesystem, rede e processos, auditoria de ações.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 5.2 -->
+        <div class="bg-dark-800 border border-teal-500/30 rounded-xl overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-teal-500/20 text-teal-400 font-bold text-sm border border-teal-500/30">5.2</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-neutral-100">Projeto 2: Criando um MCP server básico</h2>
+                        <span class="text-neutral-500 text-sm">~50min</span>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-dark-700 divide-y divide-dark-700">
+                <!-- Topic 1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">1</span>
+                        <span class="text-neutral-100 font-medium">O que vamos construir - Um MCP server para notas</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Visão geral do projeto: um MCP server que gerencia notas pessoais, expondo resources (listar notas) e tools (criar, editar, deletar) para qualquer agente compatível.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Construir um MCP server do zero é a melhor forma de entender o protocolo por dentro. Notas são simples o suficiente para focar no protocolo, não no domínio.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">MCP server architecture, resources vs tools, transport layer (stdio), schema definition, capability negotiation.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">2</span>
+                        <span class="text-neutral-100 font-medium">Setup do projeto - TypeScript, dependências, estrutura</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Inicialização do projeto TypeScript com as dependências do MCP SDK, configuração de tsconfig, estrutura de diretórios e scripts de build.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Um setup correto evita problemas futuros. A estrutura do projeto influencia manutenibilidade e facilidade de teste.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">TypeScript setup, @modelcontextprotocol/sdk, tsconfig.json, projeto scaffolding, ESM modules, build pipeline.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">3</span>
+                        <span class="text-neutral-100 font-medium">Definindo resources - Expondo dados ao agente</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Implementação dos resources do MCP: endpoints que o agente pode consultar para ler dados — neste caso, listar notas e ler o conteúdo de uma nota específica.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Resources são a forma como o agente acessa dados do seu sistema. Definir resources claros e bem tipados é a base de qualquer integração MCP.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">MCP resources, URI templates, MIME types, resource listing, resource reading, schemas JSON, paginação.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">4</span>
+                        <span class="text-neutral-100 font-medium">Definindo tools - Ações que o agente pode executar</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Implementação das tools do MCP: funções que o agente pode invocar para criar, editar e deletar notas, com schemas de input/output bem definidos.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Tools são o mecanismo de ação do agente. Sem tools bem definidas, o agente pode ler mas não pode agir — e ação é o que gera valor.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">MCP tools, input schemas (JSON Schema), output schemas, validação, error handling, idempotência, side effects.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">5</span>
+                        <span class="text-neutral-100 font-medium">Testando localmente - Conectando ao Claude Code ou Gemini CLI</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Conectando seu MCP server local a um agente real (Claude Code ou Gemini CLI), testando resources e tools, debugando problemas de comunicação.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">O teste local é onde teoria vira prática. Ver o agente usando suas tools pela primeira vez é o momento eureka do desenvolvimento MCP.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Configuração de MCP client, stdio transport, debug logging, MCP Inspector, teste manual, verificação de schemas.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">6</span>
+                        <span class="text-neutral-100 font-medium">Empacotando - Distribuição e publicação</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Preparando o MCP server para distribuição: build de produção, publicação no npm, Docker container e registro em catálogos de MCP servers.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Um MCP server que funciona local mas não é distribuível tem valor limitado. Publicar é o que torna seu trabalho reutilizável pela comunidade.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">npm publish, Docker packaging, versionamento semântico, README para MCP servers, catálogos e marketplaces, CI/CD para MCP.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 5.3 -->
+        <div class="bg-dark-800 border border-teal-500/30 rounded-xl overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-teal-500/20 text-teal-400 font-bold text-sm border border-teal-500/30">5.3</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-neutral-100">Projeto 3: Agentificando uma app com CLI-Anything</h2>
+                        <span class="text-neutral-500 text-sm">~60min</span>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-dark-700 divide-y divide-dark-700">
+                <!-- Topic 1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">1</span>
+                        <span class="text-neutral-100 font-medium">O software-alvo - Escolhendo uma app de exemplo</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Seleção estratégica de uma aplicação real para agentificar: critérios de escolha, análise de complexidade e definição do escopo do projeto CLI-Anything.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Nem toda app é igualmente agentificável. Escolher bem o alvo é metade do sucesso — apps com APIs claras e estado previsível são as melhores candidatas.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Critérios de agentificabilidade, análise de APIs existentes, mapeamento de funcionalidades, escopo mínimo viável, complexidade de estado.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">2</span>
+                        <span class="text-neutral-100 font-medium">Instalando CLI-Anything - Setup do plugin e ambiente</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Instalação e configuração do framework CLI-Anything: dependências, plugin system, configuração do ambiente de desenvolvimento e primeiros testes.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">CLI-Anything é o framework que automatiza a transformação de software em interfaces agent-native. Dominar seu setup é pré-requisito para o pipeline.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">CLI-Anything framework, plugin architecture, configuração de ambiente, templates, scaffolding, dependências de runtime.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">3</span>
+                        <span class="text-neutral-100 font-medium">Executando o pipeline - As 7 fases na prática</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Execução completa do pipeline CLI-Anything: as 7 fases de transformação aplicadas à app escolhida, do mapeamento inicial ao CLI funcional.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">O pipeline é o coração do CLI-Anything. Executá-lo na prática solidifica o entendimento teórico e revela nuances que só aparecem no uso real.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">As 7 fases do pipeline, mapeamento funcional, geração de comandos, validação de output, iteração, refinamento de prompts, quality gates.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">4</span>
+                        <span class="text-neutral-100 font-medium">Analisando o output - CLI gerado, REPL, JSON</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Análise detalhada dos artefatos gerados pelo pipeline: o CLI executável, o modo REPL interativo, outputs em JSON estruturado e a documentação gerada.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Entender o output permite avaliar qualidade, identificar gaps e iterar. Um CLI bem gerado é composável; um mal gerado é um obstáculo.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">CLI structure, REPL mode, JSON output format, help text gerado, man pages, completion scripts, error messages.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">5</span>
+                        <span class="text-neutral-100 font-medium">Testando o CLI - Comandos, estado e validação</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Teste sistemático do CLI gerado: execução de cada comando, verificação de estado, validação de outputs e identificação de edge cases.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Testar é validar. Sem testes, você não sabe se o CLI gerado funciona corretamente em todos os cenários que o agente vai encontrar.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Testes de CLI, validação de output, state management, edge cases, error paths, testes de integração, smoke tests.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">6</span>
+                        <span class="text-neutral-100 font-medium">Conectando a um agente - SKILL.md e integração</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">O passo final: conectando o CLI gerado a um agente via SKILL.md, configurando o agente para descobrir e usar os comandos, fechando o ciclo de agentificação.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">A integração com o agente é o objetivo final de todo o processo. Sem ela, você tem um CLI; com ela, você tem uma ferramenta agent-native.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">SKILL.md specification, agent discovery, tool registration, capability advertisement, end-to-end testing, agent workflow validation.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 5.4 -->
+        <div class="bg-dark-800 border border-teal-500/30 rounded-xl overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-teal-500/20 text-teal-400 font-bold text-sm border border-teal-500/30">5.4</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-neutral-100">Projeto 4: Automatizando Workspace com gws</h2>
+                        <span class="text-neutral-500 text-sm">~45min</span>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-dark-700 divide-y divide-dark-700">
+                <!-- Topic 1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">1</span>
+                        <span class="text-neutral-100 font-medium">Setup do gws - Instalação, OAuth, Google Cloud Project</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Configuração completa do gws: instalação via npm, criação do Google Cloud Project, configuração OAuth 2.0 e autenticação com sua conta Google Workspace.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">O setup OAuth do Google é notoriamente complexo. Este guia passo a passo elimina a frustração e garante que você consiga conectar rapidamente.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Google Cloud Console, OAuth 2.0 credentials, scopes de API, consent screen, token refresh, service accounts vs user accounts.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">2</span>
+                        <span class="text-neutral-100 font-medium">Gmail via CLI - Listando, lendo e enviando emails</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Operações de Gmail via terminal: listar mensagens com filtros, ler conteúdo de emails, enviar novas mensagens e responder threads — tudo via linha de comando.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Email é o canal de comunicação mais usado no trabalho. Operar Gmail via CLI permite automação, scripting e integração com agentes.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Gmail API, queries de busca, labels, threads vs messages, MIME format, attachments, batch operations.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">3</span>
+                        <span class="text-neutral-100 font-medium">Drive via CLI - Upload, download e busca de arquivos</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Gerenciamento de Google Drive via terminal: upload e download de arquivos, busca por nome e conteúdo, compartilhamento e organização de pastas.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Drive é o repositório de documentos de milhões de empresas. Acessá-lo via CLI permite automação de fluxos documentais que hoje são manuais.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Drive API, file metadata, MIME types, folder hierarchy, sharing permissions, search queries, resumable uploads.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">4</span>
+                        <span class="text-neutral-100 font-medium">Sheets via CLI - Lendo e escrevendo dados</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Operações de Google Sheets via terminal: leitura de ranges, escrita de dados, formatação básica e uso de planilhas como database leve para automações.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Sheets é o "banco de dados" mais popular do mundo corporativo. Ler e escrever dados via CLI abre possibilidades enormes de automação.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Sheets API, A1 notation, ranges, batch updates, value input options, cell formatting, formulas via API.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">5</span>
+                        <span class="text-neutral-100 font-medium">Calendar via CLI - Gerenciando eventos</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Gerenciamento de Google Calendar via terminal: listar eventos, criar reuniões, verificar disponibilidade e automatizar agendamento.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Calendário é o sistema de coordenação do trabalho moderno. Automatizar agendamento via CLI economiza horas semanais de trabalho manual.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Calendar API, events CRUD, recurrence rules, timezone handling, free/busy queries, attendees management, reminders.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">6</span>
+                        <span class="text-neutral-100 font-medium">gws + Gemini CLI - Operando Workspace via agente</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">A integração final: conectando gws ao Gemini CLI para que o agente opere Gmail, Drive, Sheets e Calendar de forma autônoma via linguagem natural.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Esta é a demonstração mais poderosa do paradigma agent-native: um agente que opera todo o Google Workspace via terminal, com linguagem natural.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Tool composition, agent orchestration, natural language to CLI, multi-service workflows, error recovery, permission boundaries.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 5.5 -->
+        <div class="bg-dark-800 border border-teal-500/30 rounded-xl overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-teal-500/20 text-teal-400 font-bold text-sm border border-teal-500/30">5.5</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-neutral-100">Projeto 5: Orquestrando múltiplos agentes</h2>
+                        <span class="text-neutral-500 text-sm">~50min</span>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-dark-700 divide-y divide-dark-700">
+                <!-- Topic 1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">1</span>
+                        <span class="text-neutral-100 font-medium">Arquitetura multi-agente - Planejamento do fluxo</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Design da arquitetura multi-agente: como planejar um fluxo onde múltiplos agentes colaboram, dividindo responsabilidades e coordenando ações.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Problemas complexos exigem múltiplos agentes especializados. Planejar a arquitetura antes de implementar evita gargalos e conflitos.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Multi-agent patterns, orquestrador vs coreografia, divisão de responsabilidades, fluxo de dados, pontos de sincronização, fallback strategies.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">2</span>
+                        <span class="text-neutral-100 font-medium">Conectando MCP servers - Composição de ferramentas</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Conexão de múltiplos MCP servers a um único agente ou grupo de agentes, criando um toolkit composto que expande as capacidades do sistema.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">O poder do MCP está na composição. Um agente com 5 MCP servers conectados é exponencialmente mais capaz que um com apenas 1.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">MCP composition, tool namespacing, conflict resolution, capability aggregation, configuration management, dynamic server discovery.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">3</span>
+                        <span class="text-neutral-100 font-medium">Workflow: código + deploy + monitoramento - Pipeline completa</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Implementação de uma pipeline end-to-end: agente escreve código, outro faz deploy, outro monitora — demonstrando orquestração real de múltiplos agentes.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Este é o futuro do desenvolvimento: pipelines onde agentes especializados colaboram em cada etapa, do código à produção.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">CI/CD agent-native, deploy automation, health checks, monitoring integration, pipeline stages, handoff protocols.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">4</span>
+                        <span class="text-neutral-100 font-medium">Observabilidade - Logs, métricas e debugging</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Implementação de observabilidade no sistema multi-agente: logging estruturado, métricas de performance, tracing distribuído e ferramentas de debugging.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Sem observabilidade, sistemas multi-agente são caixas-pretas. Quando algo falha (e vai falhar), você precisa saber onde, quando e por quê.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Structured logging, OpenTelemetry, distributed tracing, metrics collection, dashboards, alerting, agent session replay.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">5</span>
+                        <span class="text-neutral-100 font-medium">Tratamento de erros - Quando o agente falha</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Estratégias de tratamento de erros em sistemas multi-agente: retry policies, circuit breakers, fallbacks, escalação humana e recuperação graceful.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Agentes falham. Modelos alucinam, APIs timeout, permissões expiram. O que diferencia um sistema robusto é como ele lida com falhas.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Error handling patterns, retry with backoff, circuit breaker, human escalation, graceful degradation, compensation transactions, dead letter queues.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30 shrink-0">6</span>
+                        <span class="text-neutral-100 font-medium">Produção - Boas práticas para ambientes reais</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Boas práticas para levar sistemas multi-agente para produção: segurança, performance, custos, compliance, monitoramento e operação contínua.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">O gap entre demo e produção é enorme. Conhecer as boas práticas evita incidentes, custos descontrolados e problemas de segurança.</p></div>
+                        <div><h4 class="text-teal-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Production readiness, rate limiting, cost management, security hardening, compliance frameworks, SLAs, runbooks, incident response.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-teal-500/20 border border-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="flex items-center justify-between pt-8">
+            <a href="../trilha4/index.html" class="flex items-center gap-2 text-neutral-400 hover:text-teal-400 transition-colors group">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                <span>Ecossistema</span>
+            </a>
+            <a href="../trilha6/index.html" class="flex items-center gap-2 text-neutral-400 hover:text-teal-400 transition-colors group">
+                <span>Estratégia e Futuro</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+
+    </section>
+
+    <!-- Modal -->
+    <div id="contentModal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="relative w-full h-full max-w-5xl mx-auto p-4 sm:p-8 flex flex-col">
+            <div class="flex justify-end mb-2">
+                <button onclick="closeModal()" class="text-neutral-400 hover:text-neutral-100 transition-colors p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="flex-1 bg-dark-800 rounded-xl overflow-hidden border border-dark-700">
+                <iframe id="modalIframe" class="w-full h-full" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-700 bg-dark-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+                <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 transition-colors text-sm font-medium">INEMA.CLUB</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle topic expand/collapse
+        function toggleTopic(button) {
+            const content = button.nextElementSibling;
+            content.classList.toggle('hidden');
+        }
+
+        // Modal functions
+        function openModal(url) {
+            document.getElementById('modalIframe').src = url;
+            document.getElementById('contentModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('contentModal').classList.add('hidden');
+            document.getElementById('modalIframe').src = '';
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const iconSun = document.getElementById('iconSun');
+        const iconMoon = document.getElementById('iconMoon');
+        const html = document.documentElement;
+
+        function setTheme(dark) {
+            if (dark) {
+                html.classList.add('dark');
+                iconSun.classList.add('hidden');
+                iconMoon.classList.remove('hidden');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                html.classList.remove('dark');
+                iconSun.classList.remove('hidden');
+                iconMoon.classList.add('hidden');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            setTheme(false);
+        } else {
+            setTheme(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = html.classList.contains('dark');
+            setTheme(!isDark);
+        });
+    </script>
+</body>
+</html>

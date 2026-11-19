@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trilha 6 - Estratégia e Futuro | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ===== LIGHT MODE - Part 1: Base ===== */
+        html:not(.dark) body { background-color: #f8fafc; }
+        html:not(.dark) .bg-dark-900 { background-color: #ffffff; }
+        html:not(.dark) .bg-dark-800 { background-color: #f9fafb; }
+        html:not(.dark) .bg-dark-700 { background-color: #f3f4f6; }
+        html:not(.dark) .bg-dark-600 { background-color: #e5e7eb; }
+        html:not(.dark) .text-neutral-100 { color: #111827; }
+        html:not(.dark) .text-neutral-300 { color: #4b5563; }
+        html:not(.dark) .text-neutral-400 { color: #6b7280; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af; }
+        html:not(.dark) .border-dark-600 { border-color: #d1d5db; }
+        html:not(.dark) .border-dark-700 { border-color: #e5e7eb; }
+
+        /* ===== LIGHT MODE - Part 2: Accent colors for all 6 trails ===== */
+
+        /* Emerald */
+        html:not(.dark) .text-emerald-400 { color: #059669; }
+        html:not(.dark) .text-emerald-300 { color: #059669; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.1); }
+        html:not(.dark) .bg-emerald-400\/10 { background-color: rgba(5, 150, 105, 0.1); }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.3); }
+        html:not(.dark) .border-emerald-400\/30 { border-color: rgba(5, 150, 105, 0.3); }
+        html:not(.dark) .hover\:text-emerald-300:hover { color: #059669; }
+        html:not(.dark) .hover\:border-emerald-400\/50:hover { border-color: rgba(5, 150, 105, 0.5); }
+        html:not(.dark) .group-hover\:text-emerald-300 { color: #059669; }
+
+        /* Blue */
+        html:not(.dark) .text-blue-400 { color: #2563eb; }
+        html:not(.dark) .text-blue-300 { color: #2563eb; }
+        html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37, 99, 235, 0.1); }
+        html:not(.dark) .bg-blue-400\/10 { background-color: rgba(37, 99, 235, 0.1); }
+        html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.3); }
+        html:not(.dark) .border-blue-400\/30 { border-color: rgba(37, 99, 235, 0.3); }
+        html:not(.dark) .hover\:text-blue-300:hover { color: #2563eb; }
+        html:not(.dark) .hover\:border-blue-400\/50:hover { border-color: rgba(37, 99, 235, 0.5); }
+        html:not(.dark) .group-hover\:text-blue-300 { color: #2563eb; }
+
+        /* Purple */
+        html:not(.dark) .text-purple-400 { color: #7c3aed; }
+        html:not(.dark) .text-purple-300 { color: #7c3aed; }
+        html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124, 58, 237, 0.1); }
+        html:not(.dark) .bg-purple-400\/10 { background-color: rgba(124, 58, 237, 0.1); }
+        html:not(.dark) .border-purple-500\/30 { border-color: rgba(124, 58, 237, 0.3); }
+        html:not(.dark) .border-purple-400\/30 { border-color: rgba(124, 58, 237, 0.3); }
+        html:not(.dark) .hover\:text-purple-300:hover { color: #7c3aed; }
+        html:not(.dark) .hover\:border-purple-400\/50:hover { border-color: rgba(124, 58, 237, 0.5); }
+        html:not(.dark) .group-hover\:text-purple-300 { color: #7c3aed; }
+
+        /* Amber */
+        html:not(.dark) .text-amber-400 { color: #92400e; }
+        html:not(.dark) .text-amber-300 { color: #92400e; }
+        html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217, 119, 6, 0.1); }
+        html:not(.dark) .bg-amber-400\/10 { background-color: rgba(217, 119, 6, 0.1); }
+        html:not(.dark) .border-amber-500\/30 { border-color: rgba(217, 119, 6, 0.3); }
+        html:not(.dark) .border-amber-400\/30 { border-color: rgba(217, 119, 6, 0.3); }
+        html:not(.dark) .hover\:text-amber-300:hover { color: #92400e; }
+        html:not(.dark) .hover\:border-amber-400\/50:hover { border-color: rgba(217, 119, 6, 0.5); }
+        html:not(.dark) .group-hover\:text-amber-300 { color: #92400e; }
+
+        /* Teal */
+        html:not(.dark) .text-teal-400 { color: #0d9488; }
+        html:not(.dark) .text-teal-300 { color: #0d9488; }
+        html:not(.dark) .bg-teal-500\/10 { background-color: rgba(13, 148, 136, 0.1); }
+        html:not(.dark) .bg-teal-400\/10 { background-color: rgba(13, 148, 136, 0.1); }
+        html:not(.dark) .border-teal-500\/30 { border-color: rgba(13, 148, 136, 0.3); }
+        html:not(.dark) .border-teal-400\/30 { border-color: rgba(13, 148, 136, 0.3); }
+        html:not(.dark) .hover\:text-teal-300:hover { color: #0d9488; }
+        html:not(.dark) .hover\:border-teal-400\/50:hover { border-color: rgba(13, 148, 136, 0.5); }
+        html:not(.dark) .group-hover\:text-teal-300 { color: #0d9488; }
+
+        /* Rose */
+        html:not(.dark) .text-rose-400 { color: #9f1239; }
+        html:not(.dark) .text-rose-300 { color: #9f1239; }
+        html:not(.dark) .bg-rose-500\/10 { background-color: rgba(225, 29, 72, 0.1); }
+        html:not(.dark) .bg-rose-500\/20 { background-color: rgba(225, 29, 72, 0.15); }
+        html:not(.dark) .bg-rose-400\/10 { background-color: rgba(225, 29, 72, 0.1); }
+        html:not(.dark) .border-rose-500\/30 { border-color: rgba(225, 29, 72, 0.3); }
+        html:not(.dark) .border-rose-400\/30 { border-color: rgba(225, 29, 72, 0.3); }
+        html:not(.dark) .hover\:text-rose-300:hover { color: #9f1239; }
+        html:not(.dark) .hover\:border-rose-400\/50:hover { border-color: rgba(225, 29, 72, 0.5); }
+        html:not(.dark) .group-hover\:text-rose-300 { color: #9f1239; }
+
+        /* ===== LIGHT MODE - Part 3: Remove gradients + special colors ===== */
+        html:not(.dark) [class*="bg-gradient-to"] { background-image: none !important; }
+        html:not(.dark) .text-primary { color: #a16207; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(161, 98, 7, 0.08); }
+        html:not(.dark) .border-primary\/40 { border-color: rgba(161, 98, 7, 0.25); }
+        html:not(.dark) .text-sky-400 { color: #0369a1; }
+        html:not(.dark) .text-yellow-400 { color: #a16207; }
+        html:not(.dark) .hover\:text-sky-300:hover { color: #0284c7; }
+        html:not(.dark) .hover\:text-yellow-300:hover { color: #854d0e; }
+
+        /* ===== LIGHT MODE - Part 4: Nav ===== */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95); }
+    </style>
+</head>
+<body class="bg-dark-900 text-neutral-100 font-sans min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-dark-900/95 backdrop-blur-sm border-b border-dark-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo + INEMA.CLUB -->
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center gap-2 text-yellow-400 font-bold text-xl hover:text-yellow-300 transition-colors">
+                        <span>⚡</span>
+                        <span>CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+
+                <!-- Nav Links -->
+                <div class="flex items-center gap-1 sm:gap-3 text-sm overflow-x-auto">
+                    <a href="../trilha1/" class="text-emerald-400 hover:text-emerald-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Fundamentos</span><span class="sm:hidden">T1</span></a>
+                    <a href="../trilha2/" class="text-blue-400 hover:text-blue-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Arquitetura</span><span class="sm:hidden">T2</span></a>
+                    <a href="../trilha3/" class="text-purple-400 hover:text-purple-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">CLI-Anything</span><span class="sm:hidden">T3</span></a>
+                    <a href="../trilha4/" class="text-amber-400 hover:text-amber-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Ecossistema</span><span class="sm:hidden">T4</span></a>
+                    <a href="../trilha5/" class="text-teal-400 hover:text-teal-300 transition-colors px-1.5 py-1 whitespace-nowrap opacity-60"><span class="hidden sm:inline">Projetos</span><span class="sm:hidden">T5</span></a>
+                    <a href="../trilha6/" class="text-rose-400 hover:text-rose-300 transition-colors px-1.5 py-1 whitespace-nowrap font-bold border-b-2 border-rose-400"><span class="hidden sm:inline">Estratégia</span><span class="sm:hidden">T6</span></a>
+
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="ml-2 p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors text-neutral-400 hover:text-neutral-100" title="Alternar tema">
+                        <svg id="iconSun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <svg id="iconMoon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <section class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-rose-900/30 via-transparent to-transparent"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+            <div class="text-center max-w-4xl mx-auto">
+                <div class="inline-block bg-rose-500/20 border border-rose-500/30 rounded-full px-4 py-1.5 text-rose-400 text-sm font-semibold mb-6">TRILHA 6</div>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-800 text-rose-400 mb-4 tracking-tight">Estratégia e Futuro</h1>
+                <p class="text-xl sm:text-2xl text-neutral-300 font-medium mb-6">Visão de mercado, setores em migração e tendências 2026-2027</p>
+                <p class="text-neutral-400 text-lg max-w-2xl mx-auto mb-12 leading-relaxed">
+                    Das três camadas do ecossistema aos setores em transformação: uma visão estratégica do movimento CLI-agent e o que esperar para os próximos anos.
+                </p>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+                    <div class="bg-dark-800 border border-rose-500/30 rounded-xl p-4">
+                        <div class="text-2xl font-bold text-rose-400">4</div>
+                        <div class="text-neutral-400 text-sm">Módulos</div>
+                    </div>
+                    <div class="bg-dark-800 border border-rose-500/30 rounded-xl p-4">
+                        <div class="text-2xl font-bold text-rose-400">24</div>
+                        <div class="text-neutral-400 text-sm">Tópicos</div>
+                    </div>
+                    <div class="bg-dark-800 border border-rose-500/30 rounded-xl p-4">
+                        <div class="text-2xl font-bold text-rose-400">~2h</div>
+                        <div class="text-neutral-400 text-sm">Duração</div>
+                    </div>
+                    <div class="bg-dark-800 border border-rose-500/30 rounded-xl p-4">
+                        <div class="text-2xl font-bold text-rose-400">Avançado</div>
+                        <div class="text-neutral-400 text-sm">Estratégico</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modules -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 space-y-8">
+
+        <!-- Module 6.1 -->
+        <div class="bg-dark-800 border border-rose-500/30 rounded-xl overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 font-bold text-sm border border-rose-500/30">6.1</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-neutral-100">As três camadas: agente, protocolo e ferramenta</h2>
+                        <span class="text-neutral-500 text-sm">~30min</span>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-dark-700 divide-y divide-dark-700">
+                <!-- Topic 1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">1</span>
+                        <span class="text-neutral-100 font-medium">Camada 1: Agentes terminais - Gemini CLI, Claude Code, Codex CLI</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">A camada superior do ecossistema: os agentes que operam no terminal, cada um com seus modelos, capacidades e estratégias de mercado distintas.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Entender a camada de agentes é entender quem compete pelo controle da interface humano-máquina. Isso define onde o valor se concentra.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Market positioning, modelo de negócios de cada agente, diferenciação técnica, lock-in vs openness, developer experience como moat.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">2</span>
+                        <span class="text-neutral-100 font-medium">Camada 2: Protocolos de integração - MCP, gateways, catálogos</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">A camada intermediária: protocolos como MCP que conectam agentes a ferramentas, gateways que gerenciam acesso e catálogos que facilitam descoberta.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Protocolos são onde padrões se formam. Quem define o protocolo define as regras do jogo. Entender essa camada é entender o poder real.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">MCP como padrão emergente, API gateways para agentes, tool catalogs, protocol wars, interoperabilidade, standardization efforts.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">3</span>
+                        <span class="text-neutral-100 font-medium">Camada 3: Ferramentas verticais - gws, Pulumi, Azure CLI</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">A camada de base: ferramentas especializadas por domínio que os agentes usam para executar ações — de produtividade (gws) a infraestrutura (Pulumi, Azure CLI).</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Ferramentas verticais são onde o valor é entregue ao usuário final. Sem elas, agentes e protocolos são apenas infraestrutura sem utilidade.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Vertical SaaS agent-native, domain-specific CLIs, tool ecosystems, build vs buy, specialization advantage, market segmentation.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">4</span>
+                        <span class="text-neutral-100 font-medium">Como as camadas interagem - Composição e dependências</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">O modelo de interação entre as três camadas: como agentes descobrem e usam ferramentas via protocolos, e como dependências fluem entre elas.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Entender as interações revela oportunidades: onde há gaps, onde há fricção, onde é possível criar valor conectando camadas.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Layer interactions, dependency flow, capability propagation, abstraction leaks, emergent behaviors, ecosystem dynamics.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">5</span>
+                        <span class="text-neutral-100 font-medium">Mapa do ecossistema - Quem faz o quê em cada camada</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Um mapa visual e analítico de todos os players relevantes em cada camada: quem são, o que fazem, como se posicionam e quais são suas estratégias.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Ter o mapa completo do ecossistema permite tomar decisões informadas sobre quais tecnologias adotar e onde investir.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Ecosystem mapping, competitive landscape, strategic positioning, market dynamics, consolidation trends, partnership networks.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">6</span>
+                        <span class="text-neutral-100 font-medium">Onde investir tempo - Priorização estratégica</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Framework de priorização para decidir onde investir seu tempo de aprendizado: quais tecnologias, camadas e habilidades terão o maior retorno.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Tempo é o recurso mais escasso. Saber priorizar entre dezenas de tecnologias emergentes é uma meta-habilidade crítica.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Technology radar, learning ROI, skill adjacency, bet sizing, reversible vs irreversible decisions, optionality value.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 6.2 -->
+        <div class="bg-dark-800 border border-rose-500/30 rounded-xl overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 font-bold text-sm border border-rose-500/30">6.2</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-neutral-100">Setores em migração: dados, segurança, ERP, backoffice</h2>
+                        <span class="text-neutral-500 text-sm">~35min</span>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-dark-700 divide-y divide-dark-700">
+                <!-- Topic 1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">1</span>
+                        <span class="text-neutral-100 font-medium">Dados e analytics - Pipelines, queries e dashboards via CLI</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">A transformação do setor de dados: como pipelines ETL, queries analíticas e dashboards estão migrando para interfaces CLI operadas por agentes.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Dados é um dos setores com maior ROI de automação. Agentes CLI podem reduzir drasticamente o tempo de data engineering e analytics.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Data pipelines agent-native, SQL via linguagem natural, automated reporting, dbt + agents, data quality checks automatizados.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">2</span>
+                        <span class="text-neutral-100 font-medium">Segurança e compliance - Scanning, auditoria e resposta a incidentes</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">O setor de segurança em transição: scanning de vulnerabilidades, auditoria automatizada e resposta a incidentes operados por agentes CLI.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Segurança é um dos setores mais carentes de automação e com maior gap de talentos. Agentes CLI podem multiplicar a capacidade de equipes enxutas.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">SecOps automation, vulnerability scanning, compliance-as-code, incident response playbooks, SIEM integration, threat hunting via CLI.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">3</span>
+                        <span class="text-neutral-100 font-medium">ERP e backoffice - SAP, Oracle, Salesforce agent-native</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">A migração dos grandes ERPs para interfaces agent-native: como SAP, Oracle e Salesforce estão se adaptando ao paradigma CLI-agent.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">ERPs são o coração operacional de grandes empresas. A agentificação desses sistemas representa uma das maiores oportunidades de mercado.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Enterprise agent adoption, legacy system integration, ERP CLIs, business process automation, change management, ROI de agentificação.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">4</span>
+                        <span class="text-neutral-100 font-medium">Suporte e customer success - Automação via terminal</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Transformação do suporte ao cliente: agentes CLI que consultam bases de conhecimento, resolvem tickets e escalam problemas automaticamente.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Suporte é um dos maiores centros de custo das empresas. Automação agent-native pode resolver 70%+ dos tickets sem intervenção humana.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Support automation, knowledge base integration, ticket triage, escalation policies, customer sentiment analysis, SLA management.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">5</span>
+                        <span class="text-neutral-100 font-medium">Infraestrutura e DevOps - Pulumi, Terraform, Kubernetes</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">O setor que já nasceu CLI e agora ganha agentes: Infrastructure as Code com Pulumi e Terraform operados por agentes, Kubernetes management agent-native.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">DevOps e infraestrutura são o setor mais maduro para adoção de agentes CLI, pois já operam via terminal. A transição é natural.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">IaC + agents, Pulumi AI, Terraform agent workflows, kubectl + LLM, GitOps automation, cloud cost optimization via agents.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">6</span>
+                        <span class="text-neutral-100 font-medium">Finanças e contabilidade - APIs financeiras no terminal</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">O setor financeiro em transformação: APIs bancárias, contabilidade automatizada e reporting financeiro operados via agentes CLI.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Finanças envolve processos repetitivos, regulados e de alto valor. Automação agent-native pode reduzir erros e acelerar fechamentos contábeis.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Open banking APIs, contabilidade automatizada, reconciliação agent-native, regulatory compliance, financial reporting, audit trails.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 6.3 -->
+        <div class="bg-dark-800 border border-rose-500/30 rounded-xl overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 font-bold text-sm border border-rose-500/30">6.3</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-neutral-100">CLI como API humana+agente: o novo paradigma</h2>
+                        <span class="text-neutral-500 text-sm">~30min</span>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-dark-700 divide-y divide-dark-700">
+                <!-- Topic 1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">1</span>
+                        <span class="text-neutral-100 font-medium">A transição de paradigma - De software para humanos a software para agentes</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">A mudança fundamental: software está deixando de ser projetado primariamente para humanos e passando a ser projetado para agentes que servem humanos.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Esta é a tese central do curso. Entender essa transição é entender para onde toda a indústria de software está se movendo.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Paradigm shift, human-first vs agent-first, interface evolution, UX for agents, the end of the app era, software as tooling.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">2</span>
+                        <span class="text-neutral-100 font-medium">O contrato operacional - CLI como interface universal</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">O CLI como contrato operacional: uma interface que tanto humanos quanto agentes podem usar, com semântica clara, outputs estruturados e comportamento previsível.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">O CLI é a única interface que serve igualmente bem humanos e agentes. Isso o torna o contrato universal da era agent-native.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Operational contract, interface universality, structured I/O, predictable behavior, discoverability, self-documentation.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">3</span>
+                        <span class="text-neutral-100 font-medium">Composabilidade - O app perde centralidade para tooling composável</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">A desfragmentação do software: apps monolíticos perdem relevância em favor de ferramentas composáveis que agentes combinam conforme a necessidade.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Composabilidade é o princípio arquitetural da era agent-native. Quem entende composição entende como construir para o futuro.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Unix philosophy revival, composable tooling, pipe-based workflows, microtools, app unbundling, toolchain orchestration.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">4</span>
+                        <span class="text-neutral-100 font-medium">Agent-first design - Como projetar software para agentes</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Princípios de design para software agent-first: como projetar interfaces, outputs, erros e documentação pensando no agente como usuário primário.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Agent-first design é a habilidade de design mais demandada de 2026. Quem souber projetar para agentes terá vantagem competitiva enorme.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Agent-first principles, machine-readable outputs, semantic error codes, capability advertisement, progressive disclosure for agents.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">5</span>
+                        <span class="text-neutral-100 font-medium">Segurança by design - Sandboxes, políticas e auditoria</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Segurança como princípio de design, não como add-on: sandboxes obrigatórios, políticas declarativas, auditoria completa e zero-trust para agentes.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Agentes autônomos amplificam riscos de segurança. Projetar com segurança desde o início é a única abordagem responsável.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Security by design, zero-trust agents, mandatory sandboxing, policy-as-code, audit logging, principle of least privilege for AI.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">6</span>
+                        <span class="text-neutral-100 font-medium">Padrões abertos - Por que MCP e não APIs proprietárias</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">O argumento para padrões abertos: por que MCP e protocolos abertos vencem APIs proprietárias no longo prazo, e as lições de HTTP, TCP/IP e USB.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">A história da tecnologia mostra que padrões abertos vencem. Apostar em openness é apostar no lado certo da história.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Open standards history, network effects, vendor lock-in risks, protocol governance, community-driven development, standards bodies.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 6.4 -->
+        <div class="bg-dark-800 border border-rose-500/30 rounded-xl overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="flex items-center justify-center w-10 h-10 rounded-full bg-rose-500/20 text-rose-400 font-bold text-sm border border-rose-500/30">6.4</span>
+                    <div>
+                        <h2 class="text-xl font-bold text-neutral-100">Roadmap 2026-2027: o que esperar</h2>
+                        <span class="text-neutral-500 text-sm">~25min</span>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-dark-700 divide-y divide-dark-700">
+                <!-- Topic 1 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">1</span>
+                        <span class="text-neutral-100 font-medium">Tendências confirmadas - O que já está acontecendo</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Análise das tendências que já são realidade em 2026: adoção massiva de agentes CLI, MCP como padrão de facto, enterprise adoption acelerando.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Distinguir tendências confirmadas de hype é essencial para tomar decisões fundamentadas sobre carreira e investimentos.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Trend analysis, adoption curves, market signals, developer surveys, enterprise adoption patterns, investment flows.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 2 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">2</span>
+                        <span class="text-neutral-100 font-medium">Previsões 2027 - O que deve se consolidar</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Previsões fundamentadas para 2027: consolidação de protocolos, emergência de agent marketplaces, commoditização de agentes básicos e novas camadas de valor.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Antecipar tendências permite se posicionar antes da multidão. Quem se prepara hoje colhe os frutos quando a tendência se materializa.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Protocol consolidation, agent marketplaces, commoditization, new value layers, platform effects, winner-take-most dynamics.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 3 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">3</span>
+                        <span class="text-neutral-100 font-medium">Riscos e incertezas - O que pode dar errado</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Análise sóbria dos riscos: fragmentação de protocolos, regulação restritiva, incidentes de segurança, hype cycle bust e concentração de poder.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Otimismo sem risco é ingenuidade. Conhecer os riscos permite construir estratégias mais resilientes e evitar armadilhas.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Risk assessment, protocol fragmentation, regulatory risk, security incidents, hype cycle, power concentration, mitigation strategies.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 4 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">4</span>
+                        <span class="text-neutral-100 font-medium">Impacto enterprise - Como as empresas vão adotar</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">O caminho de adoção enterprise: piloto, expansão, padronização. Como empresas de diferentes tamanhos e setores vão integrar agentes CLI.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Enterprise adoption é onde o volume de mercado está. Entender o processo de adoção corporativa é crucial para quem quer vender ou implementar.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Enterprise adoption lifecycle, pilot programs, change management, IT governance, security review, compliance requirements, ROI justification.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 5 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">5</span>
+                        <span class="text-neutral-100 font-medium">Impacto para desenvolvedores - Novas habilidades necessárias</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Como a carreira de desenvolvedor muda: novas habilidades demandadas, habilidades que perdem valor, novos papéis e trajetórias profissionais emergentes.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Sua carreira depende de onde você investe. Saber quais habilidades serão valorizadas em 2027 permite se preparar com antecedência.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Skill evolution, agent-native development, prompt engineering, MCP expertise, system design for agents, career positioning.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+                <!-- Topic 6 -->
+                <div class="topic-item">
+                    <button onclick="toggleTopic(this)" class="w-full flex items-center gap-3 p-4 hover:bg-dark-700/50 transition-colors text-left">
+                        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 shrink-0">6</span>
+                        <span class="text-neutral-100 font-medium">Plano de ação pessoal - O que fazer agora</span>
+                    </button>
+                    <div class="hidden px-4 pb-4 pl-14 space-y-3">
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">O que é</h4><p class="text-neutral-400 text-sm leading-relaxed">Um framework prático para criar seu plano de ação pessoal: o que aprender primeiro, quais projetos construir, como se posicionar e onde contribuir.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Por que aprender</h4><p class="text-neutral-400 text-sm leading-relaxed">Conhecimento sem ação é entretenimento. Este módulo transforma tudo que você aprendeu no curso em um plano concreto e executável.</p></div>
+                        <div><h4 class="text-rose-400 text-sm font-semibold mb-1">Conceitos-chave</h4><p class="text-neutral-400 text-sm leading-relaxed">Action planning, learning roadmap, project portfolio, community contribution, personal branding, accountability frameworks.</p></div>
+                        <div class="flex justify-start"><button onclick="openModal('https://example.com')" class="bg-rose-500/20 border border-rose-500/30 text-rose-400 px-4 py-2 rounded-lg text-sm font-medium hover:bg-rose-500/30 transition-colors">Abrir conteúdo</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="flex items-center justify-between pt-8">
+            <a href="../trilha5/index.html" class="flex items-center gap-2 text-neutral-400 hover:text-rose-400 transition-colors group">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                <span>Projetos Práticos</span>
+            </a>
+            <a href="../../index.html" class="flex items-center gap-2 text-neutral-400 hover:text-rose-400 transition-colors group">
+                <span>Voltar ao Início</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+
+    </section>
+
+    <!-- Modal -->
+    <div id="contentModal" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="relative w-full h-full max-w-5xl mx-auto p-4 sm:p-8 flex flex-col">
+            <div class="flex justify-end mb-2">
+                <button onclick="closeModal()" class="text-neutral-400 hover:text-neutral-100 transition-colors p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="flex-1 bg-dark-800 rounded-xl overflow-hidden border border-dark-700">
+                <iframe id="modalIframe" class="w-full h-full" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-700 bg-dark-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+                <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 transition-colors text-sm font-medium">INEMA.CLUB</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle topic expand/collapse
+        function toggleTopic(button) {
+            const content = button.nextElementSibling;
+            content.classList.toggle('hidden');
+        }
+
+        // Modal functions
+        function openModal(url) {
+            document.getElementById('modalIframe').src = url;
+            document.getElementById('contentModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('contentModal').classList.add('hidden');
+            document.getElementById('modalIframe').src = '';
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const iconSun = document.getElementById('iconSun');
+        const iconMoon = document.getElementById('iconMoon');
+        const html = document.documentElement;
+
+        function setTheme(dark) {
+            if (dark) {
+                html.classList.add('dark');
+                iconSun.classList.add('hidden');
+                iconMoon.classList.remove('hidden');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                html.classList.remove('dark');
+                iconSun.classList.remove('hidden');
+                iconMoon.classList.add('hidden');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            setTheme(false);
+        } else {
+            setTheme(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = html.classList.contains('dark');
+            setTheme(!isDark);
+        });
+    </script>
+</body>
+</html>

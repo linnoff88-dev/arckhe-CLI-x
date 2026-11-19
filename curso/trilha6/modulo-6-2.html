@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulo 6.2 - Setores em migracao: dados, seguranca, ERP, backoffice | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Part 1 - Base overrides */
+        html:not(.dark) body { background-color: #f8fafc; color: #1f2937; }
+        html:not(.dark) .bg-dark-900, html:not(.dark) .bg-dark-800, html:not(.dark) .bg-dark-700 { background-color: #ffffff !important; }
+        html:not(.dark) .border-dark-600, html:not(.dark) .border-dark-700 { border-color: #e5e7eb !important; }
+        html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-neutral-400, html:not(.dark) .text-neutral-300 { color: #6b7280 !important; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af !important; }
+        html:not(.dark) .text-neutral-200 { color: #374151 !important; }
+        html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-700\/50 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .hover\:bg-dark-700:hover { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-dark-800\/80 { background-color: #f9fafb !important; }
+
+        /* Part 2 - Rose accent */
+        html:not(.dark) .text-rose-400 { color: #9f1239 !important; }
+        html:not(.dark) .bg-rose-500\/20 { background-color: rgba(225, 29, 72, 0.1) !important; }
+        html:not(.dark) .border-rose-500\/30 { border-color: rgba(225, 29, 72, 0.2) !important; }
+        html:not(.dark) .bg-rose-500\/10 { background-color: rgba(225, 29, 72, 0.08) !important; }
+        html:not(.dark) .bg-rose-500 { background-color: #9f1239 !important; }
+        html:not(.dark) .ring-rose-500\/20 { --tw-ring-color: rgba(225, 29, 72, 0.15) !important; }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-rose-900\/30 { --tw-gradient-from: rgba(225, 29, 72, 0.05) !important; }
+        html:not(.dark) .to-transparent { --tw-gradient-to: transparent !important; }
+        html:not(.dark) .bg-gradient-to-b, html:not(.dark) .bg-gradient-to-r { background: #ffffff !important; }
+        html:not(.dark) .header-gradient { background: linear-gradient(to bottom, rgba(225, 29, 72, 0.06), transparent) !important; }
+        html:not(.dark) .text-primary { color: #9f1239 !important; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(225, 29, 72, 0.08) !important; }
+        html:not(.dark) .border-primary\/30 { border-color: rgba(225, 29, 72, 0.2) !important; }
+        html:not(.dark) .text-sky-400 { color: #0369a1 !important; }
+        html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3, 105, 161, 0.08) !important; }
+        html:not(.dark) .border-sky-500\/30 { border-color: rgba(3, 105, 161, 0.2) !important; }
+        html:not(.dark) .text-yellow-400 { color: #b45309 !important; }
+        html:not(.dark) .text-red-400 { color: #dc2626 !important; }
+        html:not(.dark) .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08) !important; }
+        html:not(.dark) .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.2) !important; }
+        html:not(.dark) .text-emerald-400 { color: #059669 !important; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08) !important; }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.2) !important; }
+        html:not(.dark) .text-amber-400 { color: #d97706 !important; }
+        html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217, 119, 6, 0.08) !important; }
+        html:not(.dark) .border-amber-500\/30 { border-color: rgba(217, 119, 6, 0.2) !important; }
+
+        /* Part 4 - Nav */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        html:not(.dark) nav { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #e5e7eb !important; }
+        html:not(.dark) footer { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+
+        pre code { font-family: 'Menlo', 'Monaco', 'Courier New', monospace; font-size: 0.875rem; }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+                        <span class="text-2xl">⚡</span>
+                        <span class="font-bold text-lg hidden sm:inline">CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <a href="../trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Fundamentos</span></a>
+                    <a href="../trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Arquitetura</span></a>
+                    <a href="../trilha3/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors"><span class="sm:hidden">T3</span><span class="hidden sm:inline">CLI-Anything</span></a>
+                    <a href="../trilha4/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Ecossistema</span></a>
+                    <a href="../trilha5/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-teal-400 hover:bg-teal-500/10 transition-colors"><span class="sm:hidden">T5</span><span class="hidden sm:inline">Projetos</span></a>
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-rose-400 bg-rose-500/10"><span class="sm:hidden">T6</span><span class="hidden sm:inline">Estrategia</span></a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-2">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm text-neutral-400 mb-8">
+            <a href="../../index.html" class="hover:text-rose-400 transition-colors">Inicio</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-rose-400 transition-colors">Trilha 6</a>
+            <span>/</span>
+            <span class="text-rose-400">Modulo 6.2</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header-gradient bg-gradient-to-b from-rose-900/30 to-transparent rounded-2xl p-8 mb-12 border border-rose-500/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="px-3 py-1 bg-rose-500/20 text-rose-400 rounded-full text-xs font-bold tracking-wider uppercase">Modulo 6.2</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Analise</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Avancado</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Setores em migracao: dados, seguranca, ERP, backoffice</h1>
+            <p class="text-lg text-neutral-300 mb-6 max-w-3xl">Quais setores da economia estao sendo transformados por CLI agents? Uma analise vertical de oportunidades, ferramentas e impacto real.</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-rose-400 font-bold">6</span>
+                    <span class="text-neutral-400 text-sm">Topicos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-rose-400 font-bold">35</span>
+                    <span class="text-neutral-400 text-sm">Minutos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-rose-400 font-bold">Avancado</span>
+                    <span class="text-neutral-400 text-sm">Nivel</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-rose-400 font-bold">Estrategico</span>
+                    <span class="text-neutral-400 text-sm">Tipo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 1 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-rose-400 font-bold text-lg">1</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📊 Dados e analytics</h2>
+                    <p class="text-neutral-300 leading-relaxed">Pipelines de dados operados por agentes. O analista de dados do futuro <span class="text-rose-400 font-semibold">conversa</span> com o pipeline em vez de navegar dashboards.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-4">Ferramentas e casos de uso</h3>
+                    <div class="space-y-3 text-neutral-200">
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>dbt CLI</strong> — transformacoes de dados operadas por agente. "Crie um modelo que agregue vendas por regiao"</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>BigQuery CLI</strong> — queries SQL via linguagem natural. "Qual foi o ticket medio dos ultimos 30 dias?"</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>Metabase API</strong> — dashboards gerados por comando. Agente cria visualizacoes a partir de perguntas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-rose-900/30 to-transparent border border-rose-500/30 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-3">Fluxo agente + dados</h3>
+                    <pre class="bg-dark-900 rounded-lg p-4 overflow-x-auto border border-dark-600 text-sm"><code class="text-neutral-300"><span class="text-rose-400">Usuario:</span> "Quero um relatorio de churn dos ultimos 3 meses por segmento"
+
+<span class="text-sky-400">Agente:</span>  1. Consulta BigQuery (SQL gerado automaticamente)
+         2. Processa dados com pandas via script
+         3. Gera grafico com matplotlib
+         4. Cria dashboard no Metabase via API
+         5. Envia link por email via gws
+
+<span class="text-emerald-400">Resultado:</span> Relatorio completo em 2 minutos vs 2 horas manual</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-rose-400 font-bold text-lg">2</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔒 Seguranca e compliance</h2>
+                    <p class="text-neutral-300 leading-relaxed">Seguranca shift-left operada por agentes. A CLI e <span class="text-rose-400 font-semibold">auditavel por natureza</span> — cada comando e registrado, cada saida e rastreavel.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-4">Ferramentas de seguranca CLI</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-dark-700/50 rounded-lg p-4 border border-dark-600 text-center">
+                            <p class="text-rose-400 font-bold mb-1">Snyk CLI</p>
+                            <p class="text-neutral-300 text-sm">Scanning de dependencias e vulnerabilidades</p>
+                        </div>
+                        <div class="bg-dark-700/50 rounded-lg p-4 border border-dark-600 text-center">
+                            <p class="text-rose-400 font-bold mb-1">Trivy</p>
+                            <p class="text-neutral-300 text-sm">Scan de containers, IaC e filesystems</p>
+                        </div>
+                        <div class="bg-dark-700/50 rounded-lg p-4 border border-dark-600 text-center">
+                            <p class="text-rose-400 font-bold mb-1">OWASP ZAP</p>
+                            <p class="text-neutral-300 text-sm">Testes de seguranca automatizados para APIs</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">💡 Conceito: seguranca shift-left</h3>
+                    <p class="text-neutral-200 leading-relaxed">Em vez de escanear vulnerabilidades no final do pipeline, o agente faz scanning <span class="text-rose-400 font-semibold">durante o desenvolvimento</span>. Cada commit pode ser analisado automaticamente. Cada dependencia verificada antes de entrar no projeto. A CLI torna isso natural — e um comando a mais no workflow.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 3 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-rose-400 font-bold text-lg">3</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🏢 ERP e backoffice</h2>
+                    <p class="text-neutral-300 leading-relaxed">O backoffice e o setor com <span class="text-rose-400 font-semibold">MAIS a ganhar</span> com CLI agents — processos repetitivos, regras claras, dados estruturados.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-rose-900/30 to-transparent border border-rose-500/30 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-4">Por que backoffice e o alvo ideal</h3>
+                    <div class="space-y-3 text-neutral-200">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-emerald-400 font-bold">&#10003;</span>
+                            <span><strong>Processos repetitivos</strong> — cadastros, aprovacoes, conciliacoes, relatorios</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-emerald-400 font-bold">&#10003;</span>
+                            <span><strong>Regras claras</strong> — logica de negocio bem definida e documentada</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-emerald-400 font-bold">&#10003;</span>
+                            <span><strong>Dados estruturados</strong> — tabelas, schemas, APIs REST padronizadas</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-emerald-400 font-bold">&#10003;</span>
+                            <span><strong>APIs existentes</strong> — SAP, Oracle, Salesforce ja tem APIs maduras</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-3">CLI-Anything em acao</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">Interfaces legadas que nao tem CLI podem ser "agentificadas" com a abordagem CLI-Anything. O agente transforma qualquer interface — web, desktop, API — em comandos operaveis. Um ERP com interface web complexa vira uma serie de comandos simples.</p>
+                    <pre class="bg-dark-900 rounded-lg p-4 overflow-x-auto border border-dark-600 text-sm"><code class="text-neutral-300"><span class="text-rose-400">Agente:</span> "Aprove todas as ordens de compra abaixo de R$5.000 do departamento marketing"
+
+<span class="text-sky-400">Execucao:</span>
+  1. Lista ordens pendentes via API do ERP
+  2. Filtra por departamento + valor
+  3. Aplica aprovacao em batch via API
+  4. Gera log de auditoria
+  5. Notifica gestores por email</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-rose-400 font-bold text-lg">4</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📧 Suporte e customer success</h2>
+                    <p class="text-neutral-300 leading-relaxed">Agentes que operam CRMs, ticketing e knowledge bases via CLI. O <span class="text-rose-400 font-semibold">agente de suporte L1</span> resolve tickets simples automaticamente.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-4">Ferramentas integraveis</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-dark-600">
+                                    <th class="text-left py-2 text-rose-400 font-semibold">Plataforma</th>
+                                    <th class="text-left py-2 text-rose-400 font-semibold">Integracao</th>
+                                    <th class="text-left py-2 text-rose-400 font-semibold">Caso de uso</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-neutral-200">
+                                <tr class="border-b border-dark-700">
+                                    <td class="py-3 font-semibold">Zendesk</td>
+                                    <td class="py-3">REST API + MCP</td>
+                                    <td class="py-3">Triagem e resposta automatica de tickets</td>
+                                </tr>
+                                <tr class="border-b border-dark-700">
+                                    <td class="py-3 font-semibold">Intercom</td>
+                                    <td class="py-3">REST API + webhooks</td>
+                                    <td class="py-3">Chat L1 com escalacao inteligente</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 font-semibold">HubSpot</td>
+                                    <td class="py-3">CLI + REST API</td>
+                                    <td class="py-3">Enriquecimento de contatos, follow-ups</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">💡 Conceito: suporte L1 agentifico</h3>
+                    <p class="text-neutral-200 leading-relaxed">O agente de suporte L1 le o ticket, consulta a knowledge base, verifica o historico do cliente no CRM e propoe uma resposta. Se a confianca e alta (pergunta frequente com resposta documentada), resolve automaticamente. Se e complexo, escala para humano <span class="text-rose-400 font-semibold">com contexto completo ja montado</span>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-rose-400 font-bold text-lg">5</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🏗️ Infraestrutura e DevOps</h2>
+                    <p class="text-neutral-300 leading-relaxed">GitOps agentifico: o agente faz PR de infra, review humano, merge, deploy automatico. <span class="text-rose-400 font-semibold">Infraestrutura como conversa</span>.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-4">Stack de infra agent-native</h3>
+                    <div class="space-y-3 text-neutral-200">
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>Pulumi MCP server</strong> — provisionamento de infra via agente com preview e confirmacao</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>Terraform CLI</strong> — IaC classico, agora operavel por agentes via MCP</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>kubectl + Helm</strong> — orquestracao Kubernetes via linguagem natural</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>Azure Developer CLI</strong> — agentes hospedados em nuvem corporativa com governanca</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-rose-900/30 to-transparent border border-rose-500/30 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-3">GitOps agentifico: o fluxo</h3>
+                    <div class="space-y-3 text-neutral-200 text-sm">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold">1.</span>
+                            <span>Dev pede: "preciso de um Redis cache para o servico de sessoes"</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold">2.</span>
+                            <span>Agente gera codigo Pulumi/Terraform com configuracoes corretas</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold">3.</span>
+                            <span>Agente cria branch e abre PR com diff + preview do que sera provisionado</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold">4.</span>
+                            <span>Humano revisa e aprova (review obrigatorio)</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold">5.</span>
+                            <span>Merge dispara CI/CD que provisiona automaticamente</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold">6.</span>
+                            <span>Agente verifica health check e reporta status</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 6 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-rose-400 font-bold text-lg">6</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">💰 Financas e contabilidade</h2>
+                    <p class="text-neutral-300 leading-relaxed">Setor altamente regulado onde a CLI e <span class="text-rose-400 font-semibold">favorecida por auditabilidade</span>. Cada operacao e rastreavel, cada decisao e documentada.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-4">Casos de uso financeiros</h3>
+                    <div class="space-y-3 text-neutral-200">
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>APIs bancarias + Plaid</strong> — reconciliacao automatica de transacoes</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>Stripe via CLI</strong> — gestao de pagamentos, reembolsos e disputas</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>Relatorios gerados por agente</strong> — balanco, DRE, fluxo de caixa em formato padronizado</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                    <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">⚠️ Alerta: compliance e obrigatorio</h3>
+                    <p class="text-neutral-200 leading-relaxed">Em financas, <span class="text-red-400 font-semibold">agentes precisam de trilha auditavel completa</span>. Cada operacao deve ser logada com timestamp, usuario, parametros e resultado. A CLI naturalmente favorece isso — cada comando e um registro. Mas e preciso garantir que os logs sejam imutaveis, retidos pelo tempo regulatorio e acessiveis para auditoria.</p>
+                </div>
+
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Por que CLI favorece financas</h3>
+                    <p class="text-neutral-200 leading-relaxed">Diferente de uma GUI onde acoes podem ser ambiguas ("clicou aqui, arrastou ali"), cada comando CLI e <span class="text-rose-400 font-semibold">discreto e reproduzivel</span>. Um auditor pode ler o log de comandos e entender exatamente o que foi feito. Isso e ouro para compliance regulatorio.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumo Final -->
+        <section class="mb-16">
+            <div class="bg-gradient-to-b from-rose-900/30 to-transparent rounded-2xl p-8 border border-rose-500/30">
+                <h2 class="text-2xl font-bold text-white mb-6">Resumo Final</h2>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-rose-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">Dados e analytics: agentes transformam perguntas em queries, dashboards e relatorios automaticamente</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-rose-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">Seguranca: CLI e auditavel por natureza — shift-left com scanning continuo via agentes</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-rose-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">ERP e backoffice sao os maiores beneficiados — processos repetitivos com regras claras</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-rose-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">Suporte L1 agentifico resolve tickets simples e escala complexos com contexto completo</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-rose-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">Financas e compliance se beneficiam da rastreabilidade nativa da CLI</span>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800/50 rounded-xl p-4 mb-6 border border-dark-600">
+                    <p class="text-neutral-300"><span class="text-rose-400 font-semibold">Proximo modulo:</span> Vamos explorar o novo paradigma — CLI como API humana+agente e como projetar software para esse mundo dual.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="modulo-6-1.html" class="flex-1 text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-neutral-300 font-semibold transition-colors">
+                        &#8592; Modulo Anterior
+                    </a>
+                    <a href="modulo-6-3.html" class="flex-1 text-center px-6 py-3 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 rounded-xl text-rose-400 font-semibold transition-colors">
+                        Proximo Modulo &#8594;
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-600 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
+    </script>
+</body>
+</html>

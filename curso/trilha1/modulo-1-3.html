@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 1.3 - O terminal moderno: Warp, iTerm, Windows Terminal | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Part 1 - Base overrides */
+        html:not(.dark) body { background-color: #f8fafc; color: #1f2937; }
+        html:not(.dark) .bg-dark-900, html:not(.dark) .bg-dark-800, html:not(.dark) .bg-dark-700 { background-color: #ffffff !important; }
+        html:not(.dark) .border-dark-600, html:not(.dark) .border-dark-700 { border-color: #e5e7eb !important; }
+        html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-neutral-400, html:not(.dark) .text-neutral-300 { color: #6b7280 !important; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af !important; }
+        html:not(.dark) .text-neutral-200 { color: #374151 !important; }
+        html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-700\/50 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .hover\:bg-dark-700:hover { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-dark-800\/80 { background-color: #f9fafb !important; }
+
+        /* Part 2 - Emerald accent */
+        html:not(.dark) .text-emerald-400 { color: #059669 !important; }
+        html:not(.dark) .bg-emerald-500\/20 { background-color: rgba(5, 150, 105, 0.1) !important; }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.2) !important; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08) !important; }
+        html:not(.dark) .bg-emerald-500 { background-color: #059669 !important; }
+        html:not(.dark) .ring-emerald-500\/20 { --tw-ring-color: rgba(5, 150, 105, 0.15) !important; }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-emerald-900\/30 { --tw-gradient-from: rgba(5, 150, 105, 0.05) !important; }
+        html:not(.dark) .to-transparent { --tw-gradient-to: transparent !important; }
+        html:not(.dark) .bg-gradient-to-b, html:not(.dark) .bg-gradient-to-r { background: #ffffff !important; }
+        html:not(.dark) .header-gradient { background: linear-gradient(to bottom, rgba(5, 150, 105, 0.06), transparent) !important; }
+        html:not(.dark) .text-primary { color: #b45309 !important; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(180, 83, 9, 0.08) !important; }
+        html:not(.dark) .border-primary\/30 { border-color: rgba(180, 83, 9, 0.2) !important; }
+        html:not(.dark) .text-sky-400 { color: #0369a1 !important; }
+        html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3, 105, 161, 0.08) !important; }
+        html:not(.dark) .border-sky-500\/30 { border-color: rgba(3, 105, 161, 0.2) !important; }
+        html:not(.dark) .text-yellow-400 { color: #b45309 !important; }
+        html:not(.dark) .text-red-400 { color: #dc2626 !important; }
+        html:not(.dark) .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08) !important; }
+        html:not(.dark) .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.2) !important; }
+
+        /* Part 4 - Nav */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        html:not(.dark) nav { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #e5e7eb !important; }
+        html:not(.dark) footer { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+                        <span class="text-2xl">⚡</span>
+                        <span class="font-bold text-lg hidden sm:inline">CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 bg-emerald-500/10">
+                        <span class="sm:hidden">T1</span><span class="hidden sm:inline">Fundamentos</span>
+                    </a>
+                    <a href="../trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors">
+                        <span class="sm:hidden">T2</span><span class="hidden sm:inline">Arquitetura</span>
+                    </a>
+                    <a href="../trilha3/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors">
+                        <span class="sm:hidden">T3</span><span class="hidden sm:inline">CLI-Anything</span>
+                    </a>
+                    <a href="../trilha4/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors">
+                        <span class="sm:hidden">T4</span><span class="hidden sm:inline">Ecossistema</span>
+                    </a>
+                    <a href="../trilha5/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-teal-400 hover:bg-teal-500/10 transition-colors">
+                        <span class="sm:hidden">T5</span><span class="hidden sm:inline">Projetos</span>
+                    </a>
+                    <a href="../trilha6/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
+                        <span class="sm:hidden">T6</span><span class="hidden sm:inline">Estratégia</span>
+                    </a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-2">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm text-neutral-400 mb-8">
+            <a href="../../index.html" class="hover:text-emerald-400 transition-colors">Início</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-emerald-400 transition-colors">Trilha 1</a>
+            <span>/</span>
+            <span class="text-emerald-400">Módulo 1.3</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header-gradient bg-gradient-to-b from-emerald-900/30 to-transparent rounded-2xl p-8 mb-12 border border-emerald-500/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-bold tracking-wider uppercase">Módulo 1.3</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Prático</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">O terminal moderno: Warp, iTerm, Windows Terminal</h1>
+            <p class="text-lg text-neutral-300 mb-6 max-w-3xl">Conheça os terminais mais relevantes de 2026, como customizá-los para produtividade máxima, e como integrar agentes de IA ao seu ambiente de trabalho.</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">6</span>
+                    <span class="text-neutral-400 text-sm">Tópicos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">25</span>
+                    <span class="text-neutral-400 text-sm">Minutos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">Iniciante</span>
+                    <span class="text-neutral-400 text-sm">Nível</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-emerald-400 font-bold">Prático</span>
+                    <span class="text-neutral-400 text-sm">Tipo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 1 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">1</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🚀 Warp — Ambiente de desenvolvimento agêntico</h2>
+                    <p class="text-neutral-300 leading-relaxed">O Warp se posiciona não como um terminal, mas como um <span class="text-emerald-400 font-semibold">"agentic development environment"</span>. É o terminal que nasceu na era da IA e foi construído do zero para suportar agentes, colaboração e workflows modernos.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">O Warp reinventou o terminal com três inovações fundamentais:</p>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-emerald-400 font-bold">1.</span>
+                            <span class="text-neutral-200"><strong class="text-emerald-400">Blocos de comando</strong> — Cada comando e sua saída ficam agrupados visualmente, facilitando navegação e cópia. Adeus scroll infinito de texto solto.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-emerald-400 font-bold">2.</span>
+                            <span class="text-neutral-200"><strong class="text-emerald-400">Agentes embutidos</strong> — IA nativa para explicar comandos, sugerir correções e gerar pipelines diretamente no terminal.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-emerald-400 font-bold">3.</span>
+                            <span class="text-neutral-200"><strong class="text-emerald-400">Suporte a agentes externos</strong> — Roda Claude Code, Codex CLI e Gemini CLI dentro dele com integração perfeita.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dica Prática -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Warp é ideal para quem quer tudo integrado em um único lugar. Se você está começando com agentes CLI e quer a menor fricção possível, o Warp é provavelmente o melhor ponto de partida. Disponível para macOS, Linux e Windows (via WSL).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">2</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">💻 iTerm2 e Alacritty</h2>
+                    <p class="text-neutral-300 leading-relaxed">Dois terminais com filosofias opostas que atendem perfis diferentes: <span class="text-emerald-400 font-semibold">iTerm2</span> para quem quer features ricas e customização visual, e <span class="text-emerald-400 font-semibold">Alacritty</span> para quem quer velocidade pura e configuração via código.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Fazer vs Evitar -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+                        <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-4">iTerm2</h3>
+                        <ul class="space-y-3 text-neutral-200 text-sm">
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Terminal mais popular para macOS power users</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Split panes para múltiplas sessões na mesma janela</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Profiles para diferentes contextos de trabalho</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Triggers para automações baseadas em padrões de texto</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Busca integrada no histórico de comandos</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                        <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-4">Alacritty</h3>
+                        <ul class="space-y-3 text-neutral-200 text-sm">
+                            <li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>Terminal GPU-accelerated — ultrarrápido mesmo com output intenso</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>Cross-platform: macOS, Linux, Windows, BSD</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>Configuração 100% via TOML — versionável no Git</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>Minimalista: faz uma coisa (renderizar terminal) e faz muito bem</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-sky-400 mt-0.5">•</span><span>Combina perfeitamente com tmux/zellij para painéis</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">Ambos funcionam perfeitamente com agentes CLI. A escolha depende do seu estilo: se você gosta de ter tudo configurável pela GUI e muitas features integradas, vá de iTerm2. Se prefere velocidade máxima e configuração como código, Alacritty é a resposta.</p>
+            </div>
+        </section>
+
+        <!-- Topic 3 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">3</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🪟 Windows Terminal</h2>
+                    <p class="text-neutral-300 leading-relaxed">O terminal oficial da Microsoft transformou a experiência de linha de comando no Windows. Com suporte a <span class="text-emerald-400 font-semibold">PowerShell, WSL2, CMD e Azure Cloud Shell</span> em uma única interface, ele é a ponte que conecta o ecossistema Windows ao mundo dos agentes CLI.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Dados -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Recursos do Windows Terminal</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <span class="text-neutral-200 text-sm"><strong>Tabs e painéis</strong> — Múltiplos shells lado a lado na mesma janela</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <span class="text-neutral-200 text-sm"><strong>GPU rendering</strong> — Renderização acelerada para output pesado</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <span class="text-neutral-200 text-sm"><strong>Temas e customização</strong> — JSON settings com esquemas de cores</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <span class="text-neutral-200 text-sm"><strong>Unicode e emoji</strong> — Suporte completo a caracteres especiais</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal — WSL2</h3>
+                    <p class="text-neutral-200 leading-relaxed">O WSL2 (Windows Subsystem for Linux 2) é o que torna o Windows um cidadão de primeira classe para agentes CLI. Ele roda um <strong class="text-emerald-400">kernel Linux completo</strong> dentro do Windows, com acesso ao sistema de arquivos, rede e todas as ferramentas Linux. Agentes como Claude Code, Gemini CLI e Codex CLI funcionam nativamente no WSL2 exatamente como funcionam no macOS ou Linux.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">4</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🎨 Customização — Temas, fonts e produtividade</h2>
+                    <p class="text-neutral-300 leading-relaxed">Um terminal bem configurado não é vaidade — é <span class="text-emerald-400 font-semibold">produtividade</span>. Informações relevantes no prompt, cores que destacam erros, e ferramentas de multiplexação economizam horas por semana.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Dados -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Ferramentas Essenciais de Customização</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">Oh My Zsh / Powerlevel10k</span>
+                                <p class="text-neutral-400 text-sm">Framework de plugins e temas para Zsh. Powerlevel10k exibe branch git, versão do Node, status do ambiente virtual e muito mais no prompt.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">Starship</span>
+                                <p class="text-neutral-400 text-sm">Prompt cross-shell (Bash, Zsh, Fish, PowerShell) ultrarrápido escrito em Rust. Configuração via TOML, funciona em qualquer terminal.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">Nerd Fonts</span>
+                                <p class="text-neutral-400 text-sm">Fontes monospace com ícones embutidos (Git, linguagens, pastas). Essenciais para prompts ricos e ferramentas como lsd/eza.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dica Prática -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Use <strong class="text-primary">tmux</strong> ou <strong class="text-primary">zellij</strong> para multiplexar sessões — essencial para trabalho com agentes. Você pode ter um agente rodando em um painel enquanto monitora logs em outro e testa manualmente em um terceiro. Zellij é o mais moderno e tem melhor UX out-of-the-box; tmux é o mais estabelecido com maior ecossistema de plugins.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">5</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🤖 Agentes embutidos</h2>
+                    <p class="text-neutral-300 leading-relaxed">A tendência mais forte em terminais modernos: <span class="text-emerald-400 font-semibold">IA embutida diretamente no terminal</span>. O terminal deixa de ser passivo (espera comandos) e passa a ser ativo (sugere, completa e age proativamente).</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">Existem três níveis de integração de IA no terminal:</p>
+                    <div class="space-y-3">
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold text-sm">Nível 1 — Autocomplete inteligente</p>
+                            <p class="text-neutral-400 text-sm mt-1">O terminal sugere comandos baseado no histórico e contexto. Fish shell faz isso nativamente; ferramentas como Fig adicionam isso a qualquer terminal.</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold text-sm">Nível 2 — Assistente inline</p>
+                            <p class="text-neutral-400 text-sm mt-1">O terminal tem uma IA que explica erros, sugere correções e gera comandos. Warp faz isso nativamente; VS Code terminal tem Copilot inline.</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-bold text-sm">Nível 3 — Agente completo</p>
+                            <p class="text-neutral-400 text-sm mt-1">Um agente com contexto do projeto que lê, edita e executa. Claude Code, Gemini CLI e Codex CLI operam neste nível — o terminal é seu ambiente de trabalho.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">A progressão é clara: de terminais passivos para <span class="text-emerald-400 font-semibold">ambientes de desenvolvimento inteligentes</span> onde a IA é co-piloto constante, não uma ferramenta que você invoca separadamente.</p>
+            </div>
+        </section>
+
+        <!-- Topic 6 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-emerald-400 font-bold text-lg">6</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔌 Integração com editores</h2>
+                    <p class="text-neutral-300 leading-relaxed">O terminal não vive isolado — ele se integra com seu editor de código para criar um <span class="text-emerald-400 font-semibold">workflow unificado</span> onde você nunca precisa trocar de contexto entre edição e execução.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Dados -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Integração Terminal + Editor</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">VS Code</span>
+                                <p class="text-neutral-400 text-sm">Terminal integrado com Copilot inline + suporte a Claude Code e outros agentes. O editor mais popular para desenvolvimento com IA em 2026.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">JetBrains IDEs</span>
+                                <p class="text-neutral-400 text-sm">Terminal embutido em IntelliJ, PyCharm, WebStorm etc. AI Assistant nativo com contexto do projeto e refatoração inteligente.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-1.5"></span>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">Neovim</span>
+                                <p class="text-neutral-400 text-sm">Terminal dentro do editor via :terminal. Plugins como avante.nvim integram LLMs diretamente. Workflow completamente keyboard-driven.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <p class="text-neutral-200 leading-relaxed">O melhor setup é aquele que <strong class="text-emerald-400">minimiza troca de contexto</strong>. Cada vez que você alterna entre janelas, seu cérebro gasta energia recarregando o contexto mental. Um terminal integrado ao editor — com agentes que entendem ambos os ambientes — elimina essa fricção e mantém você no flow.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumo Final -->
+        <section class="mt-16 mb-12">
+            <div class="bg-gradient-to-r from-emerald-900/30 to-transparent border border-emerald-500/30 rounded-2xl p-8">
+                <h2 class="text-2xl font-bold text-white mb-6">Resumo Final</h2>
+                <div class="space-y-3 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Warp é o terminal agêntico nativo — ideal para quem quer tudo integrado</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">iTerm2 para features ricas no macOS; Alacritty para velocidade pura cross-platform</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Windows Terminal + WSL2 torna o Windows totalmente compatível com agentes CLI</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Starship, Nerd Fonts e tmux/zellij são essenciais para produtividade</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Terminais estão evoluindo de passivos para agênticos com IA embutida</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-emerald-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Integração terminal + editor elimina troca de contexto e aumenta produtividade</span>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800/50 rounded-xl p-4 mb-6 border border-dark-600">
+                    <p class="text-neutral-300"><span class="text-emerald-400 font-semibold">Próximo módulo:</span> Vamos dominar os conceitos essenciais do shell: anatomia de comandos, pipes, redirecionamento, JSON, navegação de arquivos e variáveis de ambiente.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="index.html" class="flex-1 text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-neutral-300 font-semibold transition-colors">
+                        ← Voltar para Trilha
+                    </a>
+                    <a href="modulo-1-4.html" class="flex-1 text-center px-6 py-3 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 rounded-xl text-emerald-400 font-semibold transition-colors">
+                        Próximo Módulo →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-600 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 2.1 - Model Context Protocol (MCP): o padrão que conecta tudo | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Part 1 - Base overrides */
+        html:not(.dark) body { background-color: #f8fafc; color: #1f2937; }
+        html:not(.dark) .bg-dark-900, html:not(.dark) .bg-dark-800, html:not(.dark) .bg-dark-700 { background-color: #ffffff !important; }
+        html:not(.dark) .border-dark-600, html:not(.dark) .border-dark-700 { border-color: #e5e7eb !important; }
+        html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-neutral-400, html:not(.dark) .text-neutral-300 { color: #6b7280 !important; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af !important; }
+        html:not(.dark) .text-neutral-200 { color: #374151 !important; }
+        html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-700\/50 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .hover\:bg-dark-700:hover { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-dark-800\/80 { background-color: #f9fafb !important; }
+
+        /* Part 2 - Blue accent */
+        html:not(.dark) .text-blue-400 { color: #2563eb !important; }
+        html:not(.dark) .bg-blue-500\/20 { background-color: rgba(37, 99, 235, 0.1) !important; }
+        html:not(.dark) .border-blue-500\/30 { border-color: rgba(37, 99, 235, 0.2) !important; }
+        html:not(.dark) .bg-blue-500\/10 { background-color: rgba(37, 99, 235, 0.08) !important; }
+        html:not(.dark) .bg-blue-500 { background-color: #2563eb !important; }
+        html:not(.dark) .ring-blue-500\/20 { --tw-ring-color: rgba(37, 99, 235, 0.15) !important; }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-blue-900\/30 { --tw-gradient-from: rgba(37, 99, 235, 0.05) !important; }
+        html:not(.dark) .to-transparent { --tw-gradient-to: transparent !important; }
+        html:not(.dark) .bg-gradient-to-b, html:not(.dark) .bg-gradient-to-r { background: #ffffff !important; }
+        html:not(.dark) .header-gradient { background: linear-gradient(to bottom, rgba(37, 99, 235, 0.06), transparent) !important; }
+        html:not(.dark) .text-primary { color: #b45309 !important; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(180, 83, 9, 0.08) !important; }
+        html:not(.dark) .border-primary\/30 { border-color: rgba(180, 83, 9, 0.2) !important; }
+        html:not(.dark) .text-sky-400 { color: #0369a1 !important; }
+        html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3, 105, 161, 0.08) !important; }
+        html:not(.dark) .border-sky-500\/30 { border-color: rgba(3, 105, 161, 0.2) !important; }
+        html:not(.dark) .text-yellow-400 { color: #b45309 !important; }
+        html:not(.dark) .text-red-400 { color: #dc2626 !important; }
+        html:not(.dark) .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08) !important; }
+        html:not(.dark) .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.2) !important; }
+        html:not(.dark) .text-emerald-400 { color: #059669 !important; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08) !important; }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.2) !important; }
+
+        /* Part 4 - Nav */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        html:not(.dark) nav { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #e5e7eb !important; }
+        html:not(.dark) footer { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+                        <span class="text-2xl">⚡</span>
+                        <span class="font-bold text-lg hidden sm:inline">CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <a href="../trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Fundamentos</span></a>
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-blue-400 bg-blue-500/10"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Arquitetura</span></a>
+                    <a href="../trilha3/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors"><span class="sm:hidden">T3</span><span class="hidden sm:inline">CLI-Anything</span></a>
+                    <a href="../trilha4/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Ecossistema</span></a>
+                    <a href="../trilha5/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-teal-400 hover:bg-teal-500/10 transition-colors"><span class="sm:hidden">T5</span><span class="hidden sm:inline">Projetos</span></a>
+                    <a href="../trilha6/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"><span class="sm:hidden">T6</span><span class="hidden sm:inline">Estratégia</span></a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-2">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm text-neutral-400 mb-8">
+            <a href="../../index.html" class="hover:text-blue-400 transition-colors">Início</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-blue-400 transition-colors">Trilha 2</a>
+            <span>/</span>
+            <span class="text-blue-400">Módulo 2.1</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header-gradient bg-gradient-to-b from-blue-900/30 to-transparent rounded-2xl p-8 mb-12 border border-blue-500/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-bold tracking-wider uppercase">Módulo 2.1</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Técnico</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Model Context Protocol (MCP): o padrão que conecta tudo</h1>
+            <p class="text-lg text-neutral-300 mb-6 max-w-3xl">Entenda o protocolo aberto da Anthropic que está se tornando o padrão universal para conectar agentes de IA a ferramentas, dados e serviços externos. MCP é para agentes o que HTTP foi para a web.</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-blue-400 font-bold">6</span>
+                    <span class="text-neutral-400 text-sm">Tópicos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-blue-400 font-bold">35</span>
+                    <span class="text-neutral-400 text-sm">Minutos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-blue-400 font-bold">Intermediário</span>
+                    <span class="text-neutral-400 text-sm">Nível</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-blue-400 font-bold">Técnico</span>
+                    <span class="text-neutral-400 text-sm">Tipo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 1 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-blue-400 font-bold text-lg">1</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔌 O que é MCP</h2>
+                    <p class="text-neutral-300 leading-relaxed">O <span class="text-blue-400 font-semibold">Model Context Protocol</span> (MCP) é um protocolo aberto criado pela Anthropic que define como assistentes de IA se conectam a dados e ferramentas externas. Em vez de cada agente ter sua própria integração proprietária com cada serviço, o MCP estabelece um padrão universal — qualquer agente pode se conectar a qualquer ferramenta que implemente o protocolo.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Conceito Principal -->
+                <div class="bg-gradient-to-r from-blue-900/30 to-transparent border border-blue-500/30 rounded-xl p-6">
+                    <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">A melhor analogia para entender o MCP:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600 text-center">
+                            <span class="text-blue-400 font-bold text-lg">HTTP</span>
+                            <p class="text-neutral-400 text-sm mt-2">Conecta browsers a servidores web. Qualquer browser acessa qualquer site.</p>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <span class="text-blue-400 text-2xl font-bold">=</span>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600 text-center">
+                            <span class="text-blue-400 font-bold text-lg">MCP</span>
+                            <p class="text-neutral-400 text-sm mt-2">Conecta agentes a ferramentas. Qualquer agente acessa qualquer tool.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">Antes do MCP, cada integração era um caso especial. Se o Claude queria acessar o GitHub, precisava de um plugin específico. Se o Gemini queria acessar o Slack, outra integração. Com o MCP, basta que o GitHub tenha um <span class="text-blue-400 font-semibold">MCP server</span> e qualquer agente com um <span class="text-blue-400 font-semibold">MCP client</span> pode interagir com ele. O protocolo elimina o problema NxM (N agentes x M ferramentas) e transforma em N+M.</p>
+
+                <!-- Dica Prática -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Por que isso importa</h3>
+                    <p class="text-neutral-200 leading-relaxed">O MCP foi lançado em novembro de 2024 e em menos de dois anos já é suportado nativamente por Claude Code, Gemini CLI, Cursor, VS Code, Zed, e dezenas de outras ferramentas. A adoção acelerada mostra que a indústria precisava desesperadamente de um padrão aberto para conectividade de agentes.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-blue-400 font-bold text-lg">2</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🏗️ Arquitetura MCP</h2>
+                    <p class="text-neutral-300 leading-relaxed">A arquitetura do MCP segue um modelo <span class="text-blue-400 font-semibold">client-server</span> com três componentes fundamentais: o Client (agente), o Server (ferramenta) e o Transport (camada de comunicação). Entender esses componentes é essencial para trabalhar com qualquer integração MCP.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Diagrama conceitual -->
+                <div class="bg-gradient-to-r from-blue-900/30 to-transparent border border-blue-500/30 rounded-xl p-6">
+                    <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-4">Diagrama da Arquitetura</h3>
+                    <div class="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                        <div class="bg-dark-800 rounded-lg px-5 py-4 border border-blue-500/30 text-center min-w-[140px]">
+                            <span class="text-blue-400 font-bold">MCP Client</span>
+                            <p class="text-neutral-400 text-xs mt-1">Claude Code, Gemini CLI,<br>Cursor, VS Code...</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-blue-400 text-sm font-mono">discover →</span>
+                            <span class="text-blue-400 text-sm font-mono">negotiate →</span>
+                            <span class="text-blue-400 text-sm font-mono">← results</span>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg px-5 py-4 border border-dark-600 text-center min-w-[140px]">
+                            <span class="text-neutral-300 font-bold">Transport</span>
+                            <p class="text-neutral-400 text-xs mt-1">stdio (local)<br>HTTP/SSE (remoto)</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-blue-400 text-sm font-mono">→ call tool</span>
+                            <span class="text-blue-400 text-sm font-mono">→ read resource</span>
+                            <span class="text-blue-400 text-sm font-mono">← response</span>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg px-5 py-4 border border-blue-500/30 text-center min-w-[140px]">
+                            <span class="text-blue-400 font-bold">MCP Server</span>
+                            <p class="text-neutral-400 text-xs mt-1">GitHub, Slack, DB,<br>filesystem...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">O fluxo começa com o client enviando um <span class="text-blue-400 font-semibold">initialize</span> request para o server, que responde com suas capabilities (quais tools, resources e prompts oferece). Depois da negociação inicial, o client pode chamar tools, ler resources e usar prompts conforme necessário. Toda a comunicação usa JSON-RPC 2.0.</p>
+
+                <!-- Dados/Pesquisa -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Transports disponíveis</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-2"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">stdio</span> — Comunicação via stdin/stdout. Ideal para servers locais que rodam como processos. O client spawna o server como subprocess.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-2"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">HTTP + SSE</span> — Server-Sent Events para streaming. Ideal para servers remotos hospedados em cloud. Suporta autenticação OAuth.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400 mt-2"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Streamable HTTP</span> — Evolução do SSE para 2026, com suporte bidirecional. Permite servers stateless e escaláveis.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 3 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-blue-400 font-bold text-lg">3</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📋 Resources e Tools</h2>
+                    <p class="text-neutral-300 leading-relaxed">O MCP define dois tipos fundamentais de capacidades que um server pode expor: <span class="text-blue-400 font-semibold">Resources</span> (dados para leitura) e <span class="text-blue-400 font-semibold">Tools</span> (ações que podem ser executadas). Essa separação é intencional e reflete a diferença entre consultar informação e agir no mundo.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Fazer vs Evitar -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6">
+                        <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-4">📖 Resources</h3>
+                        <ul class="space-y-3 text-neutral-200 text-sm">
+                            <li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>Read-only:</strong> apenas expõem dados, nunca modificam estado</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>URI-based:</strong> cada resource tem um URI único (ex: <code class="text-blue-400">git://repo/main</code>)</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>Tipados:</strong> retornam text/plain, application/json, ou binário</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>Listáveis:</strong> o client pode descobrir todos os resources disponíveis</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>Subscrevíveis:</strong> o client pode ser notificado quando mudam</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6">
+                        <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-4">🔧 Tools</h3>
+                        <ul class="space-y-3 text-neutral-200 text-sm">
+                            <li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>Executáveis:</strong> realizam ações que podem modificar estado</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>Parâmetros tipados:</strong> JSON Schema define inputs esperados</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>Model-controlled:</strong> o LLM decide quando e como chamar</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>Descritivas:</strong> incluem descrição para o LLM entender o propósito</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-blue-400 mt-0.5">•</span><span><strong>Confirmáveis:</strong> o client pode pedir aprovação humana antes de executar</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Exemplo prático -->
+                <div class="bg-gradient-to-r from-blue-900/30 to-transparent border border-blue-500/30 rounded-xl p-6">
+                    <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-3">Exemplo: MCP Server de Git</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">Um MCP server para Git exporia a seguinte estrutura:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-blue-400 font-bold text-sm mb-2">Resources (dados)</p>
+                            <ul class="text-neutral-400 text-sm space-y-1 font-mono">
+                                <li>git://repos → lista de repositórios</li>
+                                <li>git://repo/main/files → árvore de arquivos</li>
+                                <li>git://repo/main/log → histórico de commits</li>
+                                <li>git://repo/status → status do working tree</li>
+                            </ul>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                            <p class="text-blue-400 font-bold text-sm mb-2">Tools (ações)</p>
+                            <ul class="text-neutral-400 text-sm space-y-1 font-mono">
+                                <li>git_commit → criar um commit</li>
+                                <li>git_push → enviar para remote</li>
+                                <li>git_branch → criar/trocar branch</li>
+                                <li>git_diff → gerar diff entre refs</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-blue-400 font-bold text-lg">4</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔄 Prompts e Sampling</h2>
+                    <p class="text-neutral-300 leading-relaxed">Além de resources e tools, o MCP define duas capacidades avançadas que tornam as interações mais sofisticadas: <span class="text-blue-400 font-semibold">Prompts</span> (templates reutilizáveis) e <span class="text-blue-400 font-semibold">Sampling</span> (geração bidirecional de texto). Esses mecanismos permitem workflows guiados e chain-of-thought estruturado.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-blue-900/30 to-transparent border border-blue-500/30 rounded-xl p-6">
+                    <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-3">Prompts: Templates reutilizáveis</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">Um MCP server pode oferecer prompts pré-construídos que guiam o agente em tarefas complexas. O client lista os prompts disponíveis e pode invocar qualquer um com argumentos.</p>
+                    <div class="bg-dark-800 rounded-lg p-4 border border-dark-600">
+                        <p class="text-blue-400 font-bold text-sm mb-2">Exemplo: prompts de um server de code review</p>
+                        <ul class="text-neutral-400 text-sm space-y-2">
+                            <li><code class="text-blue-400">review_pr(pr_number)</code> → template completo para revisar um PR</li>
+                            <li><code class="text-blue-400">explain_code(file_path)</code> → template para explicar código</li>
+                            <li><code class="text-blue-400">suggest_tests(function_name)</code> → template para sugerir testes</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-blue-900/30 to-transparent border border-blue-500/30 rounded-xl p-6">
+                    <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-3">Sampling: O server pede ao client que gere texto</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">Sampling inverte o fluxo normal: em vez de o client chamar o server, o <span class="text-blue-400 font-semibold">server pede ao client que use o LLM</span> para gerar texto. Isso permite que o server orquestre raciocínios complexos sem ter acesso direto ao modelo.</p>
+                    <p class="text-neutral-200 leading-relaxed">Caso de uso: um MCP server de deploy detecta um erro. Em vez de apenas retornar o erro, ele pede ao client que analise o log de erro e sugira uma correção. O server então pode aplicar a sugestão automaticamente. Isso cria um loop de raciocínio poderoso onde o server e o LLM colaboram.</p>
+                </div>
+
+                <!-- Dica -->
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica Prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Sampling é a funcionalidade menos adotada do MCP em 2026, mas potencialmente a mais transformadora. Ela permite que ferramentas "pensem" usando o LLM do client, criando uma camada de inteligência distribuída. Fique de olho em servers que usam sampling para workflows multi-step.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-blue-400 font-bold text-lg">5</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🗺️ Roadmap MCP 2026</h2>
+                    <p class="text-neutral-300 leading-relaxed">O MCP está amadurecendo rapidamente. A especificação evoluiu de um draft inicial em novembro de 2024 para um protocolo robusto adotado por toda a indústria. O roadmap de 2026 foca em <span class="text-blue-400 font-semibold">escalabilidade, interoperabilidade entre agentes e governança enterprise</span>.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Timeline -->
+                <div class="space-y-4">
+                    <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider">Evolução do MCP</h3>
+                    <div class="relative border-l-2 border-blue-500/30 pl-6 space-y-6">
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-blue-500 border-2 border-dark-900"></div>
+                            <p class="text-blue-400 font-bold text-sm">Nov 2024 — Lançamento</p>
+                            <p class="text-neutral-300 text-sm">Anthropic publica a spec inicial. Suporte em Claude Desktop. Community adopta rapidamente.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-blue-500 border-2 border-dark-900"></div>
+                            <p class="text-blue-400 font-bold text-sm">Q1 2025 — Adoção ampla</p>
+                            <p class="text-neutral-300 text-sm">Cursor, VS Code, Zed adotam MCP. Centenas de servers open-source surgem. Streamable HTTP transport.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-blue-500 border-2 border-dark-900"></div>
+                            <p class="text-blue-400 font-bold text-sm">Q3 2025 — Enterprise features</p>
+                            <p class="text-neutral-300 text-sm">OAuth 2.1, authorization framework, audit logging. Grandes empresas começam a adotar.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-blue-500 border-2 border-dark-900"></div>
+                            <p class="text-blue-400 font-bold text-sm">2026 — Maturidade</p>
+                            <p class="text-neutral-300 text-sm">Streaming, paginação, agent-to-agent communication, registry/discovery, governança enterprise.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados -->
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Prioridades do Roadmap 2026</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-sky-400 font-bold text-sm">Streaming & Paginação</span>
+                            <p class="text-neutral-400 text-xs mt-1">Suportar datasets grandes e respostas incrementais sem timeout</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-sky-400 font-bold text-sm">Agent-to-Agent</span>
+                            <p class="text-neutral-400 text-xs mt-1">Agentes comunicando entre si via MCP para tarefas distribuídas</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-sky-400 font-bold text-sm">Registry & Discovery</span>
+                            <p class="text-neutral-400 text-xs mt-1">Catálogo centralizado de servers com busca, avaliação e trust scores</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-sky-400 font-bold text-sm">Governança Enterprise</span>
+                            <p class="text-neutral-400 text-xs mt-1">RBAC, compliance, audit trails, aprovações multi-nível</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 6 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-blue-400 font-bold text-lg">6</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🐳 Docker MCP Gateway</h2>
+                    <p class="text-neutral-300 leading-relaxed">A Docker entrou no ecossistema MCP de forma estratégica, criando um <span class="text-blue-400 font-semibold">catálogo, toolkit e gateway</span> para MCP servers. A proposta é tratar MCP servers como containers — com todo o isolamento, portabilidade e versionamento que isso implica.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-blue-900/30 to-transparent border border-blue-500/30 rounded-xl p-6">
+                    <h3 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-3">Docker MCP Toolkit</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">O Docker MCP Toolkit é composto por três peças:</p>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-blue-400 font-bold">1.</span>
+                            <div>
+                                <span class="text-blue-400 font-semibold">Catalog</span>
+                                <span class="text-neutral-300"> — Repositório curado de MCP servers empacotados como imagens Docker. Similar ao Docker Hub, mas específico para MCP. Inclui metadata, versões e trust scores.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-blue-400 font-bold">2.</span>
+                            <div>
+                                <span class="text-blue-400 font-semibold">Toolkit</span>
+                                <span class="text-neutral-300"> — CLI e SDK para criar, testar e publicar MCP servers como containers. Inclui templates, hot-reload para desenvolvimento e CI/CD integration.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-blue-400 font-bold">3.</span>
+                            <div>
+                                <span class="text-blue-400 font-semibold">Gateway</span>
+                                <span class="text-neutral-300"> — Proxy que gerencia múltiplos MCP servers, faz load balancing, autenticação centralizada e logging. Um único ponto de entrada para todos os servers.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerta -->
+                <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                    <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">⚠️ MCP como Infraestrutura</h3>
+                    <p class="text-neutral-200 leading-relaxed">O movimento do Docker sinaliza uma mudança fundamental: MCP servers estão deixando de ser "plugins" e se tornando <span class="text-red-400 font-semibold">infraestrutura</span>. Assim como containers transformaram deploy de aplicações, MCP containers podem transformar deploy de capacidades de IA. Empresas que ignorarem isso podem ficar para trás.</p>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">As vantagens de rodar MCP servers como containers são significativas: <span class="text-blue-400 font-semibold">isolamento</span> (cada server roda em seu próprio sandbox), <span class="text-blue-400 font-semibold">portabilidade</span> (funciona igual em qualquer máquina), <span class="text-blue-400 font-semibold">versionamento</span> (tags e rollback), e <span class="text-blue-400 font-semibold">escalabilidade</span> (orquestração via Kubernetes). Isso resolve muitos dos problemas de segurança e deployment que MCP servers nativos enfrentam.</p>
+            </div>
+        </section>
+
+        <!-- Resumo Final -->
+        <section class="mb-16">
+            <div class="bg-gradient-to-b from-blue-900/30 to-transparent rounded-2xl p-8 border border-blue-500/30">
+                <h2 class="text-2xl font-bold text-white mb-6">Resumo Final</h2>
+
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-blue-400 font-bold">✓</span>
+                        <span class="text-neutral-200">MCP é o protocolo aberto que padroniza a comunicação entre agentes de IA e ferramentas externas</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-blue-400 font-bold">✓</span>
+                        <span class="text-neutral-200">A arquitetura client-server com transports flexíveis (stdio, HTTP/SSE) suporta cenários locais e remotos</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-blue-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Resources fornecem dados read-only; Tools executam ações com parâmetros tipados</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-blue-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Prompts e Sampling adicionam templates reutilizáveis e geração bidirecional de texto</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-blue-400 font-bold">✓</span>
+                        <span class="text-neutral-200">O roadmap 2026 foca em escalabilidade, agent-to-agent e governança enterprise</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-blue-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Docker MCP Gateway trata MCP servers como infraestrutura containerizada</span>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800/50 rounded-xl p-4 mb-6 border border-dark-600">
+                    <p class="text-neutral-300"><span class="text-blue-400 font-semibold">Próximo módulo:</span> Vamos explorar como extensões, plugins e skills formam a nova camada de extensibilidade dos agentes CLI — incluindo SKILL.md e os catálogos emergentes.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="index.html" class="flex-1 text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-neutral-300 font-semibold transition-colors">
+                        ← Voltar para Trilha
+                    </a>
+                    <a href="modulo-2-2.html" class="flex-1 text-center px-6 py-3 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-xl text-blue-400 font-semibold transition-colors">
+                        Próximo Módulo →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-600 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
+    </script>
+</body>
+</html>

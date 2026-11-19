@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T2 - Arquitetura Técnica | CLI-x: O Terminal como Interface dos Agentes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+                            400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+                            800: '#1e40af', 900: '#1e3a8a', 950: '#172554'
+                        },
+                        dark: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1',
+                            400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155',
+                            800: '#1e293b', 900: '#0f172a', 950: '#020617'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Light mode - Part 1: Base */
+        html:not(.dark) body { background: #f8fafc; color: #1e293b; }
+        html:not(.dark) .dark-card { background: #ffffff; border-color: #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        html:not(.dark) .dark-text { color: #334155; }
+        html:not(.dark) .dark-muted { color: #64748b; }
+        html:not(.dark) .dark-border { border-color: #e2e8f0; }
+        html:not(.dark) .dark-hover:hover { background: #f1f5f9; }
+        html:not(.dark) .dark-input { background: #f1f5f9; border-color: #e2e8f0; color: #1e293b; }
+        html:not(.dark) .dark-bg-secondary { background: #f1f5f9; }
+
+        /* Light mode - Part 2: Blue accent */
+        html:not(.dark) .accent-text { color: #2563eb !important; }
+        html:not(.dark) .accent-bg { background: rgba(37, 99, 235, 0.1) !important; }
+        html:not(.dark) .accent-border { border-color: rgba(37, 99, 235, 0.3) !important; }
+        html:not(.dark) .accent-badge { background: rgba(37, 99, 235, 0.12); color: #2563eb; }
+        html:not(.dark) .accent-number { background: rgba(37, 99, 235, 0.12); color: #2563eb; border-color: rgba(37, 99, 235, 0.3); }
+        html:not(.dark) .accent-btn { background: #2563eb; color: #ffffff; }
+        html:not(.dark) .accent-btn:hover { background: #1d4ed8; }
+
+        /* Light mode - Part 3: Remove gradients + special colors */
+        html:not(.dark) .header-gradient { background: rgba(37, 99, 235, 0.06) !important; }
+        html:not(.dark) .module-card { background: #ffffff; border-color: #e2e8f0; }
+        html:not(.dark) .module-card:hover { border-color: rgba(37, 99, 235, 0.4); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08); }
+        html:not(.dark) .topic-row { background: #f8fafc; }
+        html:not(.dark) .topic-row:hover { background: #f1f5f9; }
+        html:not(.dark) .topic-content { background: #f1f5f9; border-color: #e2e8f0; }
+        html:not(.dark) .modal-overlay { background: rgba(0,0,0,0.3); }
+        html:not(.dark) .modal-content { background: #ffffff; }
+        html:not(.dark) .stat-card { background: #f8fafc; border-color: #e2e8f0; }
+        html:not(.dark) .nav-bottom a { color: #2563eb; }
+
+        /* Light mode - Part 4: Nav */
+        html:not(.dark) nav { background: rgba(255,255,255,0.9); border-color: #e2e8f0; backdrop-filter: blur(12px); }
+        html:not(.dark) .nav-logo { color: #2563eb; }
+        html:not(.dark) .nav-tab { color: #64748b; }
+        html:not(.dark) .nav-tab:hover { color: #2563eb; }
+        html:not(.dark) .nav-tab-active { color: #2563eb; background: rgba(37, 99, 235, 0.1); }
+        html:not(.dark) .nav-club { color: #0284c7; }
+        html:not(.dark) footer { border-color: #e2e8f0; color: #64748b; }
+
+        /* Animations */
+        .topic-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.3s ease; opacity: 0; }
+        .topic-content.open { max-height: 600px; opacity: 1; }
+        .module-card { transition: all 0.2s ease; }
+        .number-circle { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; flex-shrink: 0; transition: all 0.2s ease; }
+        .modal-overlay { transition: opacity 0.2s ease; }
+        .modal-content { transition: transform 0.2s ease; }
+    </style>
+</head>
+<body class="bg-dark-950 text-gray-100 font-sans min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-dark-950/90 backdrop-blur-xl border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center gap-2 text-yellow-400 font-bold text-xl hover:text-yellow-300 transition-colors">
+                        <span>⚡</span>
+                        <span>CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+
+                <!-- Trail tabs -->
+                <div class="flex items-center gap-1 overflow-x-auto">
+                    <a href="../trilha1/index.html" class="nav-tab px-3 py-1.5 rounded-lg text-sm font-medium text-emerald-400/60 hover:text-emerald-400 transition-colors whitespace-nowrap">T1</a>
+                    <a href="#" class="nav-tab nav-tab-active px-3 py-1.5 rounded-lg text-sm font-medium text-blue-400 bg-blue-500/20 whitespace-nowrap">T2</a>
+                    <a href="../trilha3/index.html" class="nav-tab px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors whitespace-nowrap">T3</a>
+                    <a href="../trilha4/index.html" class="nav-tab px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors whitespace-nowrap">T4</a>
+                    <a href="../trilha5/index.html" class="nav-tab px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors whitespace-nowrap">T5</a>
+                    <a href="../trilha6/index.html" class="nav-tab px-3 py-1.5 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors whitespace-nowrap">T6</a>
+                </div>
+
+                <!-- Theme toggle -->
+                <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Alternar tema">
+                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="header-gradient pt-24 pb-12 bg-gradient-to-b from-blue-900/30 to-transparent">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6">
+            <div class="flex flex-col gap-6">
+                <div class="flex items-center gap-3">
+                    <span class="accent-badge px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-full tracking-wider uppercase">Trilha 2</span>
+                    <span class="dark-muted text-gray-400 text-sm">Intermediário</span>
+                </div>
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold dark-text">
+                    Arquitetura <span class="accent-text text-blue-400">Técnica</span>
+                </h1>
+                <p class="dark-muted text-gray-400 text-lg max-w-3xl leading-relaxed">
+                    A infraestrutura técnica por trás dos agentes CLI: protocolo MCP, extensões e plugins, sandboxing, segurança, autenticação e saída estruturada.
+                </p>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+                    <div class="stat-card bg-white/5 border border-white/10 rounded-xl p-4 text-center">
+                        <div class="accent-text text-blue-400 text-2xl font-bold">5</div>
+                        <div class="dark-muted text-gray-500 text-sm">Módulos</div>
+                    </div>
+                    <div class="stat-card bg-white/5 border border-white/10 rounded-xl p-4 text-center">
+                        <div class="accent-text text-blue-400 text-2xl font-bold">30</div>
+                        <div class="dark-muted text-gray-500 text-sm">Tópicos</div>
+                    </div>
+                    <div class="stat-card bg-white/5 border border-white/10 rounded-xl p-4 text-center">
+                        <div class="accent-text text-blue-400 text-2xl font-bold">~3h</div>
+                        <div class="dark-muted text-gray-500 text-sm">Duração</div>
+                    </div>
+                    <div class="stat-card bg-white/5 border border-white/10 rounded-xl p-4 text-center">
+                        <div class="accent-text text-blue-400 text-2xl font-bold">Int.</div>
+                        <div class="dark-muted text-gray-500 text-sm">Nível</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Modules -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 pb-20">
+        <div class="space-y-6">
+
+            <!-- Module 2.1 -->
+            <div class="module-card dark-card bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-start justify-between gap-4 mb-1">
+                        <div class="flex items-center gap-3">
+                            <span class="accent-badge px-2.5 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-full">2.1</span>
+                            <h2 class="text-xl font-bold dark-text">Model Context Protocol (MCP): o padrão que conecta tudo</h2>
+                        </div>
+                        <span class="dark-muted text-gray-500 text-sm whitespace-nowrap">~35min</span>
+                    </div>
+                    <p class="dark-muted text-gray-400 text-sm mt-2 mb-5 pl-12">O protocolo aberto que define como agentes se conectam a ferramentas, dados e serviços externos.</p>
+
+                    <!-- Topics -->
+                    <div class="space-y-2">
+                        <!-- Topic 1 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">1</span>
+                                <span class="dark-text text-sm font-medium">&#128268; O que é MCP - Protocolo aberto para conectar agentes a ferramentas</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">MCP (Model Context Protocol) é um protocolo aberto criado pela Anthropic para padronizar a comunicação entre modelos de IA e ferramentas externas, eliminando integrações ad-hoc.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">MCP está se tornando o padrão da indústria. Entender o protocolo é fundamental para construir, conectar e depurar agentes CLI que interagem com o mundo real.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Protocolo aberto, JSON-RPC, tool calling, interoperabilidade, padronização de interfaces.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 2 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">2</span>
+                                <span class="dark-text text-sm font-medium">&#127959; Arquitetura MCP - Client, server, transporte e mensagens</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">A arquitetura MCP define os papéis de client (agente) e server (ferramenta), os protocolos de transporte (stdio, SSE, HTTP) e o formato das mensagens trocadas.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Compreender a arquitetura permite debugar conexões, otimizar performance e construir servers MCP customizados.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Client/server, stdio transport, SSE, HTTP streamable, JSON-RPC 2.0, handshake, capabilities.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 3 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">3</span>
+                                <span class="dark-text text-sm font-medium">&#128203; Resources e Tools - Os dois pilares do protocolo</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Resources expõem dados (arquivos, APIs, bancos) e Tools expõem ações (executar, criar, modificar). Juntos, formam a interface completa entre agente e mundo externo.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Saber quando usar Resources vs Tools é essencial para projetar servers MCP eficientes e ergonômicos.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Resources URI, tool schemas, input validation, resource templates, tool annotations.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 4 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">4</span>
+                                <span class="dark-text text-sm font-medium">&#128260; Prompts e Sampling - Interação bidirecional</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Prompts são templates reutilizáveis expostos pelo server, e Sampling permite que o server solicite completions ao LLM do client, habilitando fluxos bidirecionais.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Prompts e Sampling desbloqueiam cenários avançados como agentes que delegam raciocínio e servers que orquestram sub-tarefas.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Prompt templates, sampling request, createMessage, human-in-the-loop, bidirecionalidade.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 5 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">5</span>
+                                <span class="dark-text text-sm font-medium">&#128506; Roadmap MCP 2026 - Escalabilidade, governança, enterprise</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">O roadmap do MCP para 2026 inclui melhorias em escalabilidade, autenticação nativa, governança enterprise e suporte a cenários multi-tenant.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Antecipar a evolução do protocolo permite tomar decisões arquiteturais que não ficarão obsoletas rapidamente.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Streamable HTTP, OAuth 2.1, registry, elicitation, multi-tenancy, enterprise governance.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 6 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">6</span>
+                                <span class="dark-text text-sm font-medium">&#128051; Docker MCP Gateway - Catálogo, toolkit e gerenciamento</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Docker MCP Gateway é a solução da Docker para gerenciar, distribuir e executar servers MCP como containers, com catálogo integrado e toolkit de desenvolvimento.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Containers resolvem o problema de distribuição e isolamento de MCP servers, tornando o ecossistema mais seguro e reproduzível.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Docker MCP Toolkit, MCP Catalog, gateway, container isolation, docker compose MCP.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Module button -->
+                    <div class="flex justify-start mt-5">
+                        <button onclick="openModal('modulo-2-1.html')" class="accent-btn bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors">
+                            Abrir Módulo 2.1
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 2.2 -->
+            <div class="module-card dark-card bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-start justify-between gap-4 mb-1">
+                        <div class="flex items-center gap-3">
+                            <span class="accent-badge px-2.5 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-full">2.2</span>
+                            <h2 class="text-xl font-bold dark-text">Extensões, plugins e skills: a nova camada</h2>
+                        </div>
+                        <span class="dark-muted text-gray-500 text-sm whitespace-nowrap">~30min</span>
+                    </div>
+                    <p class="dark-muted text-gray-400 text-sm mt-2 mb-5 pl-12">Como CLIs de agentes expandem suas capacidades com extensões, plugins e skills - e por que cada abordagem é diferente.</p>
+
+                    <div class="space-y-2">
+                        <!-- Topic 1 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">1</span>
+                                <span class="dark-text text-sm font-medium">&#129513; O modelo de extensibilidade - Por que plugins não bastam</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">O modelo de extensibilidade dos agentes CLI vai além de plugins tradicionais, incorporando prompts, MCP servers, hooks e comandos slash como mecanismos complementares.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Entender as diferentes camadas de extensibilidade permite escolher o mecanismo certo para cada caso de uso.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Extensibilidade multi-camada, plugins vs extensões, composabilidade, ciclo de vida de extensão.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 2 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">2</span>
+                                <span class="dark-text text-sm font-medium">&#128230; Extensões do Gemini CLI - Prompts, MCP servers, comandos, hooks</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">O Gemini CLI oferece extensões via system prompts customizados, MCP servers configuráveis, comandos slash e hooks de lifecycle para personalizar o comportamento.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Conhecer o ecossistema Gemini permite aproveitar um dos CLIs mais extensíveis do mercado para automação e produtividade.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">GEMINI.md, .gemini/settings.json, MCP config, slash commands, pre/post hooks.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 3 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">3</span>
+                                <span class="dark-text text-sm font-medium">&#128295; Plugins do Claude Code - MCP e integração de ferramentas</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Claude Code integra ferramentas via MCP servers configurados em settings, com suporte a permissões granulares e tool use nativo para extensão de capacidades.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Claude Code é referência em integração MCP. Entender seus plugins permite construir workflows poderosos e seguros.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">CLAUDE.md, .mcp.json, permissions, tool use, allowed/denied tools, project settings.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 4 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">4</span>
+                                <span class="dark-text text-sm font-medium">&#128221; SKILL.md - O contrato entre agente e ferramenta</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">SKILL.md é um padrão emergente para documentar capacidades, pré-condições e contratos de skills que agentes podem carregar e executar sob demanda.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Skills bem documentadas são reutilizáveis e composáveis. SKILL.md torna explícito o que o agente pode esperar de cada capacidade.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Skill contract, pré-condições, pós-condições, inputs/outputs, skill discovery, composição.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 5 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">5</span>
+                                <span class="dark-text text-sm font-medium">&#127978; Catálogos e marketplaces - Descoberta de extensões</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Catálogos e marketplaces centralizam a descoberta, distribuição e avaliação de extensões MCP, plugins e skills para agentes CLI.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Saber onde encontrar e como avaliar extensões acelera a produtividade e reduz o risco de usar componentes inseguros.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">MCP Hub, Docker MCP Catalog, npm packages, GitHub registry, curadoria, trust scores.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 6 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">6</span>
+                                <span class="dark-text text-sm font-medium">&#128279; Interoperabilidade - Quando extensões cruzam ecossistemas</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Interoperabilidade é a capacidade de extensões funcionarem entre diferentes CLIs de agentes, graças ao MCP como camada comum de comunicação.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Extensões interoperáveis maximizam o investimento em desenvolvimento e permitem migrar entre plataformas sem reescrever integrações.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Cross-platform MCP, abstração de transporte, portabilidade, vendor lock-in, universal tools.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-start mt-5">
+                        <button onclick="openModal('modulo-2-2.html')" class="accent-btn bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors">
+                            Abrir Módulo 2.2
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 2.3 -->
+            <div class="module-card dark-card bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-start justify-between gap-4 mb-1">
+                        <div class="flex items-center gap-3">
+                            <span class="accent-badge px-2.5 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-full">2.3</span>
+                            <h2 class="text-xl font-bold dark-text">Sandboxing, segurança e governança</h2>
+                        </div>
+                        <span class="dark-muted text-gray-500 text-sm whitespace-nowrap">~35min</span>
+                    </div>
+                    <p class="dark-muted text-gray-400 text-sm mt-2 mb-5 pl-12">Como isolar, auditar e governar agentes que têm poder real sobre sistemas e dados.</p>
+
+                    <div class="space-y-2">
+                        <!-- Topic 1 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">1</span>
+                                <span class="dark-text text-sm font-medium">&#128274; Por que sandboxing importa - Agentes com poder real</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Sandboxing é o isolamento de execução que limita o que um agente pode acessar e modificar, criando fronteiras de segurança entre o agente e o sistema.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Agentes CLI executam código real. Sem sandboxing, um prompt injection pode comprometer todo o sistema do usuário.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Isolamento de processo, blast radius, defense in depth, princípio do menor privilégio.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 2 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">2</span>
+                                <span class="dark-text text-sm font-medium">&#128230; Modelos de sandbox - Container, namespace, filesystem</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Diferentes modelos de sandbox oferecem níveis variados de isolamento: containers Docker, Linux namespaces, chroot, filesystem virtual e macOS sandbox-exec.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Cada modelo tem trade-offs de segurança, performance e conveniência. Escolher errado pode ser tão ruim quanto não usar sandbox.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Docker containers, Linux namespaces, seccomp, AppArmor, filesystem overlay, network isolation.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 3 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">3</span>
+                                <span class="dark-text text-sm font-medium">&#128737; Políticas de execução - O que o agente pode e não pode fazer</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Políticas de execução definem regras declarativas sobre quais ações um agente pode realizar: quais ferramentas, quais diretórios, quais comandos são permitidos.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Políticas bem definidas permitem dar autonomia ao agente sem abrir mão do controle, equilibrando produtividade e segurança.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Allow/deny lists, permission scopes, tool restrictions, directory boundaries, command filtering.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 4 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">4</span>
+                                <span class="dark-text text-sm font-medium">&#128269; Auditabilidade - Logs, trilhas e reprodutibilidade</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Auditabilidade é a capacidade de rastrear todas as ações de um agente: quais ferramentas chamou, quais dados acessou, quais mudanças fez e por quê.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Sem auditabilidade, é impossível debugar falhas, provar compliance ou entender por que um agente tomou determinada decisão.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Audit logs, session recording, tool call traces, reprodutibilidade, structured logging.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 5 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">5</span>
+                                <span class="dark-text text-sm font-medium">&#9888; Falhas reais - Vulnerabilidades em MCP servers (caso Anthropic Git)</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Análise de vulnerabilidades reais descobertas em MCP servers, incluindo o caso do Anthropic Git MCP Server que permitia injeção de comandos via nomes de branch.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Casos reais demonstram que segurança em MCP não é teórica. Mesmo vendors experientes cometem erros que podem ser explorados.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Command injection, prompt injection via data, tool poisoning, CVE analysis, responsible disclosure.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 6 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">6</span>
+                                <span class="dark-text text-sm font-medium">&#128220; Governança enterprise - Compliance, RBAC e aprovações</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Governança enterprise define como organizações controlam o uso de agentes CLI: quem pode usar quais ferramentas, com quais aprovações e sob quais políticas.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Para adoção corporativa, agentes precisam de RBAC, compliance e trilhas de auditoria. Sem isso, ficam restritos a uso individual.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">RBAC, SOC2, GDPR, approval workflows, policy-as-code, centralized management, compliance reporting.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-start mt-5">
+                        <button onclick="openModal('modulo-2-3.html')" class="accent-btn bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors">
+                            Abrir Módulo 2.3
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 2.4 -->
+            <div class="module-card dark-card bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-start justify-between gap-4 mb-1">
+                        <div class="flex items-center gap-3">
+                            <span class="accent-badge px-2.5 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-full">2.4</span>
+                            <h2 class="text-xl font-bold dark-text">Autenticação, permissões e controle de acesso</h2>
+                        </div>
+                        <span class="dark-muted text-gray-500 text-sm whitespace-nowrap">~30min</span>
+                    </div>
+                    <p class="dark-muted text-gray-400 text-sm mt-2 mb-5 pl-12">Identidade, autenticação e autorização no contexto de agentes que agem em nome de humanos.</p>
+
+                    <div class="space-y-2">
+                        <!-- Topic 1 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">1</span>
+                                <span class="dark-text text-sm font-medium">&#128273; OAuth e tokens - Autenticação para agentes CLI</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">OAuth 2.1 e tokens são os mecanismos padrão para autenticar agentes CLI com serviços externos, permitindo acesso delegado sem expor credenciais do usuário.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Todo agente que acessa APIs precisa se autenticar. OAuth é o padrão que o MCP está adotando nativamente.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">OAuth 2.1, device flow, access tokens, refresh tokens, API keys, bearer tokens.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 2 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">2</span>
+                                <span class="dark-text text-sm font-medium">&#128100; Identidade do agente vs do usuário - Quem está agindo?</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Quando um agente executa ações, surge a questão: a ação é do agente ou do usuário? Essa distinção impacta auditoria, responsabilidade e controle de acesso.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Confundir identidade do agente com a do usuário cria brechas de segurança e problemas de auditoria em ambientes corporativos.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Agent identity, user delegation, impersonation, service accounts, attribution, non-repudiation.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 3 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">3</span>
+                                <span class="dark-text text-sm font-medium">&#127915; Escopos e permissões - Princípio do menor privilégio</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Escopos e permissões definem granularmente o que um agente pode fazer: quais APIs acessar, quais operações executar, em quais recursos operar.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">O princípio do menor privilégio é a base de segurança. Agentes devem ter apenas as permissões mínimas necessárias para cada tarefa.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Least privilege, OAuth scopes, fine-grained permissions, capability-based security, temporal scoping.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 4 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">4</span>
+                                <span class="dark-text text-sm font-medium">&#128272; Secrets management - Credenciais em ambiente de agentes</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Secrets management é o gerenciamento seguro de credenciais, tokens e chaves que agentes precisam para acessar serviços, sem expô-los em logs ou contexto.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Agentes processam tokens em seus contextos. Sem gestão adequada, secrets podem vazar em logs, outputs ou até em respostas do modelo.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Vault, keychain, environment variables, secret rotation, credential injection, redaction.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 5 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">5</span>
+                                <span class="dark-text text-sm font-medium">&#9989; Aprovação humana - Human-in-the-loop para ações críticas</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Aprovação humana é o mecanismo que pausa a execução do agente e solicita confirmação do usuário antes de realizar ações destrutivas ou irreversíveis.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Human-in-the-loop é a última linha de defesa. Saber quando exigir aprovação é crucial para equilibrar autonomia e segurança.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Human-in-the-loop, approval gates, destructive action detection, confirmation prompts, auto-approve rules.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 6 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">6</span>
+                                <span class="dark-text text-sm font-medium">&#127970; SSO e integração corporativa - Active Directory, SAML, OIDC</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Integração com SSO corporativo permite que agentes CLI se autentiquem via Active Directory, SAML e OIDC, respeitando as políticas de identidade da organização.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Empresas não adotam ferramentas fora do SSO. Integração corporativa é pré-requisito para deploy em escala.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">SSO, SAML 2.0, OIDC, Active Directory, SCIM provisioning, federated identity, group-based access.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-start mt-5">
+                        <button onclick="openModal('modulo-2-4.html')" class="accent-btn bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors">
+                            Abrir Módulo 2.4
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 2.5 -->
+            <div class="module-card dark-card bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-start justify-between gap-4 mb-1">
+                        <div class="flex items-center gap-3">
+                            <span class="accent-badge px-2.5 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-full">2.5</span>
+                            <h2 class="text-xl font-bold dark-text">Saída estruturada: JSON, schemas e introspecção</h2>
+                        </div>
+                        <span class="dark-muted text-gray-500 text-sm whitespace-nowrap">~30min</span>
+                    </div>
+                    <p class="dark-muted text-gray-400 text-sm mt-2 mb-5 pl-12">Como agentes produzem e consomem dados estruturados para integração confiável com pipelines e ferramentas.</p>
+
+                    <div class="space-y-2">
+                        <!-- Topic 1 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">1</span>
+                                <span class="dark-text text-sm font-medium">&#128202; Por que JSON - A língua franca dos agentes</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">JSON é o formato padrão para saída estruturada de agentes CLI, permitindo que outputs sejam parseados, validados e consumidos por outras ferramentas.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Agentes que produzem apenas texto livre não compõem bem em pipelines. JSON transforma outputs em dados acionáveis.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">JSON output mode, structured output, --output-format json, jq integration, data pipeline.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 2 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">2</span>
+                                <span class="dark-text text-sm font-medium">&#128269; Introspecção de schema - APIs que se descrevem</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Introspecção de schema permite que ferramentas e APIs descrevam seus inputs e outputs programaticamente, habilitando agentes a descobrir e usar ferramentas em runtime.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Introspecção é o que permite a um agente usar uma ferramenta que nunca viu antes, baseando-se apenas na descrição do schema.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">JSON Schema, OpenAPI, tool descriptions, self-describing APIs, schema validation, type inference.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 3 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">3</span>
+                                <span class="dark-text text-sm font-medium">&#128203; Discovery Service - Como o gws monta comandos em runtime</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Discovery Service é o mecanismo pelo qual CLIs como gcloud/gws descobrem e montam comandos dinamicamente, consultando APIs de discovery em runtime.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">O padrão de discovery é um blueprint para como agentes podem expandir suas capacidades automaticamente ao descobrir novas ferramentas.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Google Discovery API, runtime command generation, dynamic CLI, lazy loading, API surface discovery.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 4 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">4</span>
+                                <span class="dark-text text-sm font-medium">&#128260; Dry-run e preview - Simular antes de executar</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Dry-run é a capacidade de simular a execução de um comando ou ação sem efeitos colaterais, mostrando o que seria feito antes de realmente fazer.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Dry-run é essencial para segurança e confiança. Permite revisar planos de execução antes de dar permissão ao agente.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">--dry-run, execution plan, preview mode, what-if analysis, diff preview, rollback plan.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 5 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">5</span>
+                                <span class="dark-text text-sm font-medium">&#128196; Auto-paginação - Lidando com grandes volumes de dados</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Auto-paginação é o mecanismo que permite a agentes iterar automaticamente sobre resultados paginados de APIs, coletando todos os dados sem intervenção manual.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">APIs reais retornam dados paginados. Agentes precisam lidar com paginação de forma eficiente sem estourar contexto ou memória.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Cursor pagination, page tokens, --limit, streaming results, context window management, lazy evaluation.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic 6 -->
+                        <div class="rounded-xl overflow-hidden">
+                            <button onclick="toggleTopic(this)" class="topic-row w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
+                                <span class="number-circle bg-blue-500/20 text-blue-400 border border-blue-500/30">6</span>
+                                <span class="dark-text text-sm font-medium">&#129514; Validação e testes - Garantindo saída correta</span>
+                            </button>
+                            <div class="topic-content px-4 bg-white/[0.02] border-t border-white/5">
+                                <div class="py-4 pl-10 space-y-3">
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">O que é</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">Validação e testes garantem que a saída estruturada de agentes e ferramentas está conforme o schema esperado, detectando erros antes que se propaguem.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Por que aprender</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">LLMs podem gerar JSON malformado ou com campos faltando. Validação automatizada é a rede de segurança para pipelines confiáveis.</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Conceitos-chave</h4>
+                                        <p class="dark-muted text-gray-400 text-sm">JSON Schema validation, contract testing, snapshot tests, output assertions, regression testing, Zod/Pydantic.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-start mt-5">
+                        <button onclick="openModal('modulo-2-5.html')" class="accent-btn bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors">
+                            Abrir Módulo 2.5
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="nav-bottom flex items-center justify-between mt-12 pt-8 border-t border-white/10 dark-border">
+            <a href="../trilha1/index.html" class="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors font-medium">
+                <span>&larr;</span> Fundamentos
+            </a>
+            <a href="../trilha3/index.html" class="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors font-medium">
+                CLI-Anything <span>&rarr;</span>
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 py-8 text-center">
+        <p class="dark-muted text-gray-500 text-sm">CLI-x: O Terminal como Interface dos Agentes &mdash; 2026</p>
+    </footer>
+
+    <!-- Modal -->
+    <div id="moduleModal" class="modal-overlay fixed inset-0 z-[100] bg-black/70 hidden items-center justify-center p-4" onclick="closeModal(event)">
+        <div class="modal-content bg-dark-900 dark-card rounded-2xl w-full max-w-6xl h-[85vh] flex flex-col overflow-hidden border border-white/10" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-white/10 dark-border">
+                <h3 id="modalTitle" class="font-semibold dark-text text-lg">Módulo</h3>
+                <button onclick="closeModal()" class="p-2 hover:bg-white/10 rounded-lg transition-colors dark-muted text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <iframe id="modalIframe" class="w-full h-full border-0" src=""></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        // Load saved theme
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'light') {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+
+        // Topic toggle
+        function toggleTopic(btn) {
+            const content = btn.nextElementSibling;
+            const isOpen = content.classList.contains('open');
+
+            // Close all topics in this module
+            const moduleCard = btn.closest('.module-card');
+            moduleCard.querySelectorAll('.topic-content').forEach(tc => {
+                tc.classList.remove('open');
+                tc.style.padding = '';
+            });
+
+            // Open clicked if it was closed
+            if (!isOpen) {
+                content.classList.add('open');
+            }
+        }
+
+        // Modal
+        function openModal(url) {
+            const modal = document.getElementById('moduleModal');
+            const iframe = document.getElementById('modalIframe');
+            const title = document.getElementById('modalTitle');
+
+            // Extract module name from URL
+            const match = url.match(/modulo-2-(\d)/);
+            if (match) {
+                const moduleNames = {
+                    '1': '2.1 - Model Context Protocol (MCP)',
+                    '2': '2.2 - Extensões, plugins e skills',
+                    '3': '2.3 - Sandboxing, segurança e governança',
+                    '4': '2.4 - Autenticação, permissões e controle de acesso',
+                    '5': '2.5 - Saída estruturada: JSON, schemas e introspecção'
+                };
+                title.textContent = moduleNames[match[1]] || 'Módulo';
+            }
+
+            iframe.src = url;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(e) {
+            if (e && e.target !== e.currentTarget) return;
+            const modal = document.getElementById('moduleModal');
+            const iframe = document.getElementById('modalIframe');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            iframe.src = '';
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>

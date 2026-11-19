@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulo 6.1 - As tres camadas: agente, protocolo e ferramenta | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Part 1 - Base overrides */
+        html:not(.dark) body { background-color: #f8fafc; color: #1f2937; }
+        html:not(.dark) .bg-dark-900, html:not(.dark) .bg-dark-800, html:not(.dark) .bg-dark-700 { background-color: #ffffff !important; }
+        html:not(.dark) .border-dark-600, html:not(.dark) .border-dark-700 { border-color: #e5e7eb !important; }
+        html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-neutral-400, html:not(.dark) .text-neutral-300 { color: #6b7280 !important; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af !important; }
+        html:not(.dark) .text-neutral-200 { color: #374151 !important; }
+        html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-700\/50 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .hover\:bg-dark-700:hover { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-dark-800\/80 { background-color: #f9fafb !important; }
+
+        /* Part 2 - Rose accent */
+        html:not(.dark) .text-rose-400 { color: #9f1239 !important; }
+        html:not(.dark) .bg-rose-500\/20 { background-color: rgba(225, 29, 72, 0.1) !important; }
+        html:not(.dark) .border-rose-500\/30 { border-color: rgba(225, 29, 72, 0.2) !important; }
+        html:not(.dark) .bg-rose-500\/10 { background-color: rgba(225, 29, 72, 0.08) !important; }
+        html:not(.dark) .bg-rose-500 { background-color: #9f1239 !important; }
+        html:not(.dark) .ring-rose-500\/20 { --tw-ring-color: rgba(225, 29, 72, 0.15) !important; }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-rose-900\/30 { --tw-gradient-from: rgba(225, 29, 72, 0.05) !important; }
+        html:not(.dark) .to-transparent { --tw-gradient-to: transparent !important; }
+        html:not(.dark) .bg-gradient-to-b, html:not(.dark) .bg-gradient-to-r { background: #ffffff !important; }
+        html:not(.dark) .header-gradient { background: linear-gradient(to bottom, rgba(225, 29, 72, 0.06), transparent) !important; }
+        html:not(.dark) .text-primary { color: #9f1239 !important; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(225, 29, 72, 0.08) !important; }
+        html:not(.dark) .border-primary\/30 { border-color: rgba(225, 29, 72, 0.2) !important; }
+        html:not(.dark) .text-sky-400 { color: #0369a1 !important; }
+        html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3, 105, 161, 0.08) !important; }
+        html:not(.dark) .border-sky-500\/30 { border-color: rgba(3, 105, 161, 0.2) !important; }
+        html:not(.dark) .text-yellow-400 { color: #b45309 !important; }
+        html:not(.dark) .text-red-400 { color: #dc2626 !important; }
+        html:not(.dark) .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08) !important; }
+        html:not(.dark) .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.2) !important; }
+        html:not(.dark) .text-emerald-400 { color: #059669 !important; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08) !important; }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.2) !important; }
+        html:not(.dark) .text-amber-400 { color: #d97706 !important; }
+        html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217, 119, 6, 0.08) !important; }
+        html:not(.dark) .border-amber-500\/30 { border-color: rgba(217, 119, 6, 0.2) !important; }
+
+        /* Part 4 - Nav */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        html:not(.dark) nav { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #e5e7eb !important; }
+        html:not(.dark) footer { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+
+        pre code { font-family: 'Menlo', 'Monaco', 'Courier New', monospace; font-size: 0.875rem; }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+                        <span class="text-2xl">⚡</span>
+                        <span class="font-bold text-lg hidden sm:inline">CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <a href="../trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Fundamentos</span></a>
+                    <a href="../trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Arquitetura</span></a>
+                    <a href="../trilha3/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors"><span class="sm:hidden">T3</span><span class="hidden sm:inline">CLI-Anything</span></a>
+                    <a href="../trilha4/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Ecossistema</span></a>
+                    <a href="../trilha5/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-teal-400 hover:bg-teal-500/10 transition-colors"><span class="sm:hidden">T5</span><span class="hidden sm:inline">Projetos</span></a>
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-rose-400 bg-rose-500/10"><span class="sm:hidden">T6</span><span class="hidden sm:inline">Estrategia</span></a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-2">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm text-neutral-400 mb-8">
+            <a href="../../index.html" class="hover:text-rose-400 transition-colors">Inicio</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-rose-400 transition-colors">Trilha 6</a>
+            <span>/</span>
+            <span class="text-rose-400">Modulo 6.1</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header-gradient bg-gradient-to-b from-rose-900/30 to-transparent rounded-2xl p-8 mb-12 border border-rose-500/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="px-3 py-1 bg-rose-500/20 text-rose-400 rounded-full text-xs font-bold tracking-wider uppercase">Modulo 6.1</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Analise</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Avancado</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">As tres camadas: agente, protocolo e ferramenta</h1>
+            <p class="text-lg text-neutral-300 mb-6 max-w-3xl">Entenda a arquitetura do ecossistema CLI agent: quem faz o que, como as pecas se conectam e onde investir seu tempo para maximizar impacto.</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-rose-400 font-bold">6</span>
+                    <span class="text-neutral-400 text-sm">Topicos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-rose-400 font-bold">30</span>
+                    <span class="text-neutral-400 text-sm">Minutos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-rose-400 font-bold">Avancado</span>
+                    <span class="text-neutral-400 text-sm">Nivel</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-rose-400 font-bold">Estrategico</span>
+                    <span class="text-neutral-400 text-sm">Tipo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 1 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-rose-400 font-bold text-lg">1</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🏗️ Camada 1: Agentes terminais</h2>
+                    <p class="text-neutral-300 leading-relaxed">Os agentes sao os <span class="text-rose-400 font-semibold">operadores</span> do ecossistema — o cerebro que entende intencao, planeja e executa. Competem em modelo, contexto e qualidade de edicao.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-rose-900/30 to-transparent border border-rose-500/30 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-4">Os principais agentes</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-dark-600">
+                                    <th class="text-left py-2 text-rose-400 font-semibold">Agente</th>
+                                    <th class="text-left py-2 text-rose-400 font-semibold">Empresa</th>
+                                    <th class="text-left py-2 text-rose-400 font-semibold">Forca principal</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-neutral-200">
+                                <tr class="border-b border-dark-700">
+                                    <td class="py-3 font-semibold">Claude Code</td>
+                                    <td class="py-3">Anthropic</td>
+                                    <td class="py-3">Contexto longo, edicao precisa, MCP nativo</td>
+                                </tr>
+                                <tr class="border-b border-dark-700">
+                                    <td class="py-3 font-semibold">Gemini CLI</td>
+                                    <td class="py-3">Google</td>
+                                    <td class="py-3">Ecossistema Google, pesquisa web, gws</td>
+                                </tr>
+                                <tr class="border-b border-dark-700">
+                                    <td class="py-3 font-semibold">Codex CLI</td>
+                                    <td class="py-3">OpenAI</td>
+                                    <td class="py-3">Geracao rapida, multimodal, sandbox</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 font-semibold">Copilot CLI</td>
+                                    <td class="py-3">GitHub</td>
+                                    <td class="py-3">Integracao GitHub, Actions, repositorios</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">💡 Conceito-chave</h3>
+                    <p class="text-neutral-200 leading-relaxed">O agente e quem <span class="text-rose-400 font-semibold">orquestra</span>. Ele recebe intencao em linguagem natural, decompoe em passos, chama ferramentas e compoe o resultado. A qualidade do agente depende do modelo subjacente, da janela de contexto e da capacidade de usar ferramentas de forma inteligente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-rose-400 font-bold text-lg">2</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔌 Camada 2: Protocolos de integracao</h2>
+                    <p class="text-neutral-300 leading-relaxed">Protocolos sao a <span class="text-rose-400 font-semibold">cola</span> que conecta agentes a ferramentas. Sem protocolo padrao, cada ferramenta precisa de integracao custom.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-4">MCP: o padrao emergente</h3>
+                    <div class="space-y-3 text-neutral-200">
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>Model Context Protocol (MCP)</strong> — protocolo aberto para conectar agentes a ferramentas externas</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>Docker MCP Gateway</strong> — containeriza MCP servers para isolamento e seguranca</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 mt-2"></span>
+                            <span><strong>Catalogos de extensoes</strong> — marketplaces de skills e MCP servers prontos para uso</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-rose-900/30 to-transparent border border-rose-500/30 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-3">Antes vs Depois do MCP</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-dark-800/50 rounded-lg p-4 border border-dark-600">
+                            <p class="text-red-400 font-semibold text-sm mb-2">Sem protocolo padrao</p>
+                            <p class="text-neutral-300 text-sm">Cada agente precisa de plugin especifico. N agentes x M ferramentas = N*M integracoes. Esforco explode exponencialmente.</p>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-lg p-4 border border-dark-600">
+                            <p class="text-emerald-400 font-semibold text-sm mb-2">Com MCP</p>
+                            <p class="text-neutral-300 text-sm">Ferramenta implementa 1 MCP server. Qualquer agente compativel conecta. N + M integracoes. Esforco linear.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 3 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-rose-400 font-bold text-lg">3</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔧 Camada 3: Ferramentas verticais</h2>
+                    <p class="text-neutral-300 leading-relaxed">Ferramentas sao as <span class="text-rose-400 font-semibold">maos especializadas</span> do ecossistema. Cada vertical tem dominio profundo. O valor esta na especializacao.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-4">Ferramentas por vertical</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold text-sm min-w-[90px]">Workspace</span>
+                            <span class="text-neutral-200"><strong>gws</strong> — Google Workspace operado por agente (Gmail, Drive, Sheets, Calendar)</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold text-sm min-w-[90px]">Infraestrutura</span>
+                            <span class="text-neutral-200"><strong>Pulumi</strong> — Infrastructure as Code com MCP server nativo</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold text-sm min-w-[90px]">Cloud</span>
+                            <span class="text-neutral-200"><strong>Azure Developer CLI</strong> — agentes hospedados em nuvem corporativa</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold text-sm min-w-[90px]">Containers</span>
+                            <span class="text-neutral-200"><strong>Docker</strong> — MCP Gateway para isolamento de ferramentas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-6">
+                    <h3 class="text-amber-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Dado importante</h3>
+                    <p class="text-neutral-200 leading-relaxed">Ferramentas verticais tem <span class="text-rose-400 font-semibold">dominio profundo</span> que agentes generalistas nao tem. Um agente pode orquestrar, mas precisa de ferramentas especializadas para executar com precisao em cada vertical — Pulumi entende dependencias de infra, gws entende permissoes do Google, etc.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-rose-400 font-bold text-lg">4</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔗 Como as camadas interagem</h2>
+                    <p class="text-neutral-300 leading-relaxed">O agente descobre ferramentas via protocolo. A ferramenta expoe capacidades via schema. O protocolo garante <span class="text-rose-400 font-semibold">compatibilidade</span>.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-rose-900/30 to-transparent border border-rose-500/30 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-4">Diagrama de interacao</h3>
+                    <pre class="bg-dark-900 rounded-lg p-4 overflow-x-auto border border-dark-600 text-sm"><code class="text-neutral-300">
+  <span class="text-rose-400">┌─────────────────┐</span>
+  <span class="text-rose-400">│   AGENTE CLI    │</span>  Claude Code, Gemini CLI, Codex CLI
+  <span class="text-rose-400">│  (orquestrador) │</span>  Entende intencao, planeja, executa
+  <span class="text-rose-400">└────────┬────────┘</span>
+           <span class="text-rose-400">│</span>
+           <span class="text-rose-400">│</span> MCP Protocol (JSON-RPC)
+           <span class="text-rose-400">│</span>
+  <span class="text-sky-400">┌────────┴────────┐</span>
+  <span class="text-sky-400">│   PROTOCOLO     │</span>  MCP, Docker Gateway
+  <span class="text-sky-400">│   (conexao)     │</span>  Discovery, schemas, transport
+  <span class="text-sky-400">└────────┬────────┘</span>
+           <span class="text-sky-400">│</span>
+           <span class="text-sky-400">│</span> Tools / Resources / Prompts
+           <span class="text-sky-400">│</span>
+  <span class="text-emerald-400">┌────────┴────────┐</span>
+  <span class="text-emerald-400">│  FERRAMENTAS    │</span>  gws, Pulumi, kubectl, Snyk
+  <span class="text-emerald-400">│ (especializadas)│</span>  Dominio profundo, execucao real
+  <span class="text-emerald-400">└─────────────────┘</span>
+</code></pre>
+                </div>
+
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-3">Fluxo na pratica</h3>
+                    <div class="space-y-3 text-neutral-200 text-sm">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold">1.</span>
+                            <span>Agente recebe instrucao: "provisione um banco PostgreSQL na AWS"</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold">2.</span>
+                            <span>Agente consulta ferramentas disponiveis via MCP (discovery)</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold">3.</span>
+                            <span>Descobre Pulumi MCP server com tool "provision_database"</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold">4.</span>
+                            <span>Chama a tool com parametros corretos via protocolo MCP</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold">5.</span>
+                            <span>Pulumi executa provisionamento real e retorna status</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-rose-400 font-bold">6.</span>
+                            <span>Agente interpreta resultado e reporta ao usuario</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-rose-400 font-bold text-lg">5</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📊 Mapa do ecossistema</h2>
+                    <p class="text-neutral-300 leading-relaxed">Quem faz o que em cada camada? Um <span class="text-rose-400 font-semibold">panorama completo</span> das empresas e suas apostas no ecossistema CLI agent.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-rose-900/30 to-transparent border border-rose-500/30 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-4">Grid do ecossistema</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-dark-600">
+                                    <th class="text-left py-2 text-rose-400 font-semibold">Empresa</th>
+                                    <th class="text-left py-2 text-rose-400 font-semibold">Agente</th>
+                                    <th class="text-left py-2 text-rose-400 font-semibold">Protocolo</th>
+                                    <th class="text-left py-2 text-rose-400 font-semibold">Ferramenta</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-neutral-200">
+                                <tr class="border-b border-dark-700">
+                                    <td class="py-3 font-semibold">Google</td>
+                                    <td class="py-3">Gemini CLI</td>
+                                    <td class="py-3">MCP (client)</td>
+                                    <td class="py-3">gws, Extensions</td>
+                                </tr>
+                                <tr class="border-b border-dark-700">
+                                    <td class="py-3 font-semibold">Anthropic</td>
+                                    <td class="py-3">Claude Code</td>
+                                    <td class="py-3">MCP (criador)</td>
+                                    <td class="py-3">Skills, Extensions</td>
+                                </tr>
+                                <tr class="border-b border-dark-700">
+                                    <td class="py-3 font-semibold">OpenAI</td>
+                                    <td class="py-3">Codex CLI</td>
+                                    <td class="py-3">MCP (client)</td>
+                                    <td class="py-3">Sandbox</td>
+                                </tr>
+                                <tr class="border-b border-dark-700">
+                                    <td class="py-3 font-semibold">GitHub</td>
+                                    <td class="py-3">Copilot CLI</td>
+                                    <td class="py-3">Extensions</td>
+                                    <td class="py-3">Actions, Repos</td>
+                                </tr>
+                                <tr class="border-b border-dark-700">
+                                    <td class="py-3 font-semibold">Docker</td>
+                                    <td class="py-3">-</td>
+                                    <td class="py-3">MCP Gateway</td>
+                                    <td class="py-3">Containers</td>
+                                </tr>
+                                <tr class="border-b border-dark-700">
+                                    <td class="py-3 font-semibold">Pulumi</td>
+                                    <td class="py-3">-</td>
+                                    <td class="py-3">MCP server</td>
+                                    <td class="py-3">IaC agent-native</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 font-semibold">Microsoft</td>
+                                    <td class="py-3">-</td>
+                                    <td class="py-3">MCP (client)</td>
+                                    <td class="py-3">Azure CLI agents</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+                    <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">💡 Observacao</h3>
+                    <p class="text-neutral-200 leading-relaxed">Note que <span class="text-rose-400 font-semibold">nenhuma empresa domina as tres camadas sozinha</span>. Isso e intencional — o ecossistema e composto. Google tem agente + ferramenta mas usa protocolo da Anthropic. Docker nao tem agente mas domina o layer de isolamento. Pulumi nao tem agente nem protocolo mas e referencia em IaC.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 6 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-rose-400 font-bold text-lg">6</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🎯 Onde investir tempo</h2>
+                    <p class="text-neutral-300 leading-relaxed">Dependendo do seu perfil, a estrategia de investimento de tempo muda. O <span class="text-rose-400 font-semibold">MCP e o investimento mais duravel</span> porque e agnostico de agente.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-dark-800 border border-dark-600 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-4">Estrategia por perfil</h3>
+                    <div class="space-y-4">
+                        <div class="bg-dark-700/50 rounded-lg p-4 border border-dark-600">
+                            <p class="text-rose-400 font-semibold mb-2">Se voce e dev</p>
+                            <p class="text-neutral-200 text-sm">Domine um agente CLI (Claude Code ou Gemini CLI) + aprenda a criar MCP servers. Isso cobre 80% dos casos de uso. Construa skills e extensoes para seu workflow.</p>
+                        </div>
+                        <div class="bg-dark-700/50 rounded-lg p-4 border border-dark-600">
+                            <p class="text-rose-400 font-semibold mb-2">Se voce e ops/infra</p>
+                            <p class="text-neutral-200 text-sm">Foque em ferramentas verticais: Pulumi, kubectl, Terraform com MCP. Entenda Docker MCP Gateway para isolamento. O agente e meio, a ferramenta e fim.</p>
+                        </div>
+                        <div class="bg-dark-700/50 rounded-lg p-4 border border-dark-600">
+                            <p class="text-rose-400 font-semibold mb-2">Se voce e lider/gestor</p>
+                            <p class="text-neutral-200 text-sm">Entenda as tres camadas e como compor. Nao precisa dominar cada ferramenta, mas precisa saber como elas se conectam para tomar decisoes de adocao e investimento.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-rose-900/30 to-transparent border border-rose-500/30 rounded-xl p-6">
+                    <h3 class="text-rose-400 font-bold text-sm uppercase tracking-wider mb-3">🎯 Dica estrategica</h3>
+                    <p class="text-neutral-200 leading-relaxed"><span class="text-rose-400 font-semibold">MCP e o investimento mais duravel.</span> Agentes vao mudar (novo modelo, novo provider), ferramentas vao evoluir (novas versoes, novos players). Mas o protocolo que conecta tudo tende a ser estavel — assim como HTTP conecta browsers a servers ha 30 anos. Aprenda MCP e voce se protege contra mudancas nas outras camadas.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumo Final -->
+        <section class="mb-16">
+            <div class="bg-gradient-to-b from-rose-900/30 to-transparent rounded-2xl p-8 border border-rose-500/30">
+                <h2 class="text-2xl font-bold text-white mb-6">Resumo Final</h2>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-rose-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">O ecossistema CLI agent tem tres camadas: agentes (cerebro), protocolos (cola) e ferramentas (maos)</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-rose-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">MCP e o protocolo emergente que permite integracao linear (N+M) em vez de exponencial (N*M)</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-rose-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">Nenhuma empresa domina todas as camadas — o ecossistema e composavel por design</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-rose-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">A estrategia de investimento depende do perfil: dev foca em agente+MCP, ops em ferramentas, lider em composicao</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-rose-400 font-bold">&#10003;</span>
+                        <span class="text-neutral-200">MCP e o investimento mais duravel — agnostico de agente, estavel como protocolo</span>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800/50 rounded-xl p-4 mb-6 border border-dark-600">
+                    <p class="text-neutral-300"><span class="text-rose-400 font-semibold">Proximo modulo:</span> Vamos explorar quais setores da economia estao migrando para CLI agents — dados, seguranca, ERP, backoffice e muito mais.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="index.html" class="flex-1 text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-neutral-300 font-semibold transition-colors">
+                        &#8592; Voltar para Trilha
+                    </a>
+                    <a href="modulo-6-2.html" class="flex-1 text-center px-6 py-3 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 rounded-xl text-rose-400 font-semibold transition-colors">
+                        Proximo Modulo &#8594;
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-600 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
+    </script>
+</body>
+</html>

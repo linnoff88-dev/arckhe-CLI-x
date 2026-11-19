@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 3.4 - Implementação: estado, REPL e saída JSON | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Part 1 - Base overrides */
+        html:not(.dark) body { background-color: #f8fafc; color: #1f2937; }
+        html:not(.dark) .bg-dark-900, html:not(.dark) .bg-dark-800, html:not(.dark) .bg-dark-700 { background-color: #ffffff !important; }
+        html:not(.dark) .border-dark-600, html:not(.dark) .border-dark-700 { border-color: #e5e7eb !important; }
+        html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-neutral-400, html:not(.dark) .text-neutral-300 { color: #6b7280 !important; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af !important; }
+        html:not(.dark) .text-neutral-200 { color: #374151 !important; }
+        html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-700\/50 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .hover\:bg-dark-700:hover { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-dark-800\/80 { background-color: #f9fafb !important; }
+
+        /* Part 2 - Purple accent */
+        html:not(.dark) .text-purple-400 { color: #7c3aed !important; }
+        html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124, 58, 237, 0.1) !important; }
+        html:not(.dark) .border-purple-500\/30 { border-color: rgba(124, 58, 237, 0.2) !important; }
+        html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124, 58, 237, 0.08) !important; }
+        html:not(.dark) .bg-purple-500 { background-color: #7c3aed !important; }
+        html:not(.dark) .ring-purple-500\/20 { --tw-ring-color: rgba(124, 58, 237, 0.15) !important; }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-purple-900\/30 { --tw-gradient-from: rgba(124, 58, 237, 0.05) !important; }
+        html:not(.dark) .to-transparent { --tw-gradient-to: transparent !important; }
+        html:not(.dark) .bg-gradient-to-b, html:not(.dark) .bg-gradient-to-r { background: #ffffff !important; }
+        html:not(.dark) .header-gradient { background: linear-gradient(to bottom, rgba(124, 58, 237, 0.06), transparent) !important; }
+        html:not(.dark) .text-primary { color: #b45309 !important; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(180, 83, 9, 0.08) !important; }
+        html:not(.dark) .border-primary\/30 { border-color: rgba(180, 83, 9, 0.2) !important; }
+        html:not(.dark) .text-sky-400 { color: #0369a1 !important; }
+        html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3, 105, 161, 0.08) !important; }
+        html:not(.dark) .border-sky-500\/30 { border-color: rgba(3, 105, 161, 0.2) !important; }
+        html:not(.dark) .text-yellow-400 { color: #b45309 !important; }
+        html:not(.dark) .text-red-400 { color: #dc2626 !important; }
+        html:not(.dark) .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08) !important; }
+        html:not(.dark) .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.2) !important; }
+        html:not(.dark) .text-emerald-400 { color: #059669 !important; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08) !important; }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.2) !important; }
+
+        /* Part 4 - Nav */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        html:not(.dark) nav { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #e5e7eb !important; }
+        html:not(.dark) footer { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+                        <span class="text-2xl">⚡</span>
+                        <span class="font-bold text-lg hidden sm:inline">CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <a href="../trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Fundamentos</span></a>
+                    <a href="../trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Arquitetura</span></a>
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-purple-400 bg-purple-500/10"><span class="sm:hidden">T3</span><span class="hidden sm:inline">CLI-Anything</span></a>
+                    <a href="../trilha4/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Ecossistema</span></a>
+                    <a href="../trilha5/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-teal-400 hover:bg-teal-500/10 transition-colors"><span class="sm:hidden">T5</span><span class="hidden sm:inline">Projetos</span></a>
+                    <a href="../trilha6/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"><span class="sm:hidden">T6</span><span class="hidden sm:inline">Estratégia</span></a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-2">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm text-neutral-400 mb-8">
+            <a href="../../index.html" class="hover:text-purple-400 transition-colors">Início</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-purple-400 transition-colors">Trilha 3</a>
+            <span>/</span>
+            <span class="text-purple-400">Módulo 3.4</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header-gradient bg-gradient-to-b from-purple-900/30 to-transparent rounded-2xl p-8 mb-12 border border-purple-500/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold tracking-wider uppercase">Módulo 3.4</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Técnico</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Implementação: estado, REPL e saída JSON</h1>
+            <p class="text-lg text-neutral-300 mb-6 max-w-3xl">Como o pipeline gera CLIs com gerenciamento de estado persistente, REPL interativo, saída JSON estruturada e integração real com o software original.</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-purple-400 font-bold">6</span>
+                    <span class="text-neutral-400 text-sm">Tópicos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-purple-400 font-bold">40</span>
+                    <span class="text-neutral-400 text-sm">Minutos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-purple-400 font-bold">Intermediário-Avançado</span>
+                    <span class="text-neutral-400 text-sm">Nível</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-purple-400 font-bold">Técnico</span>
+                    <span class="text-neutral-400 text-sm">Tipo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 1 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">1</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">💾 Gerenciamento de estado</h2>
+                    <p class="text-neutral-300 leading-relaxed">CLIs tradicionais são stateless — cada comando é independente. CLI-Anything gera CLIs <span class="text-purple-400 font-semibold">stateful</span>: login persistente, sessão mantida, contexto acumulado entre comandos.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Camadas de estado</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">O state management da CLI gerada opera em três camadas, do mais efêmero ao mais persistente:</p>
+                    <div class="space-y-3">
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-purple-500/20 rounded-lg px-3 py-1 flex-shrink-0">
+                                <span class="text-purple-400 font-bold text-sm">L1</span>
+                            </div>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">Sessão (memória):</span>
+                                <span class="text-neutral-400 text-sm"> Contexto do REPL atual — último recurso acessado, resultados em cache, variáveis temporárias. Perdido ao fechar o REPL.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-purple-500/20 rounded-lg px-3 py-1 flex-shrink-0">
+                                <span class="text-purple-400 font-bold text-sm">L2</span>
+                            </div>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">Arquivo local (~/.myapp/state.json):</span>
+                                <span class="text-neutral-400 text-sm"> Tokens de auth, preferências, projeto ativo, último workspace. Persiste entre sessões.</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-purple-500/20 rounded-lg px-3 py-1 flex-shrink-0">
+                                <span class="text-purple-400 font-bold text-sm">L3</span>
+                            </div>
+                            <div>
+                                <span class="text-neutral-200 font-semibold">Keychain/credential store:</span>
+                                <span class="text-neutral-400 text-sm"> Tokens sensíveis armazenados no sistema operacional (macOS Keychain, Linux secret-service). Máxima segurança.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">O estado é crucial para agentes: sem estado, cada comando precisaria re-autenticar, re-selecionar o projeto, re-configurar preferências. Com estado, o agente faz <code class="bg-dark-700 px-2 py-0.5 rounded text-purple-400 text-sm">myapp auth login</code> uma vez e todos os comandos subsequentes herdam a sessão. Isso reduz o número de tokens gastos e torna fluxos complexos viáveis.</p>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Estado para agentes vs humanos</h3>
+                    <p class="text-neutral-200 leading-relaxed">Humanos geralmente configuram estado uma vez e esquecem. Agentes precisam de <strong>verificação explícita</strong>: antes de executar um comando, o agente ideal checa <code class="bg-dark-700 px-1 rounded text-purple-400">myapp status</code> para confirmar que está autenticado e no projeto correto. O CLI gerado inclui esse comando de verificação por padrão.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">2</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔄 REPL interativo</h2>
+                    <p class="text-neutral-300 leading-relaxed">O REPL (Read-Eval-Print Loop) é um modo interativo onde o usuário ou agente pode executar <span class="text-purple-400 font-semibold">comandos sequenciais sem reiniciar</span> a CLI, mantendo estado e contexto entre cada operação.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Anatomia do REPL gerado</h3>
+                    <div class="bg-dark-800 rounded-lg p-4 font-mono text-sm text-neutral-300 overflow-x-auto">
+                        <pre class="whitespace-pre-wrap">
+$ myapp repl
+Welcome to MyApp CLI v1.0 (type 'help' for commands)
+
+myapp> auth login --email j@x.com
+✓ Authenticated as João (token saved)
+
+myapp> users list --format table
+┌────┬──────────┬───────────────┬────────┐
+│ ID │ Name     │ Email         │ Role   │
+├────┼──────────┼───────────────┼────────┤
+│ 1  │ João     │ j@x.com       │ admin  │
+│ 2  │ Ana      │ a@x.com       │ user   │
+└────┴──────────┴───────────────┴────────┘
+
+myapp> tasks create --title "Review PR" --assignee 2
+✓ Task #42 created (assigned to Ana)
+
+myapp> exit
+Goodbye!</pre>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                        <span class="text-purple-400 font-bold text-sm">Auto-complete</span>
+                        <p class="text-neutral-400 text-xs mt-1">Tab completa comandos, subcomandos, flags e valores de enum</p>
+                    </div>
+                    <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                        <span class="text-purple-400 font-bold text-sm">Histórico</span>
+                        <p class="text-neutral-400 text-xs mt-1">Setas up/down navegam histórico, Ctrl+R busca</p>
+                    </div>
+                    <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                        <span class="text-purple-400 font-bold text-sm">Estado persistido</span>
+                        <p class="text-neutral-400 text-xs mt-1">Auth, contexto e resultados anteriores mantidos</p>
+                    </div>
+                    <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                        <span class="text-purple-400 font-bold text-sm">Variáveis de sessão</span>
+                        <p class="text-neutral-400 text-xs mt-1">$last_id, $last_result para encadear comandos</p>
+                    </div>
+                </div>
+
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 REPL vs comandos avulsos</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Comando avulso:</span> <code class="bg-dark-700 px-1 rounded text-purple-400">myapp users list</code> — stateless, cada execução é independente</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Modo REPL:</span> <code class="bg-dark-700 px-1 rounded text-purple-400">myapp repl</code> → sessão contínua com estado, ideal para agentes executando múltiplas operações</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Agentes tipicamente usam:</span> comandos avulsos com --format json, mas REPL quando precisam de sessão stateful</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 3 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">3</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📊 Saída JSON estruturada</h2>
+                    <p class="text-neutral-300 leading-relaxed">Toda saída da CLI gerada opera em <span class="text-purple-400 font-semibold">dual mode</span>: human-readable (formatado, colorido, tabelas) e machine-readable (JSON puro). Agentes sempre usam o modo JSON.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Estrutura padronizada de output JSON</h3>
+                    <div class="bg-dark-800 rounded-lg p-4 font-mono text-sm text-neutral-300 overflow-x-auto">
+                        <pre class="whitespace-pre-wrap">
+{
+  "status": "success",
+  "data": {
+    "users": [
+      { "id": 1, "name": "João", "email": "j@x.com", "role": "admin" },
+      { "id": 2, "name": "Ana", "email": "a@x.com", "role": "user" }
+    ]
+  },
+  "metadata": {
+    "total": 2,
+    "page": 1,
+    "per_page": 50,
+    "command": "users list",
+    "timestamp": "2026-03-23T10:30:00Z"
+  },
+  "errors": []
+}</pre>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">A estrutura é sempre a mesma: <code class="bg-dark-700 px-1 rounded text-purple-400">status</code> (success|error), <code class="bg-dark-700 px-1 rounded text-purple-400">data</code> (payload principal), <code class="bg-dark-700 px-1 rounded text-purple-400">metadata</code> (paginação, timestamps, comando executado) e <code class="bg-dark-700 px-1 rounded text-purple-400">errors</code> (array de erros com código e mensagem). Essa consistência permite que <span class="text-purple-400 font-semibold">qualquer agente parse o output sem conhecer previamente o schema específico</span> de cada comando.</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+                        <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-4">✅ Modo humano (default)</h3>
+                        <div class="bg-dark-800 rounded-lg p-3 font-mono text-xs text-neutral-300">
+                            <pre>$ myapp users list
+┌────┬──────┬──────────┐
+│ ID │ Name │ Role     │
+├────┼──────┼──────────┤
+│ 1  │ João │ admin    │
+│ 2  │ Ana  │ user     │
+└────┴──────┴──────────┘
+2 users found</pre>
+                        </div>
+                    </div>
+                    <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-6">
+                        <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-4">🤖 Modo JSON (agentes)</h3>
+                        <div class="bg-dark-800 rounded-lg p-3 font-mono text-xs text-neutral-300">
+                            <pre>$ myapp users list --json
+{"status":"success",
+ "data":{"users":[
+   {"id":1,"name":"João"},
+   {"id":2,"name":"Ana"}
+ ]},
+ "metadata":{"total":2}}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">4</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔌 Módulos e subcomandos</h2>
+                    <p class="text-neutral-300 leading-relaxed">O CLI gerado é organizado em <span class="text-purple-400 font-semibold">módulos</span> — cada módulo agrupa comandos relacionados a um domínio, com lazy loading para performance.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Estrutura de módulos típica</h3>
+                    <div class="bg-dark-800 rounded-lg p-4 font-mono text-sm text-neutral-300 overflow-x-auto">
+                        <pre class="whitespace-pre-wrap">
+myapp-cli/
+├── bin/
+│   └── myapp.js          # Entry point
+├── src/
+│   ├── commands/
+│   │   ├── auth.js        # myapp auth login|logout|status
+│   │   ├── users.js       # myapp users create|list|get|update|delete
+│   │   ├── tasks.js       # myapp tasks create|list|assign|complete
+│   │   └── config.js      # myapp config set|get|list
+│   ├── lib/
+│   │   ├── state.js       # State management (L1, L2, L3)
+│   │   ├── output.js      # JSON/table/csv formatter
+│   │   └── client.js      # HTTP client for API calls
+│   └── repl.js            # REPL mode
+├── SKILL.md
+└── package.json</pre>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">Cada módulo é carregado sob demanda (lazy loading): quando o usuário executa <code class="bg-dark-700 px-2 py-0.5 rounded text-purple-400 text-sm">myapp users list</code>, apenas o módulo <code class="bg-dark-700 px-1 rounded text-purple-400">users.js</code> é importado. Isso mantém o tempo de startup baixo mesmo em CLIs com dezenas de módulos — importante para agentes que executam centenas de comandos por sessão.</p>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Extensibilidade</h3>
+                    <p class="text-neutral-200 leading-relaxed">A estrutura modular permite que usuários adicionem novos módulos sem modificar o core da CLI. Basta criar um novo arquivo em <code class="bg-dark-700 px-1 rounded text-purple-400">src/commands/</code> seguindo o padrão e registrá-lo. Isso facilita iterações de refinamento: se o pipeline não gerou um comando necessário, é simples adicioná-lo manualmente.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">5</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">⚙️ Configuração e flags universais</h2>
+                    <p class="text-neutral-300 leading-relaxed">O pipeline gera um conjunto de <span class="text-purple-400 font-semibold">flags universais</span> presentes em todos os comandos, além de flags específicas extraídas dos parâmetros de cada função original.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Flags universais geradas automaticamente</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-start space-x-3">
+                            <code class="bg-dark-700 px-2 py-0.5 rounded text-purple-400 flex-shrink-0">--json</code>
+                            <span class="text-neutral-300">Output em JSON puro (equivalente a --format json). Atalho para agentes.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <code class="bg-dark-700 px-2 py-0.5 rounded text-purple-400 flex-shrink-0">--format</code>
+                            <span class="text-neutral-300">Formato de saída: json | table | csv. Default: table para humanos.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <code class="bg-dark-700 px-2 py-0.5 rounded text-purple-400 flex-shrink-0">--dry-run</code>
+                            <span class="text-neutral-300">Simula a operação sem executar. Mostra o que seria feito. Essencial para testes.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <code class="bg-dark-700 px-2 py-0.5 rounded text-purple-400 flex-shrink-0">--verbose</code>
+                            <span class="text-neutral-300">Modo debug: mostra requests HTTP, queries SQL, timing de operações.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <code class="bg-dark-700 px-2 py-0.5 rounded text-purple-400 flex-shrink-0">--quiet</code>
+                            <span class="text-neutral-300">Suprime outputs não-essenciais. Apenas data ou erros. Para pipelines.</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <code class="bg-dark-700 px-2 py-0.5 rounded text-purple-400 flex-shrink-0">--config</code>
+                            <span class="text-neutral-300">Caminho para arquivo de configuração alternativo (~/.myapp/config.json).</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Flags específicas por comando</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-3">Além das flags universais, cada comando recebe flags extraídas dos parâmetros da função original:</p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200">Parâmetro <code class="bg-dark-700 px-1 rounded text-purple-400">name: string</code> → flag <code class="bg-dark-700 px-1 rounded text-purple-400">--name STRING</code></span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200">Parâmetro <code class="bg-dark-700 px-1 rounded text-purple-400">isActive: boolean</code> → flag <code class="bg-dark-700 px-1 rounded text-purple-400">--active / --no-active</code></span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200">Parâmetro <code class="bg-dark-700 px-1 rounded text-purple-400">status: "open" | "closed"</code> → flag <code class="bg-dark-700 px-1 rounded text-purple-400">--status open|closed</code></span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200">Parâmetro <code class="bg-dark-700 px-1 rounded text-purple-400">limit: number = 50</code> → flag <code class="bg-dark-700 px-1 rounded text-purple-400">--limit NUMBER</code> (default: 50)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 6 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">6</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔗 Integração com o software original</h2>
+                    <p class="text-neutral-300 leading-relaxed">O ponto mais crítico de toda a implementação: o CLI gerado controla o <span class="text-purple-400 font-semibold">software real</span> ou é apenas uma simulação? A resposta depende da arquitetura do software-alvo.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Timeline de cenários -->
+                <div class="space-y-4">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider">3 cenários de integração</h3>
+                    <div class="relative border-l-2 border-purple-500/30 pl-6 space-y-6">
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                            <p class="text-emerald-400 font-bold text-sm">Cenário 1: Software com API (melhor caso)</p>
+                            <p class="text-neutral-300 text-sm">O CLI chama os endpoints REST/GraphQL diretamente. Exemplo: <code class="bg-dark-700 px-1 rounded text-purple-400">fetch("http://localhost:3000/api/users")</code>. Integração real, resultados reais, controle total. O CLI é um client HTTP tipado.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">Cenário 2: Software como biblioteca (bom caso)</p>
+                            <p class="text-neutral-300 text-sm">O CLI importa módulos do software e chama funções diretamente. Exemplo: <code class="bg-dark-700 px-1 rounded text-purple-400">const { createUser } = require('../src/services/users')</code>. Integração real, mas requer que o software suporte ser importado como lib.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-red-500 border-2 border-dark-900"></div>
+                            <p class="text-red-400 font-bold text-sm">Cenário 3: Software monolítico (caso problemático)</p>
+                            <p class="text-neutral-300 text-sm">Não há API nem módulos importáveis. O pipeline pode gerar mocks que simulam funcionalidade: salvar em arquivo local, manter estado próprio, mas sem controlar o software real. O CLI "funciona" mas não está conectado.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                    <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">🚨 Como detectar mock vs real</h3>
+                    <ul class="space-y-3 text-neutral-200 text-sm">
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Verifique o código gerado:</strong> procure por <code class="bg-dark-700 px-1 rounded text-purple-400">fetch()</code>, <code class="bg-dark-700 px-1 rounded text-purple-400">require()</code> ou <code class="bg-dark-700 px-1 rounded text-purple-400">import</code> apontando para o software original</span></li>
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Teste cruzado:</strong> crie algo via CLI e verifique se aparece na GUI do software (e vice-versa)</span></li>
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Procure por JSON/SQLite local:</strong> se o CLI armazena dados em arquivo próprio em vez de chamar o software, é mock</span></li>
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Flag de verificação:</strong> CLIs bem gerados incluem <code class="bg-dark-700 px-1 rounded text-purple-400">myapp doctor</code> que verifica a conexão com o software</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumo Final -->
+        <section class="mb-12">
+            <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-2xl p-8">
+                <h2 class="text-2xl font-bold text-white mb-6">Resumo Final</h2>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">CLIs geradas são stateful: sessão em memória, arquivo local, keychain — estado persiste entre comandos</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">REPL interativo com auto-complete, histórico e variáveis de sessão para fluxos complexos</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Saída dual-mode: humano (tabelas coloridas) e máquina (JSON padronizado com status/data/metadata/errors)</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Flags universais (--json, --dry-run, --verbose, --quiet) + flags específicas extraídas das funções originais</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Integração real depende da arquitetura: API = melhor caso, monolítico = risco de mock — sempre verifique</span>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800/50 rounded-xl p-4 mb-6 border border-dark-600">
+                    <p class="text-neutral-300"><span class="text-purple-400 font-semibold">Próximo módulo:</span> Vamos explorar as fases finais — testes automatizados, documentação gerada e o SKILL.md que torna o CLI operável por agentes LLM.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="modulo-3-3.html" class="flex-1 text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-neutral-300 font-semibold transition-colors">
+                        ← Módulo Anterior
+                    </a>
+                    <a href="modulo-3-5.html" class="flex-1 text-center px-6 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-xl text-purple-400 font-semibold transition-colors">
+                        Próximo Módulo →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-600 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
+    </script>
+</body>
+</html>

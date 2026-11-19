@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 3.6 - Prática: agentificando um software real | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Part 1 - Base overrides */
+        html:not(.dark) body { background-color: #f8fafc; color: #1f2937; }
+        html:not(.dark) .bg-dark-900, html:not(.dark) .bg-dark-800, html:not(.dark) .bg-dark-700 { background-color: #ffffff !important; }
+        html:not(.dark) .border-dark-600, html:not(.dark) .border-dark-700 { border-color: #e5e7eb !important; }
+        html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-neutral-400, html:not(.dark) .text-neutral-300 { color: #6b7280 !important; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af !important; }
+        html:not(.dark) .text-neutral-200 { color: #374151 !important; }
+        html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-700\/50 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .hover\:bg-dark-700:hover { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-dark-800\/80 { background-color: #f9fafb !important; }
+
+        /* Part 2 - Purple accent */
+        html:not(.dark) .text-purple-400 { color: #7c3aed !important; }
+        html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124, 58, 237, 0.1) !important; }
+        html:not(.dark) .border-purple-500\/30 { border-color: rgba(124, 58, 237, 0.2) !important; }
+        html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124, 58, 237, 0.08) !important; }
+        html:not(.dark) .bg-purple-500 { background-color: #7c3aed !important; }
+        html:not(.dark) .ring-purple-500\/20 { --tw-ring-color: rgba(124, 58, 237, 0.15) !important; }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-purple-900\/30 { --tw-gradient-from: rgba(124, 58, 237, 0.05) !important; }
+        html:not(.dark) .to-transparent { --tw-gradient-to: transparent !important; }
+        html:not(.dark) .bg-gradient-to-b, html:not(.dark) .bg-gradient-to-r { background: #ffffff !important; }
+        html:not(.dark) .header-gradient { background: linear-gradient(to bottom, rgba(124, 58, 237, 0.06), transparent) !important; }
+        html:not(.dark) .text-primary { color: #b45309 !important; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(180, 83, 9, 0.08) !important; }
+        html:not(.dark) .border-primary\/30 { border-color: rgba(180, 83, 9, 0.2) !important; }
+        html:not(.dark) .text-sky-400 { color: #0369a1 !important; }
+        html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3, 105, 161, 0.08) !important; }
+        html:not(.dark) .border-sky-500\/30 { border-color: rgba(3, 105, 161, 0.2) !important; }
+        html:not(.dark) .text-yellow-400 { color: #b45309 !important; }
+        html:not(.dark) .text-red-400 { color: #dc2626 !important; }
+        html:not(.dark) .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08) !important; }
+        html:not(.dark) .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.2) !important; }
+        html:not(.dark) .text-emerald-400 { color: #059669 !important; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08) !important; }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.2) !important; }
+
+        /* Part 4 - Nav */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        html:not(.dark) nav { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #e5e7eb !important; }
+        html:not(.dark) footer { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+                        <span class="text-2xl">⚡</span>
+                        <span class="font-bold text-lg hidden sm:inline">CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <a href="../trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Fundamentos</span></a>
+                    <a href="../trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Arquitetura</span></a>
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-purple-400 bg-purple-500/10"><span class="sm:hidden">T3</span><span class="hidden sm:inline">CLI-Anything</span></a>
+                    <a href="../trilha4/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Ecossistema</span></a>
+                    <a href="../trilha5/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-teal-400 hover:bg-teal-500/10 transition-colors"><span class="sm:hidden">T5</span><span class="hidden sm:inline">Projetos</span></a>
+                    <a href="../trilha6/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"><span class="sm:hidden">T6</span><span class="hidden sm:inline">Estratégia</span></a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-2">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm text-neutral-400 mb-8">
+            <a href="../../index.html" class="hover:text-purple-400 transition-colors">Início</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-purple-400 transition-colors">Trilha 3</a>
+            <span>/</span>
+            <span class="text-purple-400">Módulo 3.6</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header-gradient bg-gradient-to-b from-purple-900/30 to-transparent rounded-2xl p-8 mb-12 border border-purple-500/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold tracking-wider uppercase">Módulo 3.6</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Prático</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Prática: agentificando um software real</h1>
+            <p class="text-lg text-neutral-300 mb-6 max-w-3xl">Hands-on completo: da escolha do software-alvo à publicação do CLI, passando por setup, execução do pipeline, avaliação, refinamento e distribuição.</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-purple-400 font-bold">6</span>
+                    <span class="text-neutral-400 text-sm">Tópicos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-purple-400 font-bold">40</span>
+                    <span class="text-neutral-400 text-sm">Minutos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-purple-400 font-bold">Avançado</span>
+                    <span class="text-neutral-400 text-sm">Nível</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-purple-400 font-bold">Prático</span>
+                    <span class="text-neutral-400 text-sm">Tipo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 1 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">1</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🎯 Escolhendo o alvo</h2>
+                    <p class="text-neutral-300 leading-relaxed">O sucesso de CLI-Anything começa com a <span class="text-purple-400 font-semibold">escolha correta do software-alvo</span>. Critérios claros evitam frustração e maximizam a chance de gerar um CLI real e funcional.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Checklist de seleção</h3>
+                    <div class="space-y-3 text-neutral-200 text-sm">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>Código aberto:</strong> repositório público no GitHub/GitLab com licença permissiva</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>Backend separado da UI:</strong> diretórios distintos para API/lógica e interface gráfica</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>API interna identificável:</strong> REST endpoints, GraphQL, ou funções exportadas</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>Tamanho médio:</strong> 5K-50K LOC — nem trivial demais, nem massivo demais</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>Roda localmente:</strong> pode ser executado na sua máquina (Docker, npm start, etc.)</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>Operações repetitivas:</strong> CRUD, queries, exports — coisas que se beneficiam de CLI</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+                        <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-4">✅ Bons candidatos</h3>
+                        <ul class="space-y-2 text-neutral-200 text-sm">
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>App de notas com API REST (Trilium, Joplin server)</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Sistema de tarefas (Kanboard, Vikunja)</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Ferramenta de bookmarks (Linkding, Shiori)</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>CMS headless (Strapi, Directus)</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span>Dashboard de monitoramento (Uptime Kuma)</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                        <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-4">❌ Evitar</h3>
+                        <ul class="space-y-2 text-neutral-200 text-sm">
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Jogos (toda lógica é visual/interativa)</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Editores gráficos puros (Excalidraw, tldraw)</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Apps SPA sem backend (toda lógica no browser)</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Software com toda lógica em stored procedures</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Projetos > 200K LOC (contexto excede limites)</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">2</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔧 Setup do ambiente</h2>
+                    <p class="text-neutral-300 leading-relaxed">Antes de rodar o pipeline, você precisa de um <span class="text-purple-400 font-semibold">ambiente preparado</span>: agente CLI instalado, software-alvo clonado e funcionando localmente.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Timeline -->
+                <div class="space-y-4">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider">Setup passo a passo</h3>
+                    <div class="relative border-l-2 border-purple-500/30 pl-6 space-y-6">
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">1. Instalar pré-requisitos</p>
+                            <div class="bg-dark-800 rounded-lg p-3 mt-2 font-mono text-sm text-neutral-300">
+                                <pre class="whitespace-pre-wrap"># Node.js 18+ (necessário para maioria dos CLIs gerados)
+node --version  # v18.x ou superior
+
+# Agente CLI (escolha um)
+npm install -g @anthropic-ai/claude-code  # Claude Code
+npm install -g @anthropic-ai/gemini-cli   # Ou Gemini CLI</pre>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">2. Clonar o software-alvo</p>
+                            <div class="bg-dark-800 rounded-lg p-3 mt-2 font-mono text-sm text-neutral-300">
+                                <pre class="whitespace-pre-wrap"># Exemplo: Linkding (bookmark manager)
+git clone https://github.com/sissbruecker/linkding.git
+cd linkding</pre>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">3. Verificar que roda localmente</p>
+                            <div class="bg-dark-800 rounded-lg p-3 mt-2 font-mono text-sm text-neutral-300">
+                                <pre class="whitespace-pre-wrap"># Seguir instruções do README do projeto
+docker compose up -d  # ou npm start, python manage.py runserver etc.
+
+# Verificar que está acessível
+curl http://localhost:9090/api/  # Deve retornar resposta</pre>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">4. Configurar o agente</p>
+                            <div class="bg-dark-800 rounded-lg p-3 mt-2 font-mono text-sm text-neutral-300">
+                                <pre class="whitespace-pre-wrap"># Configurar API key
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# Abrir o agente no diretório do projeto
+claude  # ou gemini</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica de economia</h3>
+                    <p class="text-neutral-200 leading-relaxed">O pipeline consome tokens significativos. Antes de rodar no projeto completo, faça um teste em um projeto pequeno (ex: um TODO app simples com < 1K LOC) para validar que seu ambiente está configurado corretamente. Isso evita gastar tokens em execuções que falham por problemas de setup.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 3 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">3</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📋 Executando o pipeline</h2>
+                    <p class="text-neutral-300 leading-relaxed">Com o ambiente pronto, é hora de <span class="text-purple-400 font-semibold">executar o pipeline CLI-Anything</span>. O processo é orquestrado pelo agente e leva de 15 a 45 minutos dependendo da complexidade.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Passo a passo da execução</h3>
+                    <div class="bg-dark-800 rounded-lg p-4 font-mono text-sm text-neutral-300 overflow-x-auto">
+                        <pre class="whitespace-pre-wrap">
+# Dentro do agente, no diretório do projeto:
+
+> /cli-anything
+
+# O agente inicia o pipeline automaticamente:
+# [Fase 1/7] Analisando estrutura do projeto...
+#   ✓ Linguagem: Python (Django)
+#   ✓ Framework: Django REST Framework
+#   ✓ Diretórios: bookmarks/, api/, templates/
+#
+# [Fase 2/7] Mapeando arquitetura...
+#   ✓ 4 domínios identificados: bookmarks, tags, users, settings
+#   ✓ 12 endpoints REST mapeados
+#   ✓ 8 modelos de dados encontrados
+#
+# [Fase 3/7] Projetando CLI...
+#   ✓ 18 comandos definidos
+#   ✓ Árvore: linkding [bookmarks|tags|users|config] [action]
+#
+# [Fase 4/7] Implementando...
+#   ✓ Gerando handlers, state manager, REPL
+#   ✓ Integração via REST API (localhost:9090)
+#
+# [Fase 5/7] Gerando testes...
+#   ✓ 42 testes gerados (28 unitários, 14 E2E)
+#
+# [Fase 6/7] Gerando documentação...
+#   ✓ README.md, --help para cada comando
+#
+# [Fase 7/7] Gerando SKILL.md...
+#   ✓ SKILL.md com 18 comandos documentados
+#
+# ✓ Pipeline completo! CLI gerada em ./linkding-cli/</pre>
+                    </div>
+                </div>
+
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 O que esperar em cada fase</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Fases 1-2 (5-10 min):</span> O agente lê muitos arquivos, faz perguntas sobre a estrutura, gera o architecture map</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Fase 3 (3-5 min):</span> Decisões de design — pode perguntar sobre preferências de nomenclatura</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Fase 4 (10-20 min):</span> A mais longa — geração de código real, muitas iterações internas</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Fases 5-7 (5-10 min):</span> Geração de testes, docs, SKILL.md — mais rápido pois é baseado no código já gerado</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">4</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔍 Avaliando o resultado</h2>
+                    <p class="text-neutral-300 leading-relaxed">Após o pipeline completar, é hora de <span class="text-purple-400 font-semibold">avaliar sistematicamente</span> o resultado. Não confie cegamente — verifique cada aspecto do CLI gerado.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Checklist de avaliação</h3>
+                    <div class="space-y-3 text-neutral-200 text-sm">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>Cobertura:</strong> Os comandos gerados cobrem as funcionalidades principais do software?</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>Saída JSON:</strong> <code class="bg-dark-700 px-1 rounded text-purple-400">myapp bookmarks list --json</code> retorna JSON válido com estrutura padronizada?</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>REPL:</strong> <code class="bg-dark-700 px-1 rounded text-purple-400">myapp repl</code> funciona com auto-complete e histórico?</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>Estado:</strong> Auth persiste entre comandos? Contexto mantido?</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>Integração real:</strong> Crie algo via CLI e verifique se aparece na GUI do software original</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>Testes:</strong> <code class="bg-dark-700 px-1 rounded text-purple-400">npm test</code> (ou equivalente) passa? Quantos falham?</span>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-purple-400 font-bold text-lg leading-none">□</span>
+                            <span><strong>SKILL.md:</strong> Está completo e reflete os comandos realmente implementados?</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                    <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">🚨 Red flags na avaliação</h3>
+                    <ul class="space-y-3 text-neutral-200 text-sm">
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>CLI cria dados em arquivo JSON local em vez de chamar a API do software</span></li>
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Testes passam mas estão testando mocks, não o software real</span></li>
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>SKILL.md lista comandos que não existem no código gerado</span></li>
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span>Todos os comandos retornam dados estáticos (hardcoded)</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">5</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔄 Iterando e refinando</h2>
+                    <p class="text-neutral-300 leading-relaxed">Quando o resultado não é bom (e na primeira vez raramente é perfeito), o <span class="text-purple-400 font-semibold">refinamento iterativo</span> é a chave. Feedback específico ao agente produz melhorias significativas.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Técnicas de refinamento</h3>
+                    <div class="space-y-4 text-neutral-200 text-sm">
+                        <div>
+                            <span class="text-purple-400 font-bold">Feedback específico:</span>
+                            <div class="bg-dark-800 rounded-lg p-3 mt-2 font-mono text-xs text-neutral-300">
+                                <pre class="whitespace-pre-wrap">> O comando bookmarks list está retornando dados mockados.
+> A API real está em http://localhost:9090/api/bookmarks/
+> O token de auth é passado via header "Authorization: Token xxx".
+> Refaça a integração usando a API real.</pre>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-purple-400 font-bold">Hints sobre a arquitetura:</span>
+                            <div class="bg-dark-800 rounded-lg p-3 mt-2 font-mono text-xs text-neutral-300">
+                                <pre class="whitespace-pre-wrap">> O software usa Django REST Framework. Os viewsets estão em
+> bookmarks/api/serializers.py e bookmarks/api/views.py.
+> O modelo principal é Bookmark em bookmarks/models.py.
+> Há filtros em bookmarks/api/filters.py.</pre>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-purple-400 font-bold">Corrigir mapeamentos:</span>
+                            <div class="bg-dark-800 rounded-lg p-3 mt-2 font-mono text-xs text-neutral-300">
+                                <pre class="whitespace-pre-wrap">> Faltam comandos para: tags management, bookmark sharing,
+> bulk import/export. Adicione esses domínios.
+> Também preciso do comando "bookmarks search --query TERM".</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Regra prática: 3 iterações</h3>
+                    <p class="text-neutral-200 leading-relaxed"><strong>Iteração 1:</strong> Pipeline gera CLI básica, possivelmente com mocks. <strong>Iteração 2:</strong> Feedback corrige integração, adiciona comandos faltantes, fixa output JSON. <strong>Iteração 3:</strong> Polish — melhorar mensagens de erro, adicionar edge cases nos testes, refinar SKILL.md. Na maioria dos casos, 3 iterações produzem um CLI publicável.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 6 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">6</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🚀 Publicando e distribuindo</h2>
+                    <p class="text-neutral-300 leading-relaxed">Com o CLI refinado e testado, é hora de <span class="text-purple-400 font-semibold">publicar e distribuir</span> — tornando o CLI acessível para humanos e agentes no ecossistema mais amplo.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Canais de distribuição</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-purple-400 font-bold text-sm">npm (Node.js CLIs)</span>
+                            <p class="text-neutral-400 text-xs mt-1"><code>npm publish</code> — instalável via <code>npm install -g myapp-cli</code></p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-purple-400 font-bold text-sm">PyPI (Python CLIs)</span>
+                            <p class="text-neutral-400 text-xs mt-1"><code>pip install myapp-cli</code> — via twine upload</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-purple-400 font-bold text-sm">GitHub Releases</span>
+                            <p class="text-neutral-400 text-xs mt-1">Binários compilados para Linux, macOS, Windows</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-purple-400 font-bold text-sm">Docker Hub</span>
+                            <p class="text-neutral-400 text-xs mt-1"><code>docker run myapp-cli bookmarks list</code></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Integração com agentes</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Claude Code:</span> Colocar SKILL.md no projeto ou em ~/.claude/skills/ para ser reconhecido como tool</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Gemini CLI:</span> Registrar como extensão no diretório de extensions com manifest</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">MCP:</span> Converter SKILL.md em tool definitions e publicar como MCP server</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Docker MCP Catalog:</span> Registrar no catálogo para descoberta automática por agentes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 CLI como produto</h3>
+                    <p class="text-neutral-200 leading-relaxed">O conceito de "CLI como produto" vai além de distribuição técnica. Um CLI bem feito e bem documentado agrega valor ao software original: permite automação, integração com agentes, scripting avançado. Alguns mantenedores de projetos open-source adotam CLIs geradas por CLI-Anything como <strong>parte oficial do projeto</strong>, publicando junto com releases.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumo Final -->
+        <section class="mb-12">
+            <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-2xl p-8">
+                <h2 class="text-2xl font-bold text-white mb-6">Resumo Final</h2>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Escolher o alvo certo (backend separado, API identificável, 5-50K LOC) determina o sucesso do pipeline</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Setup: agente CLI instalado, software rodando localmente, API acessível — validar antes de rodar o pipeline</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">O pipeline leva 15-45 min e gera CLI completa com handlers, REPL, testes, docs e SKILL.md</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Avaliar sempre: verificar integração real vs mock, cobertura de funcionalidades, qualidade do output JSON</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">3 iterações de refinamento com feedback específico produzem um CLI publicável na maioria dos casos</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Publicar via npm/PyPI/GitHub Releases e integrar com agentes via SKILL.md, MCP ou extensões</span>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800/50 rounded-xl p-4 mb-6 border border-dark-600">
+                    <p class="text-neutral-300"><span class="text-purple-400 font-semibold">Trilha completa!</span> Você agora domina CLI-Anything — da teoria à prática. Na próxima trilha, vamos explorar o ecossistema mais amplo de agentes CLI: MCP, extensões, catálogos de ferramentas e o futuro da interação agente-software.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="modulo-3-5.html" class="flex-1 text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-neutral-300 font-semibold transition-colors">
+                        ← Módulo Anterior
+                    </a>
+                    <a href="../trilha4/index.html" class="flex-1 text-center px-6 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-xl text-purple-400 font-semibold transition-colors">
+                        Trilha 4: Ecossistema →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-600 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
+    </script>
+</body>
+</html>

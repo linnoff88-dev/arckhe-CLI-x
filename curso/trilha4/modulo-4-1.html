@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 4.1 - Gemini CLI: o agente terminal do Google | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Part 1 - Base overrides */
+        html:not(.dark) body { background-color: #f8fafc; color: #1f2937; }
+        html:not(.dark) .bg-dark-900, html:not(.dark) .bg-dark-800, html:not(.dark) .bg-dark-700 { background-color: #ffffff !important; }
+        html:not(.dark) .border-dark-600, html:not(.dark) .border-dark-700 { border-color: #e5e7eb !important; }
+        html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-neutral-400, html:not(.dark) .text-neutral-300 { color: #6b7280 !important; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af !important; }
+        html:not(.dark) .text-neutral-200 { color: #374151 !important; }
+        html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-700\/50 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .hover\:bg-dark-700:hover { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-dark-800\/80 { background-color: #f9fafb !important; }
+
+        /* Part 2 - Amber accent */
+        html:not(.dark) .text-amber-400 { color: #92400e !important; }
+        html:not(.dark) .bg-amber-500\/20 { background-color: rgba(217, 119, 6, 0.1) !important; }
+        html:not(.dark) .border-amber-500\/30 { border-color: rgba(217, 119, 6, 0.2) !important; }
+        html:not(.dark) .bg-amber-500\/10 { background-color: rgba(217, 119, 6, 0.08) !important; }
+        html:not(.dark) .bg-amber-500 { background-color: #d97706 !important; }
+        html:not(.dark) .ring-amber-500\/20 { --tw-ring-color: rgba(217, 119, 6, 0.15) !important; }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-amber-900\/30 { --tw-gradient-from: rgba(217, 119, 6, 0.05) !important; }
+        html:not(.dark) .to-transparent { --tw-gradient-to: transparent !important; }
+        html:not(.dark) .bg-gradient-to-b, html:not(.dark) .bg-gradient-to-r { background: #ffffff !important; }
+        html:not(.dark) .header-gradient { background: linear-gradient(to bottom, rgba(217, 119, 6, 0.06), transparent) !important; }
+        html:not(.dark) .text-primary { color: #b45309 !important; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(180, 83, 9, 0.08) !important; }
+        html:not(.dark) .border-primary\/30 { border-color: rgba(180, 83, 9, 0.2) !important; }
+        html:not(.dark) .text-sky-400 { color: #0369a1 !important; }
+        html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3, 105, 161, 0.08) !important; }
+        html:not(.dark) .border-sky-500\/30 { border-color: rgba(3, 105, 161, 0.2) !important; }
+        html:not(.dark) .text-yellow-400 { color: #b45309 !important; }
+        html:not(.dark) .text-red-400 { color: #dc2626 !important; }
+        html:not(.dark) .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08) !important; }
+        html:not(.dark) .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.2) !important; }
+        html:not(.dark) .text-emerald-400 { color: #059669 !important; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08) !important; }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.2) !important; }
+
+        /* Part 4 - Nav */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        html:not(.dark) nav { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #e5e7eb !important; }
+        html:not(.dark) footer { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+                        <span class="text-2xl">⚡</span>
+                        <span class="font-bold text-lg hidden sm:inline">CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <a href="../trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Fundamentos</span></a>
+                    <a href="../trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Arquitetura</span></a>
+                    <a href="../trilha3/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-purple-400 hover:bg-purple-500/10 transition-colors"><span class="sm:hidden">T3</span><span class="hidden sm:inline">CLI-Anything</span></a>
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-amber-400 bg-amber-500/10"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Ecossistema</span></a>
+                    <a href="../trilha5/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-teal-400 hover:bg-teal-500/10 transition-colors"><span class="sm:hidden">T5</span><span class="hidden sm:inline">Projetos</span></a>
+                    <a href="../trilha6/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"><span class="sm:hidden">T6</span><span class="hidden sm:inline">Estratégia</span></a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-2">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm text-neutral-400 mb-8">
+            <a href="../../index.html" class="hover:text-amber-400 transition-colors">Início</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-amber-400 transition-colors">Trilha 4</a>
+            <span>/</span>
+            <span class="text-amber-400">Módulo 4.1</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header-gradient bg-gradient-to-b from-amber-900/30 to-transparent rounded-2xl p-8 mb-12 border border-amber-500/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-xs font-bold tracking-wider uppercase">Módulo 4.1</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Análise</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Gemini CLI: o agente terminal do Google</h1>
+            <p class="text-lg text-neutral-300 mb-6 max-w-3xl">O agente open source do Google que traz o poder do Gemini direto para o terminal. Coding, pesquisa, geração de conteúdo, automação e resolução de problemas -- tudo via linha de comando.</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-amber-400 font-bold">6</span>
+                    <span class="text-neutral-400 text-sm">Tópicos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-amber-400 font-bold">35</span>
+                    <span class="text-neutral-400 text-sm">Minutos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-amber-400 font-bold">Intermediário</span>
+                    <span class="text-neutral-400 text-sm">Nível</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-amber-400 font-bold">Análise</span>
+                    <span class="text-neutral-400 text-sm">Tipo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 1 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-amber-400 font-bold text-lg">1</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🌐 O que é Gemini CLI</h2>
+                    <p class="text-neutral-300 leading-relaxed">Um agente open source do Google que traz o poder do modelo Gemini direto para o terminal. <span class="text-amber-400 font-semibold">Não é apenas um chatbot</span> — é um agente completo capaz de ler arquivos, executar comandos, buscar na web e resolver problemas complexos.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-amber-900/30 to-transparent border border-amber-500/30 rounded-xl p-6">
+                    <h3 class="text-amber-400 font-bold text-sm uppercase tracking-wider mb-3">Conceito Principal</h3>
+                    <p class="text-neutral-200 leading-relaxed mb-4">Gemini CLI é o agente terminal oficial do Google, disponível como projeto open source. Ele conecta o modelo Gemini diretamente ao seu terminal, permitindo uso geral:</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                            <span class="text-amber-400 font-bold text-sm">Coding</span>
+                            <p class="text-neutral-400 text-xs mt-1">Editar e gerar código</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                            <span class="text-amber-400 font-bold text-sm">Pesquisa</span>
+                            <p class="text-neutral-400 text-xs mt-1">Busca na internet</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                            <span class="text-amber-400 font-bold text-sm">Conteúdo</span>
+                            <p class="text-neutral-400 text-xs mt-1">Geração de texto</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                            <span class="text-amber-400 font-bold text-sm">Problemas</span>
+                            <p class="text-neutral-400 text-xs mt-1">Debug e resolução</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                            <span class="text-amber-400 font-bold text-sm">Automação</span>
+                            <p class="text-neutral-400 text-xs mt-1">Tarefas repetitivas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">Repositório oficial: <span class="text-amber-400 font-semibold">github.com/google-gemini/gemini-cli</span>. O projeto foi lançado como open source e aceita contribuições da comunidade. Posicionamento: ser o agente universal do terminal — não apenas para coding, mas para qualquer tarefa que envolva texto, arquivos e automação.</p>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Por que isso importa</h3>
+                    <p class="text-neutral-200 leading-relaxed">Diferente de chatbots web, o Gemini CLI opera diretamente no seu ambiente local. Ele pode ler seus arquivos, executar scripts, acessar a internet e encadear operações complexas. Isso muda o paradigma: de "perguntar e copiar" para "pedir e executar".</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-amber-400 font-bold text-lg">2</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🛠️ Ferramentas embutidas</h2>
+                    <p class="text-neutral-300 leading-relaxed">Gemini CLI vem com ferramentas nativas que são as <span class="text-amber-400 font-semibold">"mãos" do agente</span> — capacidades concretas para interagir com o mundo real a partir do terminal.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Ferramentas nativas</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Shell execution:</span> executa comandos no terminal e lê o output — o agente pode rodar scripts, instalar pacotes, compilar código</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">File read/write:</span> lê e escreve arquivos no filesystem — edição de código, criação de configs, análise de logs</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Web search:</span> busca na internet usando Google Search — pesquisa de documentação, exemplos, soluções</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Web fetch:</span> baixa conteúdo de URLs — lê páginas web, APIs, documentação online diretamente</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">O conceito fundamental é que <span class="text-amber-400 font-semibold">ferramentas são as "mãos" do agente</span>. Sem ferramentas, um LLM é apenas um gerador de texto. Com ferramentas, ele se torna um agente capaz de agir no mundo. Gemini CLI já vem equipado com as ferramentas mais essenciais para operar no terminal: ler, escrever, executar e pesquisar.</p>
+
+                <div class="bg-gradient-to-r from-amber-900/30 to-transparent border border-amber-500/30 rounded-xl p-6">
+                    <h3 class="text-amber-400 font-bold text-sm uppercase tracking-wider mb-3">Fluxo típico</h3>
+                    <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 text-center">
+                        <div class="bg-dark-800 rounded-lg px-4 py-3 border border-dark-600">
+                            <span class="text-amber-400 font-bold">Prompt</span>
+                            <p class="text-neutral-400 text-sm mt-1">"Corrija o bug em app.py"</p>
+                        </div>
+                        <span class="text-amber-400 text-xl">→</span>
+                        <div class="bg-dark-800 rounded-lg px-4 py-3 border border-dark-600">
+                            <span class="text-amber-400 font-bold">File read</span>
+                            <p class="text-neutral-400 text-sm mt-1">Lê app.py</p>
+                        </div>
+                        <span class="text-amber-400 text-xl">→</span>
+                        <div class="bg-dark-800 rounded-lg px-4 py-3 border border-dark-600">
+                            <span class="text-amber-400 font-bold">File write</span>
+                            <p class="text-neutral-400 text-sm mt-1">Aplica correção</p>
+                        </div>
+                        <span class="text-amber-400 text-xl">→</span>
+                        <div class="bg-dark-800 rounded-lg px-4 py-3 border border-dark-600">
+                            <span class="text-amber-400 font-bold">Shell</span>
+                            <p class="text-neutral-400 text-sm mt-1">Roda testes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 3 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-amber-400 font-bold text-lg">3</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🧩 Extensões</h2>
+                    <p class="text-neutral-300 leading-relaxed">O sistema de extensões do Gemini CLI vai além de plugins simples — empacota <span class="text-amber-400 font-semibold">MCP servers, prompts, comandos, hooks, sub-agents e skills</span> num único modelo de distribuição.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="space-y-4">
+                    <h3 class="text-amber-400 font-bold text-sm uppercase tracking-wider">O que uma extensão empacota</h3>
+                    <div class="relative border-l-2 border-amber-500/30 pl-6 space-y-6">
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-amber-500 border-2 border-dark-900"></div>
+                            <p class="text-amber-400 font-bold text-sm">MCP Servers</p>
+                            <p class="text-neutral-300 text-sm">Servidores MCP que expõem ferramentas adicionais ao agente — acesso a bancos de dados, APIs externas, serviços cloud.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-amber-500 border-2 border-dark-900"></div>
+                            <p class="text-amber-400 font-bold text-sm">Prompts customizados</p>
+                            <p class="text-neutral-300 text-sm">Templates de prompts pré-configurados para tarefas específicas — review de código, análise de segurança, geração de docs.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-amber-500 border-2 border-dark-900"></div>
+                            <p class="text-amber-400 font-bold text-sm">Comandos</p>
+                            <p class="text-neutral-300 text-sm">Novos comandos slash disponíveis no chat — atalhos para workflows complexos.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-amber-500 border-2 border-dark-900"></div>
+                            <p class="text-amber-400 font-bold text-sm">Hooks</p>
+                            <p class="text-neutral-300 text-sm">Callbacks pré/pós execução de ferramentas — logging, validação, transformação de output.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-amber-500 border-2 border-dark-900"></div>
+                            <p class="text-amber-400 font-bold text-sm">Sub-agents e Skills</p>
+                            <p class="text-neutral-300 text-sm">Agentes especializados e conjuntos de habilidades que o agente principal pode invocar para tarefas específicas.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">A configuração de extensões é feita via arquivo JSON no projeto ou globalmente. O ecossistema inclui extensões oficiais do Google, de parceiros e da comunidade. O blog oficial detalha o sistema de extensões e como criar as suas próprias.</p>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Dica prática</h3>
+                    <p class="text-neutral-200 leading-relaxed">Comece explorando extensões da comunidade antes de criar a sua. O ecossistema de extensões já cobre os casos de uso mais comuns: GitHub, Jira, bancos de dados SQL, APIs REST. Criar extensões próprias faz sentido para ferramentas internas e workflows específicos do seu time.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-amber-400 font-bold text-lg">4</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔒 Sandbox e segurança</h2>
+                    <p class="text-neutral-300 leading-relaxed">Um agente com acesso ao terminal é poderoso — e perigoso. Gemini CLI implementa <span class="text-amber-400 font-semibold">sandbox e políticas configuráveis</span> para controlar o que o agente pode e não pode fazer.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+                        <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-4">✅ Com sandbox</h3>
+                        <ul class="space-y-3 text-neutral-200 text-sm">
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Isolamento:</strong> comandos rodam em ambiente isolado, sem acesso irrestrito ao sistema</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Políticas:</strong> regras configuráveis definem quais diretórios, comandos e recursos são acessíveis</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Aprovação:</strong> comandos potencialmente perigosos requerem confirmação do usuário</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Auditoria:</strong> log detalhado de todas as ações executadas pelo agente</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                        <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-4">⚠️ Riscos sem sandbox</h3>
+                        <ul class="space-y-3 text-neutral-200 text-sm">
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>rm -rf /:</strong> sem controle, um agente pode deletar arquivos críticos</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Exfiltração:</strong> pode enviar dados sensíveis para URLs externas</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Instalação:</strong> pode instalar software malicioso sem que o usuário saiba</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Configuração:</strong> pode alterar configs do sistema, SSH keys, credenciais</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">O modo sandbox é documentado em detalhe no repositório oficial. A documentação de sandboxing do Gemini CLI descreve como configurar diferentes níveis de isolamento dependendo do caso de uso — desde desenvolvimento local até ambientes de produção.</p>
+
+                <div class="bg-gradient-to-r from-amber-900/30 to-transparent border border-amber-500/30 rounded-xl p-6">
+                    <h3 class="text-amber-400 font-bold text-sm uppercase tracking-wider mb-3">Níveis de confiança</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                            <span class="text-emerald-400 font-bold text-sm">Restrito</span>
+                            <p class="text-neutral-400 text-xs mt-1">Só leitura, sem shell</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                            <span class="text-amber-400 font-bold text-sm">Padrão</span>
+                            <p class="text-neutral-400 text-xs mt-1">Aprovação por comando</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600 text-center">
+                            <span class="text-red-400 font-bold text-sm">Yolo</span>
+                            <p class="text-neutral-400 text-xs mt-1">Execução automática</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-amber-400 font-bold text-lg">5</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">⚙️ Configuração e setup</h2>
+                    <p class="text-neutral-300 leading-relaxed">Do zero ao primeiro uso: instalação, autenticação e configuração do Gemini CLI <span class="text-amber-400 font-semibold">em poucos minutos</span>.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="space-y-4">
+                    <h3 class="text-amber-400 font-bold text-sm uppercase tracking-wider">Passo a passo</h3>
+                    <div class="relative border-l-2 border-amber-500/30 pl-6 space-y-6">
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-amber-500 border-2 border-dark-900"></div>
+                            <p class="text-amber-400 font-bold text-sm">1. Instalação via npm</p>
+                            <p class="text-neutral-300 text-sm"><code class="bg-dark-700 px-2 py-0.5 rounded text-amber-400 text-sm">npm install -g @google/gemini-cli</code> — requer Node.js 18+. Também disponível via npx para uso sem instalação global.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-amber-500 border-2 border-dark-900"></div>
+                            <p class="text-amber-400 font-bold text-sm">2. Autenticação</p>
+                            <p class="text-neutral-300 text-sm">Login com conta Google. O CLI abre o navegador para OAuth. Suporta também API key para uso programático e em CI/CD.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-amber-500 border-2 border-dark-900"></div>
+                            <p class="text-amber-400 font-bold text-sm">3. Configuração</p>
+                            <p class="text-neutral-300 text-sm">Arquivo de configuração define modelo preferido, contexto padrão, ferramentas habilitadas e extensões. Pode ser global ou por projeto.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-amber-500 border-2 border-dark-900"></div>
+                            <p class="text-amber-400 font-bold text-sm">4. Primeiro uso</p>
+                            <p class="text-neutral-300 text-sm">Execute <code class="bg-dark-700 px-2 py-0.5 rounded text-amber-400 text-sm">gemini</code> no terminal. O agente carrega o contexto do diretório atual e está pronto para receber instruções.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Requisitos</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Node.js:</span> versão 18 ou superior</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Conta Google:</span> necessária para autenticação OAuth</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Custo:</span> uso gratuito com limites generosos; planos pagos para uso intensivo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 6 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-amber-400 font-bold text-lg">6</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔄 Gemini CLI vs outros</h2>
+                    <p class="text-neutral-300 leading-relaxed">Como o Gemini CLI se posiciona no ecossistema de agentes CLI? <span class="text-amber-400 font-semibold">Forças, fraquezas e quando escolhê-lo</span> em relação às alternativas.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6">
+                        <h3 class="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-4">✅ Forças</h3>
+                        <ul class="space-y-3 text-neutral-200 text-sm">
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Integração Google:</strong> acesso nativo a Google Cloud, Workspace e serviços</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Extensões ricas:</strong> ecossistema de extensões com MCP, hooks, sub-agents</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Modelo Gemini:</strong> contexto longo, multimodal, raciocínio forte</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-emerald-400 mt-0.5">•</span><span><strong>Open source:</strong> código aberto, auditável, extensível pela comunidade</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                        <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-4">⚠️ Fraquezas</h3>
+                        <ul class="space-y-3 text-neutral-200 text-sm">
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Dependência Google:</strong> requer conta Google para autenticação</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Ecossistema mais novo:</strong> menos extensões e integrações que concorrentes maduros</span></li>
+                            <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Lock-in parcial:</strong> extensões escritas para Gemini não rodam em outros CLIs diretamente</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Quando escolher Gemini CLI</h3>
+                    <p class="text-neutral-200 leading-relaxed">Gemini CLI é a melhor escolha quando seu time já opera no ecossistema Google: Google Cloud Platform, Google Workspace (Gmail, Drive, Calendar, Docs). A integração nativa com esses serviços — especialmente via extensões como gws — cria um fluxo de trabalho que nenhum outro agente CLI consegue igualar no contexto Google.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumo Final -->
+        <section class="mb-16">
+            <div class="bg-gradient-to-b from-amber-900/30 to-transparent rounded-2xl p-8 border border-amber-500/30">
+                <h2 class="text-2xl font-bold text-white mb-6">Resumo Final</h2>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-amber-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Gemini CLI é o agente terminal open source do Google — coding, pesquisa, automação e resolução de problemas</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-amber-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Ferramentas embutidas (shell, files, web search, web fetch) são as "mãos" que permitem ao agente agir no mundo</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-amber-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Extensões empacotam MCP servers, prompts, comandos, hooks e sub-agents em um modelo de distribuição unificado</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-amber-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Sandbox e políticas configuráveis controlam o que o agente pode executar — segurança é prioridade</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-amber-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Melhor escolha para times que operam no ecossistema Google (Cloud, Workspace)</span>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800/50 rounded-xl p-4 mb-6 border border-dark-600">
+                    <p class="text-neutral-300"><span class="text-amber-400 font-semibold">Próximo módulo:</span> Vamos explorar o Claude Code — a abordagem da Anthropic para desenvolvimento agêntico no terminal, com foco em edição de código, contexto longo e MCP.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="index.html" class="flex-1 text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-neutral-300 font-semibold transition-colors">
+                        ← Voltar para Trilha
+                    </a>
+                    <a href="modulo-4-2.html" class="flex-1 text-center px-6 py-3 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 rounded-xl text-amber-400 font-semibold transition-colors">
+                        Próximo Módulo →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-600 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
+    </script>
+</body>
+</html>

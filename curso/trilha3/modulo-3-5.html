@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo 3.5 - Testes, documentação e SKILL.md | CLI-x</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FACC15',
+                        dark: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            600: '#4b5563',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Part 1 - Base overrides */
+        html:not(.dark) body { background-color: #f8fafc; color: #1f2937; }
+        html:not(.dark) .bg-dark-900, html:not(.dark) .bg-dark-800, html:not(.dark) .bg-dark-700 { background-color: #ffffff !important; }
+        html:not(.dark) .border-dark-600, html:not(.dark) .border-dark-700 { border-color: #e5e7eb !important; }
+        html:not(.dark) .text-white { color: #111827 !important; }
+        html:not(.dark) .text-neutral-400, html:not(.dark) .text-neutral-300 { color: #6b7280 !important; }
+        html:not(.dark) .text-neutral-500 { color: #9ca3af !important; }
+        html:not(.dark) .text-neutral-200 { color: #374151 !important; }
+        html:not(.dark) .bg-dark-800\/50, html:not(.dark) .bg-dark-700\/50 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .hover\:bg-dark-700:hover { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-dark-800\/80 { background-color: #f9fafb !important; }
+
+        /* Part 2 - Purple accent */
+        html:not(.dark) .text-purple-400 { color: #7c3aed !important; }
+        html:not(.dark) .bg-purple-500\/20 { background-color: rgba(124, 58, 237, 0.1) !important; }
+        html:not(.dark) .border-purple-500\/30 { border-color: rgba(124, 58, 237, 0.2) !important; }
+        html:not(.dark) .bg-purple-500\/10 { background-color: rgba(124, 58, 237, 0.08) !important; }
+        html:not(.dark) .bg-purple-500 { background-color: #7c3aed !important; }
+        html:not(.dark) .ring-purple-500\/20 { --tw-ring-color: rgba(124, 58, 237, 0.15) !important; }
+
+        /* Part 3 - Remove gradients + special colors */
+        html:not(.dark) .from-purple-900\/30 { --tw-gradient-from: rgba(124, 58, 237, 0.05) !important; }
+        html:not(.dark) .to-transparent { --tw-gradient-to: transparent !important; }
+        html:not(.dark) .bg-gradient-to-b, html:not(.dark) .bg-gradient-to-r { background: #ffffff !important; }
+        html:not(.dark) .header-gradient { background: linear-gradient(to bottom, rgba(124, 58, 237, 0.06), transparent) !important; }
+        html:not(.dark) .text-primary { color: #b45309 !important; }
+        html:not(.dark) .bg-primary\/10 { background-color: rgba(180, 83, 9, 0.08) !important; }
+        html:not(.dark) .border-primary\/30 { border-color: rgba(180, 83, 9, 0.2) !important; }
+        html:not(.dark) .text-sky-400 { color: #0369a1 !important; }
+        html:not(.dark) .bg-sky-500\/10 { background-color: rgba(3, 105, 161, 0.08) !important; }
+        html:not(.dark) .border-sky-500\/30 { border-color: rgba(3, 105, 161, 0.2) !important; }
+        html:not(.dark) .text-yellow-400 { color: #b45309 !important; }
+        html:not(.dark) .text-red-400 { color: #dc2626 !important; }
+        html:not(.dark) .bg-red-500\/10 { background-color: rgba(220, 38, 38, 0.08) !important; }
+        html:not(.dark) .border-red-500\/30 { border-color: rgba(220, 38, 38, 0.2) !important; }
+        html:not(.dark) .text-emerald-400 { color: #059669 !important; }
+        html:not(.dark) .bg-emerald-500\/10 { background-color: rgba(5, 150, 105, 0.08) !important; }
+        html:not(.dark) .border-emerald-500\/30 { border-color: rgba(5, 150, 105, 0.2) !important; }
+
+        /* Part 4 - Nav */
+        html:not(.dark) .bg-dark-900\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
+        html:not(.dark) nav { background-color: rgba(255, 255, 255, 0.95) !important; border-color: #e5e7eb !important; }
+        html:not(.dark) footer { background-color: #ffffff !important; border-color: #e5e7eb !important; }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-dark-900/95 backdrop-blur-sm border-b border-dark-600">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <a href="../../index.html" class="flex items-center space-x-2 text-yellow-400 hover:text-yellow-300">
+                        <span class="text-2xl">⚡</span>
+                        <span class="font-bold text-lg hidden sm:inline">CLI-x</span>
+                    </a>
+                    <span class="text-neutral-600">|</span>
+                    <a href="https://inema.club" target="_blank" class="text-sky-400 hover:text-sky-300 text-sm font-medium">INEMA.CLUB</a>
+                </div>
+                <div class="flex items-center space-x-1 sm:space-x-2">
+                    <a href="../trilha1/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"><span class="sm:hidden">T1</span><span class="hidden sm:inline">Fundamentos</span></a>
+                    <a href="../trilha2/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"><span class="sm:hidden">T2</span><span class="hidden sm:inline">Arquitetura</span></a>
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-purple-400 bg-purple-500/10"><span class="sm:hidden">T3</span><span class="hidden sm:inline">CLI-Anything</span></a>
+                    <a href="../trilha4/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"><span class="sm:hidden">T4</span><span class="hidden sm:inline">Ecossistema</span></a>
+                    <a href="../trilha5/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-teal-400 hover:bg-teal-500/10 transition-colors"><span class="sm:hidden">T5</span><span class="hidden sm:inline">Projetos</span></a>
+                    <a href="../trilha6/index.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"><span class="sm:hidden">T6</span><span class="hidden sm:inline">Estratégia</span></a>
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 transition-colors ml-2">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-neutral-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center space-x-2 text-sm text-neutral-400 mb-8">
+            <a href="../../index.html" class="hover:text-purple-400 transition-colors">Início</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-purple-400 transition-colors">Trilha 3</a>
+            <span>/</span>
+            <span class="text-purple-400">Módulo 3.5</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="header-gradient bg-gradient-to-b from-purple-900/30 to-transparent rounded-2xl p-8 mb-12 border border-purple-500/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold tracking-wider uppercase">Módulo 3.5</span>
+                <span class="px-3 py-1 bg-dark-700 text-neutral-300 rounded-full text-xs font-medium">Técnico</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Testes, documentação e SKILL.md</h1>
+            <p class="text-lg text-neutral-300 mb-6 max-w-3xl">As fases finais do pipeline: testes automatizados para garantir qualidade, documentação para humanos e o SKILL.md que transforma o CLI em ferramenta operável por agentes LLM.</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-purple-400 font-bold">6</span>
+                    <span class="text-neutral-400 text-sm">Tópicos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-purple-400 font-bold">35</span>
+                    <span class="text-neutral-400 text-sm">Minutos</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-purple-400 font-bold">Intermediário-Avançado</span>
+                    <span class="text-neutral-400 text-sm">Nível</span>
+                </div>
+                <div class="flex items-center space-x-2 bg-dark-800/80 rounded-lg px-4 py-2">
+                    <span class="text-purple-400 font-bold">Técnico</span>
+                    <span class="text-neutral-400 text-sm">Tipo</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic 1 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">1</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🧪 Testes unitários gerados</h2>
+                    <p class="text-neutral-300 leading-relaxed">O pipeline gera automaticamente testes unitários para cada comando da CLI: <span class="text-purple-400 font-semibold">input válido, input inválido e edge cases</span>. A cobertura alvo é de pelo menos 3 cenários por comando.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Estrutura de testes por comando</h3>
+                    <div class="bg-dark-800 rounded-lg p-4 font-mono text-sm text-neutral-300 overflow-x-auto">
+                        <pre class="whitespace-pre-wrap">
+describe('users create', () => {
+  test('creates user with valid input', async () => {
+    const result = await cli('users create --name "João" --email j@x.com');
+    expect(result.status).toBe('success');
+    expect(result.data.user.name).toBe('João');
+    expect(result.data.user.id).toBeDefined();
+  });
+
+  test('rejects missing required field', async () => {
+    const result = await cli('users create --name "João"');
+    expect(result.status).toBe('error');
+    expect(result.errors[0].code).toBe('MISSING_REQUIRED');
+    expect(result.errors[0].field).toBe('email');
+  });
+
+  test('rejects invalid email format', async () => {
+    const result = await cli('users create --name "João" --email not-email');
+    expect(result.status).toBe('error');
+    expect(result.errors[0].code).toBe('INVALID_FORMAT');
+  });
+
+  test('handles duplicate email gracefully', async () => {
+    await cli('users create --name "João" --email j@x.com');
+    const result = await cli('users create --name "Ana" --email j@x.com');
+    expect(result.status).toBe('error');
+    expect(result.errors[0].code).toBe('DUPLICATE');
+  });
+});</pre>
+                    </div>
+                </div>
+
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 Métricas de cobertura típicas</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Comandos CRUD:</span> 4-6 testes cada (create, read, update, delete + edge cases)</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Comandos de query:</span> 3-5 testes cada (filtros, paginação, formato de saída)</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Auth:</span> 4-6 testes (login success, login fail, token expired, logout)</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Flags universais:</span> 2-3 testes (--json valida schema, --dry-run não muta, --verbose mostra debug)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 2 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">2</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔄 Testes E2E — fluxos completos</h2>
+                    <p class="text-neutral-300 leading-relaxed">Além dos testes unitários, o pipeline gera <span class="text-purple-400 font-semibold">testes end-to-end</span> que exercitam fluxos completos: criar → listar → editar → deletar, com verificação de estado e saída JSON.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Tipos de testes E2E</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-purple-400 font-bold text-sm">Fluxo CRUD completo</span>
+                            <p class="text-neutral-400 text-xs mt-1">create → list (verify exists) → update → get (verify change) → delete → list (verify gone)</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-purple-400 font-bold text-sm">Testes de REPL</span>
+                            <p class="text-neutral-400 text-xs mt-1">Sequência de comandos em sessão REPL com verificação de estado entre cada um</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-purple-400 font-bold text-sm">Testes de estado</span>
+                            <p class="text-neutral-400 text-xs mt-1">Login → execute command → logout → verify command fails without auth</p>
+                        </div>
+                        <div class="bg-dark-800 rounded-lg p-3 border border-dark-600">
+                            <span class="text-purple-400 font-bold text-sm">Testes de output JSON</span>
+                            <p class="text-neutral-400 text-xs mt-1">Validação do JSON contra schema: todos os campos obrigatórios, tipos corretos, estrutura padronizada</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">Testes E2E são particularmente importantes para CLI-Anything porque verificam se a integração com o software original é <span class="text-purple-400 font-semibold">real e funcional</span>. Se o teste E2E de "criar usuário → listar → verificar que existe" falha, isso indica que o CLI pode estar operando como mock, não controlando o software de verdade.</p>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Testes como detector de mocks</h3>
+                    <p class="text-neutral-200 leading-relaxed">O teste E2E mais revelador é o <strong>teste cruzado</strong>: criar algo via CLI e verificar na GUI (ou no banco de dados) se realmente foi criado. Se o pipeline gerou uma CLI mock, esse teste falha imediatamente. Incluir testes cruzados no refinamento é a melhor forma de garantir integração real.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 3 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">3</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📝 Documentação automática</h2>
+                    <p class="text-neutral-300 leading-relaxed">A Fase 6 gera documentação completa: <span class="text-purple-400 font-semibold">README.md, --help para cada comando e exemplos práticos</span> que servem tanto para humanos quanto como referência para agentes.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Timeline -->
+                <div class="space-y-4">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider">Artefatos de documentação</h3>
+                    <div class="relative border-l-2 border-purple-500/30 pl-6 space-y-6">
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">README.md</p>
+                            <p class="text-neutral-300 text-sm">Instalação (npm install -g, pip install, binary download), setup inicial (auth, config), quick start com 5-10 comandos essenciais, link para docs completas.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">--help integrado</p>
+                            <p class="text-neutral-300 text-sm">Cada comando e subcomando responde a --help com: descrição, argumentos, flags, exemplos de uso. Gerado a partir do command schema (Fase 3).</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">Exemplos práticos</p>
+                            <p class="text-neutral-300 text-sm">Cenários reais documentados: "Como criar um projeto do zero", "Como exportar relatório mensal", "Como configurar integração com CI/CD". Copy-pasteable.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">Changelog (em iterações)</p>
+                            <p class="text-neutral-300 text-sm">Quando o pipeline roda múltiplas iterações de refinamento, gera changelog documentando comandos adicionados, bugs corrigidos, outputs melhorados.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Exemplo de --help gerado</h3>
+                    <div class="bg-dark-800 rounded-lg p-4 font-mono text-sm text-neutral-300 overflow-x-auto">
+                        <pre class="whitespace-pre-wrap">
+$ myapp users create --help
+
+Usage: myapp users create [options] &lt;name&gt;
+
+Create a new user account in the system.
+
+Arguments:
+  name                    Full name of the user (required)
+
+Options:
+  --email &lt;email&gt;         Email address (required)
+  --role &lt;role&gt;           User role: admin, user, viewer (default: "user")
+  --active                Set user as active (default: true)
+  --format &lt;format&gt;       Output format: json, table, csv (default: "table")
+  --json                  Shortcut for --format json
+  --dry-run               Show what would be created without creating
+  -h, --help              Display this help message
+
+Examples:
+  $ myapp users create "João Silva" --email joao@example.com
+  $ myapp users create "Ana Costa" --email ana@x.com --role admin --json</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 4 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">4</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🤖 SKILL.md — O contrato para agentes LLM</h2>
+                    <p class="text-neutral-300 leading-relaxed">O SKILL.md é o artefato mais inovador do pipeline — funciona como <span class="text-purple-400 font-semibold">"documentação de API para agentes LLM"</span>, permitindo que qualquer agente saiba operar a CLI sem supervisão humana.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Estrutura do SKILL.md</h3>
+                    <div class="bg-dark-800 rounded-lg p-4 font-mono text-sm text-neutral-300 overflow-x-auto">
+                        <pre class="whitespace-pre-wrap">
+# MyApp CLI Tool
+
+## Description
+Command-line interface for managing projects, users and tasks
+in MyApp. Supports CRUD operations, queries with filters,
+data export, and interactive REPL mode.
+
+## Prerequisites
+- MyApp server running on localhost:3000
+- Authenticated session (run `myapp auth login` first)
+
+## Commands
+
+### Authentication
+- `myapp auth login --email EMAIL --password PASS`
+- `myapp auth logout`
+- `myapp auth status` — Check current auth state
+
+### Users
+- `myapp users list [--role ROLE] [--format json|table]`
+- `myapp users create --name NAME --email EMAIL [--role ROLE]`
+- `myapp users get ID [--format json]`
+- `myapp users update ID [--name NAME] [--role ROLE]`
+- `myapp users delete ID [--force]`
+
+### Tasks
+- `myapp tasks list [--status open|closed] [--assignee ID]`
+- `myapp tasks create --title TITLE [--assignee ID] [--priority 1-5]`
+- `myapp tasks complete ID`
+
+## Output Format
+All commands support `--json` flag for machine-readable output.
+JSON structure: { status, data, metadata, errors }
+
+## Limitations
+- Max 100 results per list query (use --page for pagination)
+- File uploads not supported via CLI
+- Real-time notifications not available (poll with list commands)
+
+## Error Handling
+Errors return JSON with status:"error" and errors array.
+Common codes: AUTH_REQUIRED, NOT_FOUND, VALIDATION_ERROR, DUPLICATE.</pre>
+                    </div>
+                </div>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Por que o SKILL.md muda tudo</h3>
+                    <p class="text-neutral-200 leading-relaxed">Sem SKILL.md, um agente LLM precisa ler toda a documentação, tentar comandos por trial-and-error, e pode cometer erros. Com SKILL.md, o agente <strong>sabe exatamente</strong> quais comandos existem, quais parâmetros são obrigatórios, qual o formato de saída e quais as limitações. A taxa de sucesso de agentes operando CLIs com SKILL.md é significativamente maior que sem ele.</p>
+                </div>
+
+                <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-6">
+                    <h3 class="text-sky-400 font-bold text-sm uppercase tracking-wider mb-3">📊 SKILL.md como padrão emergente</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Claude Code:</span> lê SKILL.md automaticamente quando está na raiz do projeto ou em .claude/</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">Gemini CLI:</span> extensões com SKILL.md são registradas como tools disponíveis</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                            <span class="text-neutral-200"><span class="font-semibold text-sky-400">MCP:</span> SKILL.md pode ser convertido em tool definitions para Model Context Protocol</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topic 5 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">5</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">📋 Manifest e metadata</h2>
+                    <p class="text-neutral-300 leading-relaxed">O pacote gerado inclui <span class="text-purple-400 font-semibold">metadata estruturada</span> (package.json, pyproject.toml ou equivalente) que facilita instalação, descoberta e integração com catálogos de ferramentas.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-xl p-6">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Metadata gerada para catálogos</h3>
+                    <div class="bg-dark-800 rounded-lg p-4 font-mono text-sm text-neutral-300 overflow-x-auto">
+                        <pre class="whitespace-pre-wrap">
+{
+  "name": "myapp-cli",
+  "version": "1.0.0",
+  "description": "CLI for MyApp - manage projects, users and tasks",
+  "bin": { "myapp": "./bin/myapp.js" },
+  "keywords": ["cli", "myapp", "agent-native", "cli-anything"],
+  "engines": { "node": ">=18" },
+  "cli-anything": {
+    "source": "https://github.com/org/myapp",
+    "generated": "2026-03-23",
+    "pipeline_version": "1.2.0",
+    "agent_compatibility": ["claude-code", "gemini-cli", "codex-cli"],
+    "integration_type": "api",
+    "commands_count": 15,
+    "has_repl": true,
+    "has_skill_md": true
+  }
+}</pre>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 leading-relaxed">A seção <code class="bg-dark-700 px-1 rounded text-purple-400">cli-anything</code> no manifest é metadata específica que catálogos de ferramentas usam para indexar o CLI: qual software foi agentificado, qual tipo de integração (API, biblioteca, mock), compatibilidade com agentes, e se tem SKILL.md. Isso facilita a <span class="text-purple-400 font-semibold">descoberta automática</span> por agentes procurando ferramentas.</p>
+            </div>
+        </section>
+
+        <!-- Topic 6 -->
+        <section class="mb-16">
+            <div class="flex items-start space-x-5 mb-6">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
+                    <span class="text-purple-400 font-bold text-lg">6</span>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">🔍 Refinamento iterativo</h2>
+                    <p class="text-neutral-300 leading-relaxed">O primeiro resultado do pipeline raramente é perfeito. O <span class="text-purple-400 font-semibold">refinamento iterativo</span> é parte fundamental do processo — tipicamente 2-3 ciclos são necessários para um CLI robusto.</p>
+                </div>
+            </div>
+
+            <div class="ml-0 sm:ml-17 space-y-6">
+                <!-- Timeline -->
+                <div class="space-y-4">
+                    <h3 class="text-purple-400 font-bold text-sm uppercase tracking-wider">Ciclo de refinamento</h3>
+                    <div class="relative border-l-2 border-purple-500/30 pl-6 space-y-6">
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">1. Gerar (pipeline completo)</p>
+                            <p class="text-neutral-300 text-sm">Executar as 7 fases pela primeira vez. Output: CLI v0.1 com comandos básicos.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">2. Testar (manual + automatizado)</p>
+                            <p class="text-neutral-300 text-sm">Rodar os testes gerados. Testar manualmente os comandos principais. Verificar integração real vs mock.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">3. Identificar gaps</p>
+                            <p class="text-neutral-300 text-sm">Comandos faltantes, outputs mal formatados, estado inconsistente, integração incompleta, erros de tipo.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">4. Refinar (feedback ao agente)</p>
+                            <p class="text-neutral-300 text-sm">Dar feedback específico ao agente: "o comando tasks list não retorna o campo assignee", "auth login não persiste o token". Re-executar fases relevantes.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-8 w-4 h-4 rounded-full bg-purple-500 border-2 border-dark-900"></div>
+                            <p class="text-purple-400 font-bold text-sm">5. Repetir (2-3x)</p>
+                            <p class="text-neutral-300 text-sm">Cada iteração melhora significativamente o resultado. Na terceira iteração, a maioria dos CLIs está funcional e robusta.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
+                    <h3 class="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">🚨 Áreas comuns que precisam de refinamento</h3>
+                    <ul class="space-y-3 text-neutral-200 text-sm">
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Comandos faltantes:</strong> funcionalidades importantes que o pipeline não mapeou</span></li>
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Outputs incompletos:</strong> campos faltando no JSON, formatação de tabela quebrada</span></li>
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Estado inconsistente:</strong> auth que não persiste, contexto perdido entre comandos</span></li>
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>Integração parcial:</strong> alguns comandos reais, outros mock — precisa unificar</span></li>
+                        <li class="flex items-start space-x-2"><span class="text-red-400 mt-0.5">•</span><span><strong>SKILL.md desatualizado:</strong> não reflete os comandos que realmente foram implementados</span></li>
+                    </ul>
+                </div>
+
+                <div class="bg-primary/10 border border-primary/30 rounded-xl p-6">
+                    <h3 class="text-primary font-bold text-sm uppercase tracking-wider mb-3">💡 Técnica avançada</h3>
+                    <p class="text-neutral-200 leading-relaxed">A melhor forma de testar refinamento é <strong>usar o CLI como se fosse um agente</strong>: pedir a outro agente LLM para executar uma tarefa usando apenas o SKILL.md e os comandos disponíveis. Onde o agente falha = onde o CLI precisa de refinamento. Esse "agente como QA" é a forma mais eficiente de encontrar gaps.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resumo Final -->
+        <section class="mb-12">
+            <div class="bg-gradient-to-r from-purple-900/30 to-transparent border border-purple-500/30 rounded-2xl p-8">
+                <h2 class="text-2xl font-bold text-white mb-6">Resumo Final</h2>
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Testes unitários cobrem input válido, inválido e edge cases — pelo menos 3 cenários por comando</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Testes E2E verificam fluxos completos e são o melhor detector de integração mock vs real</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Documentação inclui README, --help por comando e exemplos práticos copy-pasteable</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">SKILL.md é o contrato para agentes LLM — permite operação autônoma do CLI sem trial-and-error</span>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <span class="text-purple-400 font-bold">✓</span>
+                        <span class="text-neutral-200">Refinamento iterativo (2-3 ciclos) é essencial — usar "agente como QA" é a melhor técnica</span>
+                    </div>
+                </div>
+
+                <div class="bg-dark-800/50 rounded-xl p-4 mb-6 border border-dark-600">
+                    <p class="text-neutral-300"><span class="text-purple-400 font-semibold">Próximo módulo:</span> Prática hands-on — vamos agentificar um software real do zero usando CLI-Anything, da escolha do alvo até a publicação.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="modulo-3-4.html" class="flex-1 text-center px-6 py-3 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-xl text-neutral-300 font-semibold transition-colors">
+                        ← Módulo Anterior
+                    </a>
+                    <a href="modulo-3-6.html" class="flex-1 text-center px-6 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-xl text-purple-400 font-semibold transition-colors">
+                        Próximo Módulo →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-600 mt-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="text-neutral-500 text-sm">CLI-x: O Terminal como Interface dos Agentes - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                lightIcon.classList.remove('hidden');
+                darkIcon.classList.add('hidden');
+            } else {
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+        updateIcons();
+
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateIcons();
+        });
+    </script>
+</body>
+</html>
